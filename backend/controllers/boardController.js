@@ -3,9 +3,9 @@ const Column = require('../models/Column');
 const Task = require('../models/Task');
 const { validationResult } = require('express-validator');
 
-// @desc    Get all boards for current user
-// @route   GET /api/boards
-// @access  Private
+
+
+
 exports.getUserBoards = async (req, res) => {
   try {
     const boards = await Board.find({ 'members.userId': req.user.id })
@@ -20,9 +20,9 @@ exports.getUserBoards = async (req, res) => {
   }
 };
 
-// @desc    Create a new board
-// @route   POST /api/boards
-// @access  Private
+
+
+
 exports.createBoard = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -40,7 +40,7 @@ exports.createBoard = async (req, res) => {
 
     const board = await newBoard.save();
 
-    // Create default columns
+    
     const defaultColumns = [
       { title: 'To Do', boardId: board._id, order: 0 },
       { title: 'In Progress', boardId: board._id, order: 1 },
@@ -56,9 +56,9 @@ exports.createBoard = async (req, res) => {
   }
 };
 
-// @desc    Get board by ID
-// @route   GET /api/boards/:id
-// @access  Private
+
+
+
 exports.getBoard = async (req, res) => {
   try {
     const board = await Board.findOne({
@@ -91,9 +91,9 @@ exports.getBoard = async (req, res) => {
   }
 };
 
-// @desc    Update board
-// @route   PUT /api/boards/:id
-// @access  Private
+
+
+
 exports.updateBoard = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -127,9 +127,9 @@ exports.updateBoard = async (req, res) => {
   }
 };
 
-// @desc    Delete board
-// @route   DELETE /api/boards/:id
-// @access  Private
+
+
+
 exports.deleteBoard = async (req, res) => {
   try {
     const board = await Board.findOneAndDelete({
@@ -145,7 +145,7 @@ exports.deleteBoard = async (req, res) => {
       });
     }
 
-    // Delete all related data
+    
     await Promise.all([
       Column.deleteMany({ boardId: board._id }),
       Task.deleteMany({ boardId: board._id })

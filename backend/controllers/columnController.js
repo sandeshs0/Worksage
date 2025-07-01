@@ -2,12 +2,12 @@ const Column = require('../models/Column');
 const Board = require('../models/Board');
 const { validationResult } = require('express-validator');
 
-// @desc    Get all columns for a board
-// @route   GET /api/boards/:boardId/columns
-// @access  Private
+
+
+
 exports.getColumns = async (req, res) => {
   try {
-    // Verify user has access to the board
+    
     const hasAccess = await Board.exists({
       _id: req.params.boardId,
       'members.userId': req.user.id
@@ -31,9 +31,9 @@ exports.getColumns = async (req, res) => {
   }
 };
 
-// @desc    Create a new column
-// @route   POST /api/columns
-// @access  Private
+
+
+
 exports.createColumn = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -43,7 +43,7 @@ exports.createColumn = async (req, res) => {
   try {
     const { title, boardId } = req.body;
 
-    // Verify user has admin/owner access to the board
+    
     const board = await Board.findOne({
       _id: boardId,
       'members.userId': req.user.id,
@@ -57,7 +57,7 @@ exports.createColumn = async (req, res) => {
       });
     }
 
-    // Get the highest order number
+    
     const lastColumn = await Column.findOne({ boardId })
       .sort('-order')
       .select('order')
@@ -77,9 +77,9 @@ exports.createColumn = async (req, res) => {
   }
 };
 
-// @desc    Update a column
-// @route   PUT /api/columns/:id
-// @access  Private
+
+
+
 exports.updateColumn = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -89,7 +89,7 @@ exports.updateColumn = async (req, res) => {
   try {
     const { title, order } = req.body;
 
-    // Find column and verify access
+    
     const column = await Column.findById(req.params.id);
     if (!column) {
       return res.status(404).json({ 
@@ -111,7 +111,7 @@ exports.updateColumn = async (req, res) => {
       });
     }
 
-    // Update fields if provided
+    
     if (title) column.title = title;
     if (order !== undefined) column.order = order;
 
@@ -123,12 +123,12 @@ exports.updateColumn = async (req, res) => {
   }
 };
 
-// @desc    Delete a column
-// @route   DELETE /api/columns/:id
-// @access  Private
+
+
+
 exports.deleteColumn = async (req, res) => {
   try {
-    // Find column and verify access
+    
     const column = await Column.findById(req.params.id);
     if (!column) {
       return res.status(404).json({ 
@@ -150,10 +150,10 @@ exports.deleteColumn = async (req, res) => {
       });
     }
 
-    // Delete all tasks in this column
+    
     await Task.deleteMany({ columnId: column._id });
 
-    // Delete the column
+    
     await column.remove();
 
     res.json({ success: true, message: 'Column deleted successfully' });
@@ -163,14 +163,14 @@ exports.deleteColumn = async (req, res) => {
   }
 };
 
-// @desc    Reorder columns
-// @route   PUT /api/columns/:id/reorder
-// @access  Private
+
+
+
 exports.reorderColumns = async (req, res) => {
   try {
     const { newOrder } = req.body;
 
-    // Find column and verify access
+    
     const column = await Column.findById(req.params.id);
     if (!column) {
       return res.status(404).json({ 
@@ -192,14 +192,14 @@ exports.reorderColumns = async (req, res) => {
       });
     }
 
-    // Update the order of the current column
+    
     column.order = newOrder;
     await column.save();
 
-    // Get all columns for the board
+    
     const columns = await Column.find({ boardId: column.boardId }).sort('order');
 
-    // Reorder other columns if needed
+    
     for (let i = 0; i < columns.length; i++) {
       if (columns[i]._id.toString() !== column._id.toString()) {
         columns[i].order = i >= newOrder ? i + 1 : i;

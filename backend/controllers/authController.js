@@ -5,14 +5,12 @@ const TokenService = require("../services/tokenService");
 const sendEmail = require("../utils/sendEmail");
 const jwt = require("jsonwebtoken");
 
-// Legacy token generation for OAuth compatibility
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
-// Helper function to get client info
 const getClientInfo = (req) => {
   return {
     ipAddress: req.ip || req.connection.remoteAddress,
@@ -23,7 +21,7 @@ const getClientInfo = (req) => {
 const verifyRecaptcha = require("../utils/verifyRecaptcha");
 exports.register = async (req, res) => {
   try {
-    // Check validation errors
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -35,7 +33,7 @@ exports.register = async (req, res) => {
 
     const { name, email, password, recaptchaToken } = req.body;
 
-    // Verify reCAPTCHA
+    
     const recaptchaValid = await verifyRecaptcha(recaptchaToken);
     if (!recaptchaValid) {
       return res.status(400).json({
@@ -44,7 +42,7 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Check if user already exists
+    
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({
@@ -53,21 +51,21 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Create new user
+    
     user = new User({
       name,
       email,
       password,
     });
 
-    // Generate OTP
+    
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.otp = otp;
-    user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    user.otpExpires = Date.now() + 10 * 60 * 1000; 
 
     await user.save();
 
-    // Send verification email
+    
     const message = `Your OTP for Worksage verification is: ${otp}\nThis code will expire in 10 minutes.`;
 
     await sendEmail({
@@ -103,7 +101,7 @@ exports.verifyEmail = async (req, res) => {
 
     const { email, otp } = req.body;
 
-    // Find user with valid OTP
+    
     const user = await User.findOne({
       email,
       otp,
@@ -117,13 +115,13 @@ exports.verifyEmail = async (req, res) => {
       });
     }
 
-    // Verify user
+    
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpires = undefined;
     await user.save();
 
-    // Create session with new token system
+    
     const { ipAddress, userAgent } = getClientInfo(req);
     const tokens = await TokenService.createSession(
       user._id,
@@ -131,12 +129,12 @@ exports.verifyEmail = async (req, res) => {
       userAgent
     );
 
-    // Set secure HTTP-only cookie for refresh token
+    
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     res.status(200).json({
@@ -175,7 +173,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const { ipAddress, userAgent } = getClientInfo(req);
 
-    // Find user
+    
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
@@ -184,7 +182,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if email is verified
     if (!user.isVerified) {
       return res.status(400).json({
         success: false,
@@ -192,7 +189,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if user has a password (OAuth users might not have one)
     if (!user.password) {
       return res.status(400).json({
         success: false,
@@ -201,7 +197,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Verify password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(400).json({
@@ -210,7 +205,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if password has expired
     if (user.isPasswordExpired()) {
       return res.status(401).json({
         success: false,
@@ -220,7 +214,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if user must change password
     if (user.mustChangePassword) {
       return res.status(401).json({
         success: false,
@@ -230,9 +223,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if MFA is enabled for this user
     if (user.mfa && user.mfa.enabled) {
-      // Don't create full session yet, return MFA challenge
+      
       return res.json({
         success: true,
         requiresMFA: true,
@@ -245,19 +237,19 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Create session with new token system
+    
     const tokens = await TokenService.createSession(
       user._id,
       ipAddress,
       userAgent
     );
 
-    // Set secure HTTP-only cookie for refresh token
+    
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     res.json({
@@ -282,9 +274,9 @@ exports.login = async (req, res) => {
   }
 };
 
-// @desc    Complete MFA Login
-// @route   POST /api/auth/mfa-login
-// @access  Public
+
+
+
 exports.completeMFALogin = async (req, res) => {
   try {
     const { userId, mfaToken, isBackupCode, tempData } = req.body;
@@ -296,10 +288,10 @@ exports.completeMFALogin = async (req, res) => {
       });
     }
 
-    // Declare user variable for later use
+    
     let user;
 
-    // Verify MFA token directly
+    
     try {
       user = await User.findById(userId).select('+mfa.secret');
       if (!user) {
@@ -327,13 +319,13 @@ exports.completeMFALogin = async (req, res) => {
       const { verifyBackupCode, verifyTOTP, decryptSecret } = require('../utils/mfaUtils');
 
       if (isBackupCode) {
-        // Verify backup code
+        
         isValid = verifyBackupCode(mfaToken, user.mfa.backupCodes);
         if (isValid) {
-          await user.save(); // Save the updated backup codes
+          await user.save(); 
         }
       } else {
-        // Verify TOTP
+        
         if (!user.mfa.secret) {
           return res.status(400).json({
             success: false,
@@ -363,7 +355,7 @@ exports.completeMFALogin = async (req, res) => {
         });
       }
 
-      // Update last used timestamp
+      
       user.mfa.lastUsedAt = new Date();
       await user.save();
 
@@ -375,22 +367,22 @@ exports.completeMFALogin = async (req, res) => {
       });
     }
 
-    // Get user for session creation
-    // User is already fetched above during MFA verification
+    
+    
 
-    // Create session with original login data
+    
     const tokens = await TokenService.createSession(
       user._id,
       tempData.ipAddress,
       tempData.userAgent
     );
 
-    // Set secure HTTP-only cookie for refresh token
+    
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     res.json({
@@ -451,7 +443,7 @@ exports.refreshToken = async (req, res) => {
   } catch (error) {
     console.error("Token refresh error:", error);
 
-    // Clear invalid refresh token
+    
     res.clearCookie("refreshToken");
 
     res.status(401).json({
@@ -571,5 +563,5 @@ exports.updateRole = async (req, res) => {
   }
 };
 
-// Export legacy token generation for OAuth compatibility
+
 exports.generateToken = generateToken;
