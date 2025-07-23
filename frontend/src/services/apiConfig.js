@@ -129,6 +129,23 @@ const createApiInstance = () => {
         }
       }
 
+      // Handle XSS protection errors
+      if (error.response?.data?.code === "XSS_ATTEMPT_BLOCKED") {
+        console.warn("🚨 XSS attempt blocked by server:", error.response.data.message);
+        
+        // Dispatch custom event for components to handle XSS blocked
+        window.dispatchEvent(new CustomEvent("security:xss-blocked", {
+          detail: {
+            message: error.response.data.message,
+            endpoint: originalRequest.url,
+            timestamp: new Date()
+          }
+        }));
+
+        // You can also show a user-friendly notification here
+        // For now, we'll let the component handle it
+      }
+
       return Promise.reject(error);
     }
   );
