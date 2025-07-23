@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 
 function OtpVerificationPage() {
@@ -49,7 +49,7 @@ function OtpVerificationPage() {
   const handlePaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").trim().slice(0, 6);
-    
+
     if (/^\d+$/.test(pastedData)) {
       const newOtp = [...otp];
       for (let i = 0; i < pastedData.length; i++) {
@@ -58,7 +58,7 @@ function OtpVerificationPage() {
         }
       }
       setOtp(newOtp);
-      
+
       // Set focus to appropriate input after paste
       if (pastedData.length < 6 && inputRefs.current[pastedData.length]) {
         inputRefs.current[pastedData.length].focus();
@@ -67,9 +67,10 @@ function OtpVerificationPage() {
   };
 
   const handleSubmit = async (e) => {
+    console.log("Submitting OTP:", otp.join(""));
     e.preventDefault();
     const otpValue = otp.join("");
-    
+
     if (otpValue.length !== 6) {
       setError("Please enter the complete 6-digit OTP");
       return;
@@ -79,7 +80,8 @@ function OtpVerificationPage() {
     setError("");
 
     try {
-      await authService.verifyOtp({
+      console.log("Verifying OTP:", otpValue);
+      await authService.verifyEmail({
         email,
         otp: otpValue,
       });
@@ -140,7 +142,10 @@ function OtpVerificationPage() {
         initial="hidden"
         animate="visible"
       >
-        <motion.div className="flex justify-center mb-6" variants={itemVariants}>
+        <motion.div
+          className="flex justify-center mb-6"
+          variants={itemVariants}
+        >
           <div className="w-16 h-16 rounded-lg flex items-center justify-center">
             <img
               src="src/assets/logo.png"
@@ -161,7 +166,8 @@ function OtpVerificationPage() {
           className="text-gray-600 text-center mb-8"
           variants={itemVariants}
         >
-          We've sent a verification code to <span className="font-medium">{email}</span>
+          We've sent a verification code to{" "}
+          <span className="font-medium">{email}</span>
         </motion.p>
 
         {error && (

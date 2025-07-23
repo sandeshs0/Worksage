@@ -14,18 +14,20 @@ export function UserProvider({ children }) {
       console.log("🔄 UserContext: Starting user data refresh...");
       console.log("📍 Current path:", window.location.pathname);
       console.log("🔗 Current URL:", window.location.href);
-      
+
       setIsLoading(true);
 
       // Skip refresh if OAuth is being processed
       if (isOAuthProcessing) {
-        console.log("⏸️ UserContext: Skipping refresh while OAuth is processing");
+        console.log(
+          "⏸️ UserContext: Skipping refresh while OAuth is processing"
+        );
         setIsLoading(false);
         return;
       }
 
       // Skip refresh if we're on OAuth callback page (let that handle the token)
-      if (window.location.pathname === '/OAuthCallback') {
+      if (window.location.pathname === "/OAuthCallback") {
         console.log("⏸️ UserContext: Skipping refresh on OAuth callback page");
         setIsLoading(false);
         return;
@@ -33,8 +35,10 @@ export function UserProvider({ children }) {
 
       // Additional check for OAuth URL parameters
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('accessToken')) {
-        console.log("⏸️ UserContext: Found accessToken in URL, skipping refresh");
+      if (urlParams.has("accessToken")) {
+        console.log(
+          "⏸️ UserContext: Found accessToken in URL, skipping refresh"
+        );
         setIsLoading(false);
         return;
       }
@@ -51,7 +55,7 @@ export function UserProvider({ children }) {
       // Try to get user profile
       const profileData = await authService.getUserProfile();
       console.log("📋 UserContext: Profile data received:", profileData);
-      
+
       // Handle different response structures
       const userData = profileData.data || profileData.user || profileData;
       console.log("👤 UserContext: Setting user data:", userData);
@@ -61,7 +65,6 @@ export function UserProvider({ children }) {
       // Update localStorage user data
       localStorage.setItem("user", JSON.stringify(userData));
       console.log("💾 UserContext: User data stored in localStorage");
-      
     } catch (error) {
       console.error("❌ UserContext: Failed to fetch user data:", error);
 
@@ -71,14 +74,18 @@ export function UserProvider({ children }) {
         // Try to refresh token first
         try {
           await authService.refreshToken();
-          console.log("✅ UserContext: Token refreshed successfully, retrying profile fetch...");
+          console.log(
+            "✅ UserContext: Token refreshed successfully, retrying profile fetch..."
+          );
           // Retry getting user profile
           const profileData = await authService.getUserProfile();
           const userData = profileData.data || profileData.user || profileData;
           setUser(userData);
           setIsAuthenticated(true);
           localStorage.setItem("user", JSON.stringify(userData));
-          console.log("✅ UserContext: Profile fetch successful after token refresh");
+          console.log(
+            "✅ UserContext: Profile fetch successful after token refresh"
+          );
         } catch (refreshError) {
           console.error("❌ UserContext: Token refresh failed:", refreshError);
           // Refresh failed, logout user
@@ -86,7 +93,7 @@ export function UserProvider({ children }) {
           setUser(null);
           setIsAuthenticated(false);
           // Only redirect if we're not already on the login page
-          if (window.location.pathname !== '/login') {
+          if (window.location.pathname !== "/login") {
             window.location.href = "/login";
           }
         }
@@ -150,38 +157,53 @@ export function UserProvider({ children }) {
 
   // OAuth processing management
   const setOAuthProcessing = (processing) => {
-    console.log(processing ? "🔄 OAuth processing started" : "✅ OAuth processing completed");
+    console.log(
+      processing
+        ? "🔄 OAuth processing started"
+        : "✅ OAuth processing completed"
+    );
     setIsOAuthProcessing(processing);
   };
 
   // Initial fetch of user data when component mounts
   useEffect(() => {
-    console.log("🚀 UserContext useEffect triggered, current path:", window.location.pathname);
-    
+    console.log(
+      "🚀 UserContext useEffect triggered, current path:",
+      window.location.pathname
+    );
+
     // Check if OAuth is in progress (set by pre-processor)
-    const oauthInProgress = sessionStorage.getItem('oauthInProgress');
-    if (oauthInProgress === 'true') {
-      console.log("⏸️ UserContext: OAuth pre-processing detected, skipping initial refresh");
+    const oauthInProgress = sessionStorage.getItem("oauthInProgress");
+    if (oauthInProgress === "true") {
+      console.log(
+        "⏸️ UserContext: OAuth pre-processing detected, skipping initial refresh"
+      );
       setIsLoading(false);
       return;
     }
-    
+
     // Don't auto-refresh on OAuth callback page - let that component handle it
-    if (window.location.pathname === '/OAuthCallback') {
-      console.log("⏸️ UserContext: Skipping initial refresh on OAuth callback page");
+    if (window.location.pathname === "/OAuthCallback") {
+      console.log(
+        "⏸️ UserContext: Skipping initial refresh on OAuth callback page"
+      );
       setIsLoading(false);
       return;
     }
-    
+
     // Check if URL contains OAuth parameters (additional safety check)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('accessToken')) {
-      console.log("⏸️ UserContext: Found accessToken in URL, skipping initial refresh");
+    if (urlParams.has("accessToken")) {
+      console.log(
+        "⏸️ UserContext: Found accessToken in URL, skipping initial refresh"
+      );
       setIsLoading(false);
       return;
     }
-    
-    console.log("⏰ UserContext: Starting immediate refresh (no OAuth detected)");
+
+    console.log(
+      "⏰ UserContext: Starting immediate refresh (no OAuth detected)"
+    );
     // Start refresh immediately if no OAuth is detected
     refreshUserData();
   }, []);
@@ -204,7 +226,7 @@ export function UserProvider({ children }) {
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("auth:logout", handleLogoutEvent);
-    
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("auth:logout", handleLogoutEvent);

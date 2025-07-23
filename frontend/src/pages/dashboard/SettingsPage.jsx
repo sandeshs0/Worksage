@@ -9,7 +9,6 @@ import {
   Mail,
   Moon,
   Save,
-  Settings as SettingsIcon,
   Sun,
   User,
 } from "lucide-react";
@@ -338,9 +337,9 @@ function SettingsPage() {
   // Handle password input changes
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({
+    setPasswordData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 

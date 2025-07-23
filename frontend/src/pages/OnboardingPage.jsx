@@ -53,7 +53,7 @@ function OnboardingPage() {
     setError("");
 
     try {
-      await authService.updateUserRole({ role: selectedRole });
+      await authService.updateRole(selectedRole );
       navigate("/dashboard");
     } catch (err) {
       setError(

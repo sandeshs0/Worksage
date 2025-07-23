@@ -13,9 +13,9 @@ import {
   LogOut,
   Mail,
   Settings,
+  Shield,
   Trello,
   UsersRound,
-  Shield, // New icon for sessions
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -33,7 +33,8 @@ function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] =
+    useState(false);
   const [sessions, setSessions] = useState([]);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -49,7 +50,7 @@ function DashboardLayout() {
     isActive: true,
     googleId: null,
     createdAt: null,
-    _id: ""
+    _id: "",
   });
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const location = useLocation();
@@ -97,10 +98,10 @@ function DashboardLayout() {
       try {
         setIsLoadingProfile(true);
         const response = await authService.getUserProfile();
-        
+
         // Handle the new API response structure
         const userData = response.success ? response.data : response;
-        
+
         setUserProfile({
           fullName: userData.fullName || userData.name || user?.name || "User",
           email: userData.email || user?.email || "",
@@ -111,11 +112,11 @@ function DashboardLayout() {
           isActive: userData.isActive ?? user?.isActive ?? true,
           googleId: userData.googleId || user?.googleId || null,
           createdAt: userData.createdAt || user?.createdAt || null,
-          _id: userData._id || userData.id || user?.id || user?._id || ""
+          _id: userData._id || userData.id || user?.id || user?._id || "",
         });
       } catch (error) {
         console.error("Error fetching user profile:", error);
-        
+
         // Fallback to user context data if profile fetch fails
         if (user) {
           setUserProfile({
@@ -128,10 +129,10 @@ function DashboardLayout() {
             isActive: user.isActive ?? true,
             googleId: user.googleId || null,
             createdAt: user.createdAt || null,
-            _id: user._id || user.id || ""
+            _id: user._id || user.id || "",
           });
         }
-        
+
         // Handle error - maybe redirect to login if unauthorized
         if (error.response && error.response.status === 401) {
           authService.logout();
@@ -183,7 +184,7 @@ function DashboardLayout() {
       const response = await authService.getSessions();
       setSessions(response.data || []);
     } catch (error) {
-      console.error('Failed to load sessions:', error);
+      console.error("Failed to load sessions:", error);
     }
   };
 
@@ -191,11 +192,11 @@ function DashboardLayout() {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success('Logged out successfully');
-      navigate('/login');
+      toast.success("Logged out successfully");
+      navigate("/login");
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Error during logout');
+      console.error("Logout error:", error);
+      toast.error("Error during logout");
     }
   };
 
@@ -203,11 +204,11 @@ function DashboardLayout() {
   const handleLogoutAll = async () => {
     try {
       await logoutAll();
-      toast.success('Logged out from all devices');
-      navigate('/login');
+      toast.success("Logged out from all devices");
+      navigate("/login");
     } catch (error) {
-      console.error('Logout all error:', error);
-      toast.error('Error during logout');
+      console.error("Logout all error:", error);
+      toast.error("Error during logout");
     }
   };
 
@@ -559,39 +560,51 @@ function DashboardLayout() {
                         </div>
                       )}
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900">{userProfile.fullName}</p>
-                        <p className="text-sm text-gray-500">{userProfile.email}</p>
+                        <p className="font-medium text-gray-900">
+                          {userProfile.fullName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {userProfile.email}
+                        </p>
                       </div>
                     </div>
-                    
+
                     {/* User Status Indicators */}
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        userProfile.isVerified 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {userProfile.isVerified ? '✓ Verified' : '⚠ Unverified'}
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          userProfile.isVerified
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {userProfile.isVerified ? "✓ Verified" : "⚠ Unverified"}
                       </span>
-                      
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        userProfile.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {userProfile.isActive ? 'Active' : 'Inactive'}
+
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          userProfile.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {userProfile.isActive ? "Active" : "Inactive"}
                       </span>
-                      
+
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {userProfile.plan.charAt(0).toUpperCase() + userProfile.plan.slice(1)} Plan
+                        {userProfile.plan.charAt(0).toUpperCase() +
+                          userProfile.plan.slice(1)}{" "}
+                        Plan
                       </span>
-                      
-                      {userProfile.role && userProfile.role !== 'unassigned' && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          {userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1)}
-                        </span>
-                      )}
-                      
+
+                      {userProfile.role &&
+                        userProfile.role !== "unassigned" && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {userProfile.role.charAt(0).toUpperCase() +
+                              userProfile.role.slice(1)}
+                          </span>
+                        )}
+
                       {userProfile.googleId && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                           Google Account
@@ -599,7 +612,7 @@ function DashboardLayout() {
                       )}
                     </div>
                   </div>
-                  
+
                   <NavLink
                     to="/dashboard/settings"
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
@@ -608,7 +621,7 @@ function DashboardLayout() {
                     <Settings className="h-4 w-4 mr-3" />
                     Settings
                   </NavLink>
-                  
+
                   {/* New Sessions option */}
                   <button
                     onClick={() => {
@@ -621,7 +634,7 @@ function DashboardLayout() {
                     <Shield className="h-4 w-4 mr-3" />
                     Active Sessions
                   </button>
-                  
+
                   <button
                     onClick={handleLogout}
                     className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50"
@@ -735,8 +748,10 @@ function DashboardLayout() {
                           {userProfile.fullName}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {userProfile.role === 'unassigned' ? 'No role assigned' : 
-                           userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1)}
+                          {userProfile.role === "unassigned"
+                            ? "No role assigned"
+                            : userProfile.role.charAt(0).toUpperCase() +
+                              userProfile.role.slice(1)}
                         </div>
                       </div>
                     </div>
@@ -818,28 +833,33 @@ function DashboardLayout() {
                 ×
               </button>
             </div>
-            
+
             <div className="space-y-3">
               {sessions.map((session) => (
                 <div key={session._id} className="border rounded-lg p-3">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium">
-                        {session.ipAddress} 
+                        {session.ipAddress}
                         {session.ipAddress === window.location.hostname && (
-                          <span className="text-green-600 text-sm ml-2">(Current)</span>
+                          <span className="text-green-600 text-sm ml-2">
+                            (Current)
+                          </span>
                         )}
                       </p>
-                      <p className="text-sm text-gray-600">{session.userAgent}</p>
+                      <p className="text-sm text-gray-600">
+                        {session.userAgent}
+                      </p>
                       <p className="text-xs text-gray-500">
-                        Last accessed: {new Date(session.lastAccessedAt).toLocaleString()}
+                        Last accessed:{" "}
+                        {new Date(session.lastAccessedAt).toLocaleString()}
                       </p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-6 flex justify-between">
               <button
                 onClick={handleLogoutAll}
