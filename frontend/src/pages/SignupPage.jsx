@@ -4,9 +4,19 @@ import { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../services/authService";
+import { useXSSProtection } from "../utils/xssHOC.jsx";
+import { validateXSS } from "../utils/xssProtection";
 
 function SignupPage() {
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+  // XSS Protection Hook
+  const { protectInput, protectedOnChange, securityLog, hasSecurityWarnings } =
+    useXSSProtection({
+      enableValidation: true,
+      logAttempts: true,
+    });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -158,9 +168,19 @@ function SignupPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Sanitize input for XSS protection
+    const sanitizedValue = protectInput(value, name);
+
+    // Validate for potential XSS attempts
+    const validation = validateXSS(value);
+    if (!validation.isValid) {
+      console.warn(`XSS attempt detected in ${name}:`, validation.threats);
+    }
+
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: sanitizedValue,
     });
 
     // Clear errors when user types
@@ -378,6 +398,48 @@ function SignupPage() {
             >
               Create an Account
             </motion.h1>
+
+            {/* Security Warnings */}
+            {hasSecurityWarnings && (
+              <motion.div
+                className="bg-red-50 border-l-4 border-red-400 p-4 mb-6"
+                variants={formItemVariants}
+              >
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-red-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      Security Alert
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>
+                        Potentially malicious content was detected and removed
+                        from your input.
+                      </p>
+                      <ul className="list-disc pl-5 mt-1">
+                        {securityLog.slice(-3).map((log, index) => (
+                          <li key={index}>
+                            Field "{log.field}": {log.threats.join(", ")}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
               {/* Full Name */}
