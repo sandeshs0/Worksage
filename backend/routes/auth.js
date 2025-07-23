@@ -91,13 +91,50 @@ router.put(
 // Google OAuth routes (keeping legacy token for compatibility)
 router.get(
   "/google",
-  authLimiter,
+  (req, res, next) => {
+    console.log("🚀 Initiating Google OAuth...");
+    console.log(
+      "Google Client ID:",
+      process.env.GOOGLE_CLIENT_ID ? "✅ Set" : "❌ Missing"
+    );
+    console.log(
+      "Google Client Secret:",
+      process.env.GOOGLE_CLIENT_SECRET ? "✅ Set" : "❌ Missing"
+    );
+    next();
+  },
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/", session: false }),
+  (req, res, next) => {
+    console.log("🔍 Google OAuth callback received:");
+    console.log("Query params:", req.query);
+    console.log(
+      "Raw OAuth code:",
+      req.rawOAuthCode
+        ? req.rawOAuthCode.substring(0, 20) + "..."
+        : "Not preserved"
+    );
+
+    // If we have a preserved raw code, replace the encoded one
+    if (req.rawOAuthCode) {
+      req.query.code = req.rawOAuthCode;
+      console.log("✅ Using preserved raw OAuth code");
+    }
+
+    console.log("Headers:", req.headers);
+    next();
+  },
+  passport.authenticate("google", {
+    failureRedirect: "/",
+    session: false,
+    failureCallback: (req, res) => {
+      console.error("❌ Google OAuth authentication failed");
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_auth_failed`);
+    },
+  }),
   async (req, res) => {
     try {
       const user = req.user;

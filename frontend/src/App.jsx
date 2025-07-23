@@ -17,6 +17,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import OtpVerificationPage from "./pages/OtpVerificationPage";
 import SignupPage from "./pages/SignupPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
+import { XSSProtectionProvider } from "./utils/xssHOC.jsx";
 
 import { Toaster } from "sonner";
 import { UserProvider, useUser } from "./context/UserContext";
@@ -138,12 +139,19 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <UserProvider>
-      <BrowserRouter>
-        <AnimatedRoutes />
-        <Toaster position="top-right" richColors />
-      </BrowserRouter>
-    </UserProvider>
+    <XSSProtectionProvider
+      enabled={true}
+      sanitizationLevel="strict"
+      enableValidation={true}
+      logAttempts={true}
+    >
+      <UserProvider>
+        <BrowserRouter>
+          <AnimatedRoutes />
+          <Toaster position="top-right" richColors />
+        </BrowserRouter>
+      </UserProvider>
+    </XSSProtectionProvider>
   );
 }
 

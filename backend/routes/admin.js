@@ -21,7 +21,16 @@ router.delete("/users/:userId", adminController.deleteUser);
 // System statistics
 router.get("/stats", adminController.getSystemStats);
 
-// Activity logs (placeholder)
-router.get("/logs", adminController.getActivityLogs);
+// Activity logs (paginated, filterable)
+router.get("/activity-logs", adminController.getActivityLogs);
+
+// Security logs (dedicated endpoint for security events)
+router.get("/security-logs", adminController.getSecurityLogs);
+
+// Security dashboard summary
+router.get("/security-dashboard", adminController.getSecurityDashboard);
+
+// Clear activity logs
+router.delete("/activity-logs", adminController.clearActivityLogs);
 
 module.exports = router;
