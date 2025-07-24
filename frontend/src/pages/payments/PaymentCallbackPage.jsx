@@ -11,7 +11,7 @@ function PaymentCallbackPage() {
   const [verificationMessage, setVerificationMessage] = useState(
     "Verifying your payment..."
   );
-  
+
   // Use refs to prevent infinite loops - these persist across re-renders
   const hasProcessed = useRef(false);
   const isProcessingRef = useRef(false);
@@ -22,18 +22,18 @@ function PaymentCallbackPage() {
       console.log("Payment verification already processed, skipping...");
       return;
     }
-    
+
     if (isProcessingRef.current) {
       console.log("Payment verification currently processing, skipping...");
       return;
     }
 
     console.log("Starting payment verification process...");
-    
+
     // Mark as processed and processing immediately
     hasProcessed.current = true;
     isProcessingRef.current = true;
-    
+
     // Start processing
     processPayment();
   }, []); // Intentionally empty dependency array
@@ -41,7 +41,7 @@ function PaymentCallbackPage() {
   const processPayment = async () => {
     try {
       console.log("Starting payment verification...");
-      
+
       // Get URL parameters
       const status = searchParams.get("status");
       const pidx = searchParams.get("pidx");
@@ -72,7 +72,7 @@ function PaymentCallbackPage() {
           status === "User canceled"
             ? "Payment was canceled by user"
             : `Payment failed with status: ${status}`;
-        
+
         handleVerificationFailure(
           failMsg,
           "Payment not completed",

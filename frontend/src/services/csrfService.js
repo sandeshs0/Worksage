@@ -1,7 +1,6 @@
 let csrfToken = null;
 let csrfTokenExpiry = null;
 
-// Accept axios instance as argument
 const getCSRFToken = async (api) => {
   if (csrfToken && csrfTokenExpiry && Date.now() < csrfTokenExpiry) {
     return csrfToken;

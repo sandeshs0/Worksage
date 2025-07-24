@@ -48,11 +48,11 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 40px;
-            border-bottom: 3px solid #007991;
+            border-bottom: 3px solid #18cb96;
             padding-bottom: 20px;
         }
         .company-info h1 {
-            color: #007991;
+            color: #18cb96;
             font-size: 36px;
             margin: 0 0 10px 0;
             font-weight: bold;
@@ -63,14 +63,14 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
         }
         .invoice-details {
             background: #f8f9fa;
-            border: 2px solid #007991;
+            border: 2px solid #18cb96;
             border-radius: 8px;
             padding: 20px;
             text-align: right;
             min-width: 250px;
         }
         .invoice-details h2 {
-            color: #007991;
+            color: #18cb96;
             font-size: 24px;
             margin: 0 0 15px 0;
         }
@@ -80,13 +80,13 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
         }
         .invoice-details .label {
             font-weight: 600;
-            color: #007991;
+            color: #18cb96;
         }
         .bill-to {
             margin: 30px 0;
         }
         .bill-to h3 {
-            color: #007991;
+            color: #18cb96;
             font-size: 20px;
             margin-bottom: 15px;
             border-bottom: 2px solid #e9ecef;
@@ -110,7 +110,7 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
             margin: 30px 0;
         }
         .project-info h3 {
-            color: #007991;
+            color: #18cb96;
             font-size: 20px;
             margin-bottom: 15px;
             border-bottom: 2px solid #e9ecef;
@@ -141,7 +141,7 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .items-table th {
-            background: #007991;
+            background: #18cb96;
             color: white;
             padding: 15px;
             text-align: left;
@@ -199,18 +199,18 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
             color: #dc3545;
         }
         .totals-row.total {
-            border-top: 2px solid #007991;
+            border-top: 2px solid #18cb96;
             padding-top: 15px;
             margin-top: 15px;
             font-size: 20px;
             font-weight: bold;
-            color: #007991;
+            color: #18cb96;
         }
         .section {
             margin: 30px 0;
         }
         .section h3 {
-            color: #007991;
+            color: #18cb96;
             font-size: 18px;
             margin-bottom: 15px;
             border-bottom: 2px solid #e9ecef;
@@ -246,7 +246,7 @@ export const generateInvoiceHTML = (invoiceData, invoiceNumber = null) => {
         .thank-you {
             font-size: 18px;
             font-weight: 600;
-            color: #007991;
+            color: #18cb96;
         }
         @media (max-width: 600px) {
             body {
