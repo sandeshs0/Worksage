@@ -37,44 +37,7 @@ const authLimiter = rateLimit({
     });
   },
 });
-
-const passwordResetLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 3,
-  message: {
-    error:
-      "Too many password reset attempts from this IP, please try again after 1 hour.",
-    retryAfter: 60 * 60,
-  },
-  handler: (req, res) => {
-    res.status(429).json({
-      error:
-        "Too many password reset attempts from this IP, please try again after 1 hour.",
-      retryAfter: Math.ceil(req.rateLimit.resetTime / 1000),
-    });
-  },
-});
-
-const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
-  message: {
-    error:
-      "Too many registration attempts from this IP, please try again after 1 hour.",
-    retryAfter: 60 * 60,
-  },
-  handler: (req, res) => {
-    res.status(429).json({
-      error:
-        "Too many registration attempts from this IP, please try again after 1 hour.",
-      retryAfter: Math.ceil(req.rateLimit.resetTime / 1000),
-    });
-  },
-});
-
 module.exports = {
   apiLimiter,
   authLimiter,
-  passwordResetLimiter,
-  registerLimiter,
 };

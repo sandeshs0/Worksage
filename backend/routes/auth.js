@@ -4,7 +4,7 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const { check } = require('express-validator');
 const userController = require('../controllers/userController');
-const {authLimiter, passwordResetLimiter, registerLimiter} = require('../middleware/rateLimiter');
+const {authLimiter} = require('../middleware/rateLimiter');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,7 +14,7 @@ const generateToken = (id) => {
 const { register, verifyEmail, login, updateRole } = require('../controllers/authController');
 const auth = require('../middleware/auth');
 
-router.post('/register', registerLimiter, register);
+router.post('/register', authLimiter, register);
 router.post('/verify', authLimiter, verifyEmail);
 router.post('/login', authLimiter, login);
 router.put('/role', auth, updateRole);
@@ -45,7 +45,7 @@ router.put(
     [
         check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 })
     ],
-    passwordResetLimiter,
+    authLimiter,
     userController.resetPassword
 );
 
