@@ -1,0 +1,160 @@
+/* TipTap Editor Styles */
+.ProseMirror {
+  min-height: 150px;
+  outline: none;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.ProseMirror p {
+  margin: 0.5em 0;
+}
+
+.ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror ul, .ProseMirror ol {
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.25em;
+}
+
+.ProseMirror a {
+  color: #0073aa;
+  text-decoration: underline;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Placeholder text */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+@keyframes highlight-fade {
+  0% {
+    background-color: rgba(255, 243, 191, 1);
+  }
+  100% {
+    background-color: rgba(255, 243, 191, 0);
+  }
+}
+
+.ai-rewritten {
+  animation: highlight-fade 2s ease-out forwards;
+}
+
+.prose p.ai-rewritten {
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Add these styles for the typewriter effect */
+.typewriter {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Add multiple sparkle animations */
+.sparkle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sparkle {
+  position: absolute;
+  animation: float 2s ease-in-out forwards;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0); opacity: 0; }
+}
+
+
+/* Add this to your CSS file or in a style tag */
+.dragging-task {
+  opacity: 0.5;
+  cursor: grabbing !important;
+}
+
+/* Add this to improve touch handling on mobile */
+html {
+  touch-action: none;
+}
+
+/* Add these styles to your CSS */
+.drag-handle:hover {
+  background-color: #f3f4f6;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Add this class to improve the visibility of the dragged item */
+[data-dnd-dragging="true"] {
+  z-index: 50 !important;
+  cursor: grabbing !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Enhanced drag styles */
+[data-dnd-draggable="true"] {
+  position: relative;
+  z-index: 1;
+}
+
+/* This ensures drag overlay is visible above everything */
+div[role="presentation"].dnd-kit_draggable-overlay {
+  z-index: 9999 !important;
+}
+
+/* Ghost effect for the original location */
+.ghost-card {
+  opacity: 0.4;
+  background-color: #f9fafb;
+  border: 2px dashed #d1d5db;
+}
+
+/* Make columns highlight when dragged over */
+.column-drop-target {
+  transition: background-color 0.2s ease;
+}
+
+.column-drop-target.is-over {
+  background-color: #f0f9ff;
+  border-color: #bae6fd;
+}

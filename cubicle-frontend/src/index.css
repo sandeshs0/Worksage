@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add this to your global CSS */
+@media print {
+  .invoice-print {
+    position: relative !important;
+    overflow: visible !important;
+    background: white !important;
+    display: block !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .invoice-print * {
+    visibility: visible !important;
+  }
+  
+  .invoice-container {
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
