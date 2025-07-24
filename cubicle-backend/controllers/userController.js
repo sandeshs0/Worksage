@@ -3,9 +3,7 @@ const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const { uploadProfileImage } = require('../middleware/upload');
 
-// @desc    Get user profile
-// @route   GET /api/users/me
-// @access  Private
+
 exports.getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password -otp -otpExpires');
@@ -19,9 +17,6 @@ exports.getProfile = async (req, res) => {
     }
 };
 
-// @desc    Update user profile
-// @route   PUT /api/users/me
-// @access  Private
 exports.updateProfile = async (req, res) => {
     try {
         const { name, email, role } = req.body;
@@ -88,8 +83,8 @@ exports.changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide current and new password' });
         }
 
-        if (newPassword.length < 6) {
-            return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long' });
+        if (newPassword.length < 8) {
+            return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long' });
         }
 
         // Get user
@@ -106,13 +101,11 @@ exports.changePassword = async (req, res) => {
             });
         }
 
-        // Verify current password
         const isMatch = await user.matchPassword(currentPassword);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Current password is incorrect' });
         }
 
-        // Hash new password
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
         await user.save();
