@@ -175,7 +175,7 @@ const InvoicesTab = ({ invoices = [], project, client }) => {
 
         <button
           onClick={handleNewInvoice}
-          className="bg-[#007991] text-white px-3 py-2 rounded-md shadow flex items-center hover:bg-[#007991]/90 transition-colors"
+          className="bg-[#18cb96] text-white px-3 py-2 rounded-md shadow flex items-center hover:bg-[#18cb96]/90 transition-colors"
           title="New Invoice (Ctrl + I)"
         >
           <Plus size={16} className="mr-1" />

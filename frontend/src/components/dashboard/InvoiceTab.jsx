@@ -302,7 +302,7 @@ const InvoiceTab = ({ project, client }) => {
           </div>
           <button
             onClick={handleCreateInvoice}
-            className="bg-[#007991] text-white px-4 py-2 rounded-md flex items-center hover:bg-[#005f67] transition-colors"
+            className="bg-[#18cb96] text-white px-4 py-2 rounded-md flex items-center hover:bg-[#005f67] transition-colors"
             title="Create Invoice (Ctrl + I)"
           >
             <Plus size={16} className="mr-2" />
@@ -316,7 +316,7 @@ const InvoiceTab = ({ project, client }) => {
         <button
           className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === "list"
-              ? "bg-white text-[#007991] shadow-sm"
+              ? "bg-white text-[#18cb96] shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           }`}
           onClick={() => setActiveTab("list")}
@@ -327,7 +327,7 @@ const InvoiceTab = ({ project, client }) => {
         <button
           className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === "insights"
-              ? "bg-white text-[#007991] shadow-sm"
+              ? "bg-white text-[#18cb96] shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           }`}
           onClick={() => setActiveTab("insights")}
@@ -431,7 +431,7 @@ const InvoiceTab = ({ project, client }) => {
                   onChange={(e) =>
                     setFilters({ ...filters, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                 >
                   <option value="">All Statuses</option>
                   <option value="draft">Draft</option>
@@ -454,7 +454,7 @@ const InvoiceTab = ({ project, client }) => {
                   onChange={(e) =>
                     setFilters({ ...filters, startDate: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                 />
               </div>
 
@@ -468,7 +468,7 @@ const InvoiceTab = ({ project, client }) => {
                   onChange={(e) =>
                     setFilters({ ...filters, endDate: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                 />
               </div>
 
@@ -488,7 +488,7 @@ const InvoiceTab = ({ project, client }) => {
                     onChange={(e) =>
                       setFilters({ ...filters, search: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                    className="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                   />
                 </div>
               </div>
@@ -499,7 +499,7 @@ const InvoiceTab = ({ project, client }) => {
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007991]"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#18cb96]"></div>
               </div>
             ) : invoices.length === 0 ? (
               <div className="text-center py-12">
@@ -512,7 +512,7 @@ const InvoiceTab = ({ project, client }) => {
                 </p>
                 <button
                   onClick={handleCreateInvoice}
-                  className="bg-[#007991] text-white px-4 py-2 rounded-lg hover:bg-[#005f67] transition-colors"
+                  className="bg-[#18cb96] text-white px-4 py-2 rounded-lg hover:bg-[#005f67] transition-colors"
                   title="Create Invoice (Ctrl + I)"
                 >
                   Create Invoice
@@ -572,7 +572,7 @@ const InvoiceTab = ({ project, client }) => {
                               {/* Primary Actions - Send and Log Payment */}
                               <button
                                 onClick={() => handleSendInvoice(invoice)}
-                                className="flex items-center px-2 py-1 text-white bg-[#007991] rounded hover:bg-blue-700"
+                                className="flex items-center px-2 py-1 text-white bg-[#18cb96] rounded hover:bg-blue-700"
                                 title="Send Invoice"
                               >
                                 <Send size={15} className="mr-1" />
@@ -827,8 +827,8 @@ const InvoiceTab = ({ project, client }) => {
                               invoiceStats.data.totalPaid || 0,
                               invoiceStats.data.totalOutstanding || 0,
                             ],
-                            backgroundColor: ["#007991", "#10B981", "#F59E0B"],
-                            borderColor: ["#005f73", "#059669", "#D97706"],
+                            backgroundColor: ["#18cb96", "#10B981", "#F59E0B"],
+                            borderColor: ["#14a085", "#059669", "#D97706"],
                             borderWidth: 1,
                           },
                         ],
@@ -991,7 +991,7 @@ const InvoiceTab = ({ project, client }) => {
           ) : (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007991] mx-auto mb-2"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#18cb96] mx-auto mb-2"></div>
                 <p className="text-gray-500">Loading invoice insights...</p>
               </div>
             </div>

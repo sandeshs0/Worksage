@@ -17,7 +17,7 @@ const InvoiceSuccessDialog = ({ invoice, onClose, onSendNow }) => {
           <div className="flex space-x-4 w-full">
             <button
               onClick={onSendNow}
-              className="flex-1 flex items-center justify-center px-4 py-3 bg-[#007991] text-white rounded-lg hover:bg-[#007991]/80 transition-colors"
+              className="flex-1 flex items-center justify-center px-4 py-3 bg-[#18cb96] text-white rounded-lg hover:bg-[#18cb96]/80 transition-colors"
             >
               <Mail className="h-5 w-5 mr-2" />
               Send Now

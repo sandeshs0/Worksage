@@ -66,7 +66,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentLogged }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <div className="bg-[#007991] p-2 rounded-lg mr-3">
+            <div className="bg-[#18cb96] p-2 rounded-lg mr-3">
               <DollarSign size={20} className="text-white" />
             </div>
             <div>
@@ -103,7 +103,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentLogged }) => {
             </div>
             <div className="col-span-2">
               <span className="text-gray-600">Remaining Amount:</span>
-              <div className="font-semibold text-[#007991]">
+              <div className="font-semibold text-[#18cb96]">
                 {formatCurrency(remainingAmount)}
               </div>
             </div>
@@ -127,7 +127,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentLogged }) => {
                 max={remainingAmount}
                 value={formData.amount}
                 onChange={(e) => handleInputChange("amount", e.target.value)}
-                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#007991] focus:border-transparent"
+                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#18cb96] focus:border-transparent"
                 placeholder="0.00"
                 required
               />
@@ -151,7 +151,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentLogged }) => {
                 min="0"
                 value={formData.tip}
                 onChange={(e) => handleInputChange("tip", e.target.value)}
-                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#007991] focus:border-transparent"
+                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#18cb96] focus:border-transparent"
                 placeholder="0.00"
               />
             </div>
@@ -164,7 +164,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentLogged }) => {
             <textarea
               value={formData.note}
               onChange={(e) => handleInputChange("note", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#007991] focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#18cb96] focus:border-transparent"
               placeholder="e.g., Paid via bank transfer, Cash payment, etc."
               rows="3"
             />
@@ -182,7 +182,7 @@ const PaymentModal = ({ invoice, onClose, onPaymentLogged }) => {
             <button
               type="submit"
               disabled={loading || !formData.amount}
-              className="flex-1 px-4 py-2 bg-[#007991] text-white rounded-md hover:bg-[#005f67] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-4 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#005f67] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? "Logging..." : "Log Payment"}
             </button>

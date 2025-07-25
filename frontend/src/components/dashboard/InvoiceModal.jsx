@@ -310,7 +310,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                     onChange={(e) =>
                       handleInputChange("issueDate", e.target.value)
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                     required
                   />
                 </div>
@@ -324,7 +324,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                     onChange={(e) =>
                       handleInputChange("dueDate", e.target.value)
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                     required
                   />
                 </div>
@@ -339,7 +339,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                   <button
                     type="button"
                     onClick={addItem}
-                    className="flex items-center px-3 py-2 text-[#007991] border border-[#007991] rounded-md hover:bg-[#007991]/10"
+                    className="flex items-center px-3 py-2 text-[#18cb96] border border-[#18cb96] rounded-md hover:bg-[#18cb96]/10"
                   >
                     <Plus size={16} className="mr-1" />
                     Add Item
@@ -392,7 +392,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                         onChange={(e) =>
                           handleInputChange("taxType", e.target.value)
                         }
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                       >
                         <option value="percentage">Percentage</option>
                         <option value="fixed">Fixed Amount</option>
@@ -404,7 +404,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                         onChange={(e) =>
                           handleInputChange("taxRate", e.target.value)
                         }
-                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                         placeholder={
                           formData.taxType === "percentage"
                             ? "Tax %"
@@ -424,7 +424,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                         onChange={(e) =>
                           handleInputChange("discountType", e.target.value)
                         }
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                       >
                         <option value="percentage">Percentage</option>
                         <option value="fixed">Fixed Amount</option>
@@ -436,7 +436,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                         onChange={(e) =>
                           handleInputChange("discountValue", e.target.value)
                         }
-                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                         placeholder={
                           formData.discountType === "percentage"
                             ? "Discount %"
@@ -458,7 +458,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                     value={formData.notes}
                     onChange={(e) => handleInputChange("notes", e.target.value)}
                     rows={3}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                     placeholder="Additional notes for the invoice..."
                   />
                 </div>
@@ -471,7 +471,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                     value={formData.terms}
                     onChange={(e) => handleInputChange("terms", e.target.value)}
                     rows={3}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                     placeholder="Terms and conditions..."
                   />
                 </div>
@@ -486,7 +486,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                       handleInputChange("paymentInstructions", e.target.value)
                     }
                     rows={2}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                     placeholder="Payment instructions..."
                   />
                 </div>
@@ -504,7 +504,7 @@ const InvoiceModal = ({ invoice, project, client, onClose, onSave }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-[#007991] text-white rounded-md hover:bg-[#007991]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#18cb96]/80 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading
                     ? "Saving..."
