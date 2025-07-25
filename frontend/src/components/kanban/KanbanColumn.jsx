@@ -30,7 +30,7 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`column-drop-target bg-[#007991]/20 border-2 border-[#007991]/20 rounded-lg p-3 flex-shrink-0 min-w-[280px] max-w-[280px] transition-colors
+      className={`column-drop-target bg-[#18cb96]/20 border-2 border-[#18cb96]/20 rounded-lg p-3 flex-shrink-0 min-w-[280px] max-w-[280px] transition-colors
         ${isOver ? "is-over ring-1 ring-blue-300" : ""}`}
     >
       <ColumnHeader

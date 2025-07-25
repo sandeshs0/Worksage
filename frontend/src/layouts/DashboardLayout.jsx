@@ -388,7 +388,7 @@ function DashboardLayout() {
             <div className="hidden lg:flex items-center">
               <img
                 src="/src/assets/logo.png"
-                alt="Cubicle Logo"
+                alt="WorkSage Logo"
                 className="h-12 w-12"
               />
               <span
@@ -396,14 +396,14 @@ function DashboardLayout() {
                   !sidebarOpen && "lg:hidden"
                 }`}
               >
-                Cubicle
+                WorkSage
               </span>
             </div>
 
             {/* Collapse sidebar button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md ml-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-[#007991] transition-all hover:shadow-sm"
+              className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md ml-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-[#18cb96] transition-all hover:shadow-sm"
               title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             >
               {sidebarOpen ? (
@@ -441,7 +441,7 @@ function DashboardLayout() {
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
-                        className="text-xs text-[#007991] hover:text-[#005f73] font-medium flex items-center"
+                        className="text-xs text-[#18cb96] hover:text-[#14a085] font-medium flex items-center"
                       >
                         <Check size={12} className="mr-1" />
                         Mark all as read
@@ -451,7 +451,7 @@ function DashboardLayout() {
                   <div className="max-h-96 overflow-y-auto">
                     {notificationLoading ? (
                       <div className="flex items-center justify-center p-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#007991]"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#18cb96]"></div>
                       </div>
                     ) : notifications.length === 0 ? (
                       <div className="px-4 py-6 text-center text-gray-500">
@@ -483,7 +483,7 @@ function DashboardLayout() {
                                   onClick={() =>
                                     handleMarkAsRead(notification._id)
                                   }
-                                  className="text-xs text-[#007991] hover:text-[#005f73] font-medium"
+                                  className="text-xs text-[#18cb96] hover:text-[#14a085] font-medium"
                                 >
                                   Mark as read
                                 </button>
@@ -516,7 +516,7 @@ function DashboardLayout() {
                     className="w-8 h-8 rounded-full object-cover border border-gray-200"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#222E50] text-white flex items-center justify-center font-medium">
+                  <div className="w-8 h-8 rounded-full bg-[#18172a] text-white flex items-center justify-center font-medium">
                     {userProfile.fullName
                       .split(" ")
                       .map((name) => name.charAt(0))
@@ -664,12 +664,12 @@ function DashboardLayout() {
             <div className="flex items-center">
               <img
                 src="/src/assets/logo.png"
-                alt="Cubicle Logo"
+                alt="WorkSage Logo"
                 className={`${sidebarOpen ? "h-10 w-10" : "h-8 w-8"}`}
               />
               {sidebarOpen && (
                 <span className="ml-2 text-xl font-semibold text-gray-800">
-                  Cubicle
+                  WorkSage
                 </span>
               )}
             </div>
@@ -704,7 +704,7 @@ function DashboardLayout() {
                     {({ isActive }) =>
                       isActive && (
                         <div className="ml-auto">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#222E50]"></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#18172a]"></div>
                         </div>
                       )
                     }
@@ -734,7 +734,7 @@ function DashboardLayout() {
                           className="w-12 h-12 rounded-xl object-cover border border-gray-200"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-[#222E50] text-white flex items-center justify-center font-medium text-lg">
+                        <div className="w-12 h-12 rounded-xl bg-[#18172a] text-white flex items-center justify-center font-medium text-lg">
                           {userProfile.fullName
                             .split(" ")
                             .map((name) => name.charAt(0))
@@ -765,7 +765,7 @@ function DashboardLayout() {
 
                       {userProfile.plan.toLowerCase() === "free" && (
                         <button
-                          className="text-xs font-medium text-[#007991] py-1 px-2 flex items-center hover:bg-[#f0f9ff] rounded"
+                          className="text-xs font-medium text-[#18cb96] py-1 px-2 flex items-center hover:bg-[#f0f9ff] rounded"
                           onClick={() => navigate("/dashboard/settings")}
                         >
                           Upgrade <ArrowUpRight size={12} className="ml-1" />
@@ -782,7 +782,7 @@ function DashboardLayout() {
                         className="w-10 h-10 rounded-full object-cover border border-gray-200"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-[#222E50] text-white flex items-center justify-center font-medium">
+                      <div className="w-10 h-10 rounded-full bg-[#18172a] text-white flex items-center justify-center font-medium">
                         {userProfile.fullName
                           .split(" ")
                           .map((name) => name.charAt(0))

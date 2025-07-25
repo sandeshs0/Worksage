@@ -576,7 +576,7 @@ const TaskModal = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#007991] text-white rounded-md hover:bg-[#034e5d]"
+                className="px-4 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#034e5d]"
                 disabled={loading}
               >
                 {loading ? "Saving..." : task ? "Save Changes" : "Create Task"}

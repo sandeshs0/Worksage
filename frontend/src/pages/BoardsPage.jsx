@@ -94,9 +94,9 @@ const BoardsPage = () => {
   };
 
   const BoardCard = ({ board }) => (
-    <div className="group bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:border-[#007991]/30 transition-all duration-300 transform hover:-translate-y-1">
+    <div className="group bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-lg hover:border-[#18cb96]/30 transition-all duration-300 transform hover:-translate-y-1">
       {/* Card Header with Gradient */}
-      <div className="h-20 bg-gradient-to-br from-[#007991] to-[#005f73] relative overflow-hidden">
+      <div className="h-20 bg-gradient-to-br from-[#18cb96] to-[#14a085] relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-3 right-3">
           <button className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors opacity-0 group-hover:opacity-100">
@@ -110,7 +110,7 @@ const BoardsPage = () => {
       {/* Card Content */}
       <div className="p-6">
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#007991] transition-colors line-clamp-1">
+          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[#18cb96] transition-colors line-clamp-1">
             {board.title}
           </h3>
           <Star size={16} className="text-gray-300 hover:text-yellow-400 cursor-pointer transition-colors" />
@@ -134,7 +134,7 @@ const BoardsPage = () => {
 
         {/* Created By */}
         <div className="flex items-center mb-4">
-          <div className="w-6 h-6 rounded-full bg-[#007991] flex items-center justify-center text-xs text-white font-medium">
+          <div className="w-6 h-6 rounded-full bg-[#18cb96] flex items-center justify-center text-xs text-white font-medium">
             {board.createdBy?.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <span className="ml-2 text-sm text-gray-600">
@@ -146,7 +146,7 @@ const BoardsPage = () => {
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <button
             onClick={() => navigate(`/dashboard/boards/${board._id}`)}
-            className="flex-1 bg-[#007991] hover:bg-[#005f73] text-white px-4 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 mr-2"
+            className="flex-1 bg-[#18cb96] hover:bg-[#14a085] text-white px-4 py-2.5 rounded-lg font-medium text-sm transition-colors duration-200 mr-2"
           >
             Open Board
           </button>
@@ -159,7 +159,7 @@ const BoardsPage = () => {
                 });
                 // Implement edit functionality
               }}
-              className="p-2.5 text-gray-400 hover:text-[#007991] hover:bg-[#007991]/5 rounded-lg transition-colors"
+              className="p-2.5 text-gray-400 hover:text-[#18cb96] hover:bg-[#18cb96]/5 rounded-lg transition-colors"
               title="Edit board"
             >
               <Edit size={16} />
@@ -179,8 +179,8 @@ const BoardsPage = () => {
 
   const EmptyState = () => (
     <div className="col-span-full flex flex-col items-center justify-center py-16">
-      <div className="bg-gradient-to-br from-[#007991]/10 to-[#005f73]/5 rounded-full p-8 mb-6">
-        <Grid className="text-[#007991]" size={48} />
+      <div className="bg-gradient-to-br from-[#18cb96]/10 to-[#14a085]/5 rounded-full p-8 mb-6">
+        <Grid className="text-[#18cb96]" size={48} />
       </div>
       <h3 className="text-2xl font-semibold text-gray-900 mb-2">
         No boards yet
@@ -190,7 +190,7 @@ const BoardsPage = () => {
       </p>
       <button
         onClick={() => setShowCreateModal(true)}
-        className="bg-[#007991] hover:bg-[#005f73] text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
+        className="bg-[#18cb96] hover:bg-[#14a085] text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors duration-200"
       >
         <PlusCircle size={20} />
         Create Your First Board
@@ -215,7 +215,7 @@ const BoardsPage = () => {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'grid' 
-                      ? 'bg-white text-[#007991] shadow-sm' 
+                      ? 'bg-white text-[#18cb96] shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
@@ -225,7 +225,7 @@ const BoardsPage = () => {
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'list' 
-                      ? 'bg-white text-[#007991] shadow-sm' 
+                      ? 'bg-white text-[#18cb96] shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
@@ -235,7 +235,7 @@ const BoardsPage = () => {
               
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-[#007991] hover:bg-[#005f73] text-white px-6 py-3 rounded-lg flex items-center gap-2 font-medium transition-colors duration-200 shadow-lg hover:shadow-xl"
+                className="bg-[#18cb96] hover:bg-[#14a085] text-white px-6 py-3 rounded-lg flex items-center gap-2 font-medium transition-colors duration-200 shadow-lg hover:shadow-xl"
               >
                 <PlusCircle size={20} />
                 Create Board
@@ -250,7 +250,7 @@ const BoardsPage = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64">
             <div className="relative">
-              <div className="w-16 h-16 border-4 border-[#007991]/20 border-t-[#007991] rounded-full animate-spin"></div>
+              <div className="w-16 h-16 border-4 border-[#18cb96]/20 border-t-[#18cb96] rounded-full animate-spin"></div>
             </div>
             <p className="text-gray-600 mt-4">Loading your boards...</p>
           </div>
@@ -269,17 +269,17 @@ const BoardsPage = () => {
               <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-[#007991]">{boards.length}</div>
+                    <div className="text-2xl font-bold text-[#18cb96]">{boards.length}</div>
                     <div className="text-sm text-gray-600">Total Boards</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-[#007991]">
+                    <div className="text-2xl font-bold text-[#18cb96]">
                       {boards.filter(board => board.createdAt > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
                     </div>
                     <div className="text-sm text-gray-600">Created This Week</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-[#007991]">
+                    <div className="text-2xl font-bold text-[#18cb96]">
                       {boards.reduce((acc, board) => acc + (board.members?.length || 1), 0)}
                     </div>
                     <div className="text-sm text-gray-600">Total Members</div>
@@ -309,11 +309,11 @@ const BoardsPage = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#007991] to-[#005f73] px-6 py-8">
+            <div className="bg-gradient-to-r from-[#18cb96] to-[#14a085] px-6 py-8">
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Create New Board</h2>
-                  <p className="text-[#007991]/80 text-sm mt-1">Start organizing your project</p>
+                  <p className="text-[#18cb96]/80 text-sm mt-1">Start organizing your project</p>
                 </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -332,7 +332,7 @@ const BoardsPage = () => {
                 </label>
                 <input
                   type="text"
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#007991] focus:border-transparent transition-all"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#18cb96] focus:border-transparent transition-all"
                   placeholder="Enter a descriptive board title"
                   value={newBoard.title}
                   onChange={(e) =>
@@ -347,7 +347,7 @@ const BoardsPage = () => {
                   Description <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <textarea
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#007991] focus:border-transparent transition-all resize-none"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#18cb96] focus:border-transparent transition-all resize-none"
                   placeholder="What's this board about?"
                   value={newBoard.description}
                   onChange={(e) =>
@@ -367,7 +367,7 @@ const BoardsPage = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-[#007991] text-white rounded-xl hover:bg-[#005f73] font-medium flex items-center justify-center gap-2 transition-colors shadow-lg"
+                  className="flex-1 px-6 py-3 bg-[#18cb96] text-white rounded-xl hover:bg-[#14a085] font-medium flex items-center justify-center gap-2 transition-colors shadow-lg"
                   disabled={isCreating}
                 >
                   {isCreating ? (

@@ -441,7 +441,7 @@ function KanbanPage() {
     <div>
       {/* Breadcrumb navigation */}
       <div className="flex items-center text-lg text-gray-500 mb-4">
-        <Link to="/dashboard/boards" className="hover:text-[#007991]">
+        <Link to="/dashboard/boards" className="hover:text-[#18cb96]">
           Boards
         </Link>
         <ChevronRight size={20} className="mx-2" />
@@ -453,7 +453,7 @@ function KanbanPage() {
           <h1 className="text-3xl font-bold">{board.title}</h1>
           <button
             onClick={() => setIsAddingColumn(true)}
-            className="px-6 py-2 bg-[#007991] font-bold text-lg text-white rounded-md shadow-md hover:bg-[#034e5d] transition-colors"
+            className="px-6 py-2 bg-[#18cb96] font-bold text-lg text-white rounded-md shadow-md hover:bg-[#034e5d] transition-colors"
           >
             {/* <Plus className="w-4 h-4 mr-2" /> */}+ Add Column
           </button>
@@ -603,7 +603,7 @@ function KanbanPage() {
               </button>
               <button
                 onClick={handleAddColumn}
-                className="px-4 py-2 bg-[#007991] text-white rounded-md shadow-md hover:bg-[#005f67] transition-colors"
+                className="px-4 py-2 bg-[#18cb96] text-white rounded-md shadow-md hover:bg-[#005f67] transition-colors"
               >
                 Add Column
               </button>
