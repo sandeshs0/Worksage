@@ -36,6 +36,10 @@ const UserSchema = new mongoose.Schema({
     enum: ["free", "pro", "vantage"],
     default: "free",
   },
+  planExpiry: {
+    type: Date,
+    default: null, // null means no expiry (for free plan)
+  },
   otp: {
     type: String,
   },

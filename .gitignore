@@ -1,0 +1,4 @@
+
+# Ignore critical evaluation markdown files
+*.md
+*.sh

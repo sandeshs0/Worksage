@@ -277,6 +277,19 @@ app.use(
   require("./routes/board")
 );
 app.use("/api/security", require("./routes/security"));
+
+// Plans callback route (no CSRF protection - called by Khalti)
+app.get("/api/plans/callback", require("./routes/plans"));
+
+// Other plans routes (with CSRF protection)
+app.use(
+  "/api/plans",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/plans")
+);
+
 app.use(
   "/api/columns",
   auth,

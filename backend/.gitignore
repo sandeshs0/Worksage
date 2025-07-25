@@ -20,3 +20,8 @@ logs/
 # certificate
 *.pem
 cert/*
+
+# Test files
+*.test.js
+*test*
+*.md
