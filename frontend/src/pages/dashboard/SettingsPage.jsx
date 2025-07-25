@@ -1342,7 +1342,7 @@ function SettingsPage() {
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="font-medium">
-                              Upgraded to {upgrade.planType.charAt(0).toUpperCase() + upgrade.planType.slice(1)}
+                              Upgraded to {upgrade.toPlan ? upgrade.toPlan.charAt(0).toUpperCase() + upgrade.toPlan.slice(1) : 'Unknown Plan'}
                             </p>
                             <p className="text-sm text-gray-500">
                               {new Date(upgrade.createdAt).toLocaleDateString('en-US', {
@@ -1361,7 +1361,7 @@ function SettingsPage() {
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-red-100 text-red-800'
                             }`}>
-                              {upgrade.status.charAt(0).toUpperCase() + upgrade.status.slice(1)}
+                              {upgrade.status ? upgrade.status.charAt(0).toUpperCase() + upgrade.status.slice(1) : 'Unknown Status'}
                             </span>
                           </div>
                         </div>
