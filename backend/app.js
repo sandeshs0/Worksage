@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const express = require("express");
 const https = require("https");
@@ -6,8 +5,12 @@ const path = require("path");
 const fs = require("fs");
 const connectDB = require("./config/db");
 const cors = require("cors");
+const helmet = require("helmet");
 const { apiLimiter } = require("./middleware/rateLimiter");
 const cookieParser = require("cookie-parser");
+const mongoSanitize = require("express-mongo-sanitize");
+const { noSqlSanitizer } = require("./middleware/noSqlSanitizer");
+const { xssProtection } = require("./middleware/xssProtection");
 
 const app = express();
 
@@ -28,18 +31,16 @@ require("./config/passport")(passport);
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl, postman)
+      // Allow requests with no origin (mobile apps, curl, postman, OAuth callbacks)
       if (!origin) return callback(null, true);
 
       const allowedOrigins = [
-        "https://localhost:3000",
-        "http://localhost:3000",
         "https://localhost:5173",
         "http://localhost:5173",
         "https://127.0.0.1:3000",
         "http://127.0.0.1:3000",
         "https://127.0.0.1:5173",
-        "http://127.0.0.1:5173",
+        "https://accounts.google.com", // Allow Google OAuth
       ];
 
       if (allowedOrigins.includes(origin)) {
@@ -63,22 +64,42 @@ app.use(
   })
 );
 
-// Security headers
-app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+// Enhanced Security Headers with Helmet
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://res.cloudinary.com",
+          "https://*.cloudinary.com",
+        ],
+        scriptSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+        connectSrc: ["'self'", "https://api.cloudinary.com"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Disable COEP for compatibility
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    noSniff: true,
+    frameguard: { action: "deny" },
+    xssFilter: false, // Disable helmet's XSS filter as we have custom XSS protection
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  })
+);
 
-  if (req.secure) {
-    res.setHeader(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains"
-    );
-  }
-
-  next();
-});
+// Additional custom security headers for enhanced protection
 
 // Body parsing middleware
 app.use(
@@ -90,16 +111,44 @@ app.use(
 
 app.use(
   express.urlencoded({
-    extended: false,
+    extended: true, // Use qs library instead of querystring for better handling
     limit: "10mb",
   })
 );
 app.use(cookieParser());
 
+// NoSQL injection prevention
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+    onSanitize: ({ req, key }) => {
+      console.warn(
+        `⚠️ NoSQL injection attempt detected and sanitized: ${key} from ${req.ip}`
+      );
+    },
+  })
+);
+
+// Additional custom NoSQL injection protection
+app.use(noSqlSanitizer);
+
+// Initialize security log array for tracking security events
+app.use((req, res, next) => {
+  req.securityLog = [];
+  next();
+});
+
+// XSS Protection
+app.use(xssProtection);
+
 // Passport middleware
 app.use(passport.initialize());
 
-// Logging middleware for debugging
+// Activity logging middleware (logs all API requests)
+const activityLogger = require("./middleware/activityLogger");
+app.use(activityLogger);
+
+// Logging middleware for debugging (optional, can remove if not needed)
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - Origin: ${req.get("origin")}`);
   next();
@@ -132,10 +181,33 @@ app.get("/api/csrf-token", csrfProtection, (req, res) => {
   });
 });
 
-// Public Routes
+// OAuth Routes with conditional CSRF protection and query preservation
 app.use(
   "/api/auth",
-  csrfProtection,
+  (req, res, next) => {
+    // Preserve original query for OAuth routes before any encoding
+    if (req.path === "/google/callback" && req.url.includes("code=")) {
+      console.log("🔧 Preserving original OAuth query parameters");
+      // Extract the raw code from the URL
+      const rawUrl = req.url;
+      const codeMatch = rawUrl.match(/code=([^&]+)/);
+      if (codeMatch) {
+        const rawCode = decodeURIComponent(codeMatch[1]);
+        console.log("📝 Raw OAuth code:", rawCode.substring(0, 20) + "...");
+        // Store the clean code
+        req.rawOAuthCode = rawCode;
+      }
+    }
+
+    // Skip CSRF for OAuth routes that come from external domains
+    if (req.path === "/google" || req.path === "/google/callback") {
+      console.log(`🔓 Skipping CSRF for OAuth route: ${req.path}`);
+      return next();
+    }
+    // Apply CSRF protection for all other auth routes
+    console.log(`🔒 Applying CSRF for auth route: ${req.path}`);
+    csrfProtection(req, res, next);
+  },
   csrfErrorHandler,
   require("./routes/auth")
 );
@@ -204,6 +276,7 @@ app.use(
   csrfErrorHandler,
   require("./routes/board")
 );
+app.use("/api/security", require("./routes/security"));
 app.use(
   "/api/columns",
   auth,

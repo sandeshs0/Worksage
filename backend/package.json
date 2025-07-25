@@ -4,8 +4,11 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "test-security": "node test-security.js",
+    "test-nosql": "node test-nosql-injection.js",
+    "test-xss": "jest test-xss-protection.js",
     "start": "nodemon app.js",
     "server": "nodemon app.js",
     "client": "npm start --prefix client",
@@ -25,8 +28,10 @@
     "csurf": "^1.11.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^8.0.1",
     "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.2",
     "morgan": "^1.10.0",
@@ -40,6 +45,8 @@
     "validator": "^13.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "jest": "^30.0.5",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
   }
 }

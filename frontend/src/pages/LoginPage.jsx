@@ -4,8 +4,16 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import authService from "../services/authService";
+import { useXSSProtection } from "../utils/xssHOC.jsx";
+import { validateXSS } from "../utils/xssProtection";
 
 function LoginPage() {
+  // XSS Protection Hook
+  const { protectInput, securityLog, hasSecurityWarnings } = useXSSProtection({
+    enableValidation: true,
+    logAttempts: true,
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -23,7 +31,8 @@ function LoginPage() {
   const [retryCountdown, setRetryCountdown] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, isLoading, user, refreshUserData } = useUser();
+  const { login, isAuthenticated, isLoading, user, refreshUserData } =
+    useUser();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -43,9 +52,19 @@ function LoginPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Sanitize input for XSS protection
+    const sanitizedValue = protectInput(value, name);
+
+    // Validate for potential XSS attempts
+    const validation = validateXSS(value);
+    if (!validation.isValid) {
+      console.warn(`XSS attempt detected in ${name}:`, validation.threats);
+    }
+
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: sanitizedValue,
     });
 
     // Clear errors when user types

@@ -1,4 +1,103 @@
+const ActivityLog = require("../models/ActivityLog");
 const User = require("../models/User");
+const mongoose = require("mongoose");
+
+// Get activity logs with pagination and insights
+exports.getActivityLogs = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    // Build filter
+    const filter = {};
+    if (req.query.method) filter.method = req.query.method;
+    if (req.query.endpoint)
+      filter.endpoint = { $regex: req.query.endpoint, $options: "i" };
+    if (req.query.status) filter.status = parseInt(req.query.status);
+    if (req.query.from || req.query.to) {
+      filter.timestamp = {};
+      if (req.query.from) filter.timestamp.$gte = new Date(req.query.from);
+      if (req.query.to) filter.timestamp.$lte = new Date(req.query.to);
+    }
+    // Only filter by user if valid ObjectId
+    if (req.query.user && /^[a-fA-F0-9]{24}$/.test(req.query.user.trim())) {
+      filter.user = mongoose.Types.ObjectId(req.query.user.trim());
+    }
+
+    // Get total count
+    const total = await ActivityLog.countDocuments(filter);
+
+    // Get logs with user info
+    const logs = await ActivityLog.find(filter)
+      .populate("user", "_id name email")
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Basic insights
+    const uniqueUsers = await ActivityLog.distinct("user", filter);
+    const topEndpoints = await ActivityLog.aggregate([
+      { $match: filter },
+      { $group: { _id: "$endpoint", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ]);
+    const topMethods = await ActivityLog.aggregate([
+      { $match: filter },
+      { $group: { _id: "$method", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.json({
+      success: true,
+      logs,
+      page,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
+      total,
+      insights: {
+        totalRequests: total,
+        uniqueUsers: uniqueUsers.length,
+        topEndpoints,
+        topMethods,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch activity logs",
+      error: error.message,
+    });
+  }
+};
+
+// Clear activity logs (with optional date filtering)
+exports.clearActivityLogs = async (req, res) => {
+  try {
+    const filter = {};
+
+    // Optional date filtering - only clear logs older than specified date
+    if (req.body.olderThan) {
+      filter.timestamp = { $lt: new Date(req.body.olderThan) };
+    }
+
+    const result = await ActivityLog.deleteMany(filter);
+
+    res.json({
+      success: true,
+      message: `Cleared ${result.deletedCount} activity logs`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear activity logs",
+      error: error.message,
+    });
+  }
+};
 
 // List all users
 exports.getAllUsers = async (req, res) => {
@@ -61,7 +160,357 @@ exports.getSystemStats = async (req, res) => {
   }
 };
 
-// Placeholder for activity logs (to be implemented)
-exports.getActivityLogs = async (req, res) => {
-  res.json({ success: true, logs: [] });
+// Get security logs specifically
+exports.getSecurityLogs = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    // Build filter for security events - support both old and new formats
+    const filter = {
+      $or: [{ isSecurityEvent: true }, { type: "security" }],
+    };
+
+    // Additional filters
+    if (req.query.eventType) {
+      filter.$or.push(
+        { "securityEvents.type": req.query.eventType },
+        { action: req.query.eventType }
+      );
+    }
+    if (req.query.ip) {
+      filter.$or.push(
+        { ip: { $regex: req.query.ip, $options: "i" } },
+        { ipAddress: { $regex: req.query.ip, $options: "i" } }
+      );
+    }
+    if (req.query.from || req.query.to) {
+      filter.timestamp = {};
+      if (req.query.from) filter.timestamp.$gte = new Date(req.query.from);
+      if (req.query.to) filter.timestamp.$lte = new Date(req.query.to);
+    }
+    if (req.query.user && /^[a-fA-F0-9]{24}$/.test(req.query.user.trim())) {
+      filter.user = mongoose.Types.ObjectId(req.query.user.trim());
+    }
+
+    // Get total count
+    const total = await ActivityLog.countDocuments(filter);
+
+    // Get security logs with user info
+    const logs = await ActivityLog.find(filter)
+      .populate("user", "_id fullName email")
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Enhanced security insights including XSS attacks
+    const securityStats = await ActivityLog.aggregate([
+      {
+        $match: {
+          $or: [{ isSecurityEvent: true }, { type: "security" }],
+        },
+      },
+      {
+        $addFields: {
+          eventType: {
+            $cond: {
+              if: { $eq: ["$type", "security"] },
+              then: "$action",
+              else: {
+                $cond: {
+                  if: { $isArray: "$securityEvents" },
+                  then: { $arrayElemAt: ["$securityEvents.type", 0] },
+                  else: "unknown",
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$eventType",
+          count: { $sum: 1 },
+          latestIncident: { $max: "$timestamp" },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    // XSS specific statistics
+    const xssStats = await ActivityLog.aggregate([
+      {
+        $match: {
+          type: "security",
+          action: "xss_attempt",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            hour: { $hour: "$timestamp" },
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
+          },
+          count: { $sum: 1 },
+          uniqueIPs: { $addToSet: "$ipAddress" },
+        },
+      },
+      { $sort: { "_id.date": -1, "_id.hour": -1 } },
+      { $limit: 24 },
+    ]);
+
+    const topThreats = await ActivityLog.aggregate([
+      {
+        $match: {
+          $or: [{ isSecurityEvent: true }, { type: "security" }],
+        },
+      },
+      {
+        $addFields: {
+          threatIP: {
+            $cond: {
+              if: { $ne: ["$ipAddress", null] },
+              then: "$ipAddress",
+              else: "$ip",
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$threatIP",
+          count: { $sum: 1 },
+          latestAttempt: { $max: "$timestamp" },
+          threatTypes: { $addToSet: "$action" },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
+    const recentThreats = await ActivityLog.find({
+      $or: [{ isSecurityEvent: true }, { type: "security" }],
+    })
+      .sort({ timestamp: -1 })
+      .limit(5)
+      .lean();
+
+    // Calculate threat severity
+    const criticalThreats = await ActivityLog.countDocuments({
+      $or: [{ isSecurityEvent: true }, { type: "security" }],
+      timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24h
+    });
+
+    res.json({
+      success: true,
+      data: {
+        logs,
+        pagination: {
+          current: page,
+          total: Math.ceil(total / limit),
+          count: total,
+          limit,
+        },
+        insights: {
+          securityStats,
+          xssStats,
+          topThreats,
+          recentThreats,
+          criticalThreats,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching security logs:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch security logs" });
+  }
+};
+
+// Get security dashboard summary
+exports.getSecurityDashboard = async (req, res) => {
+  try {
+    const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const last7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // Enhanced threat counts including new security format
+    const threats24h = await ActivityLog.countDocuments({
+      $or: [{ isSecurityEvent: true }, { type: "security" }],
+      timestamp: { $gte: last24h },
+    });
+
+    const threats7d = await ActivityLog.countDocuments({
+      $or: [{ isSecurityEvent: true }, { type: "security" }],
+      timestamp: { $gte: last7d },
+    });
+
+    const totalThreats = await ActivityLog.countDocuments({
+      $or: [{ isSecurityEvent: true }, { type: "security" }],
+    });
+
+    // XSS-specific metrics
+    const xssAttempts24h = await ActivityLog.countDocuments({
+      $or: [
+        { "securityEvents.type": "XSS_ATTEMPT" },
+        { type: "security", action: "xss_attempt" }
+      ],
+      timestamp: { $gte: last24h },
+    });
+
+    const xssAttempts7d = await ActivityLog.countDocuments({
+      $or: [
+        { "securityEvents.type": "XSS_ATTEMPT" },
+        { type: "security", action: "xss_attempt" }
+      ],
+      timestamp: { $gte: last7d },
+    });
+
+    const noSqlAttempts24h = await ActivityLog.countDocuments({
+      $or: [
+        { "securityEvents.type": "NoSQL_INJECTION_ATTEMPT" },
+        { "securityEvents.type": "NOSQL_INJECTION_ATTEMPT" },
+        { type: "security", action: "nosql_injection_attempt" }
+      ],
+      timestamp: { $gte: last24h },
+    });
+
+    const noSqlAttempts7d = await ActivityLog.countDocuments({
+      $or: [
+        { "securityEvents.type": "NoSQL_INJECTION_ATTEMPT" },
+        { "securityEvents.type": "NOSQL_INJECTION_ATTEMPT" },
+        { type: "security", action: "nosql_injection_attempt" }
+      ],
+      timestamp: { $gte: last7d },
+    });
+
+    // Enhanced threat types breakdown
+    const threatBreakdown = await ActivityLog.aggregate([
+      {
+        $match: {
+          $or: [{ isSecurityEvent: true }, { type: "security" }],
+          timestamp: { $gte: last7d },
+        },
+      },
+      {
+        $addFields: {
+          threatType: {
+            $cond: {
+              if: { $eq: ["$type", "security"] },
+              then: "$action",
+              else: {
+                $cond: {
+                  if: { $isArray: "$securityEvents" },
+                  then: { $arrayElemAt: ["$securityEvents.type", 0] },
+                  else: "unknown",
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$threatType",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    // Top attacking IPs with enhanced data
+    const topAttackers = await ActivityLog.aggregate([
+      {
+        $match: {
+          $or: [{ isSecurityEvent: true }, { type: "security" }],
+          timestamp: { $gte: last7d },
+        },
+      },
+      {
+        $addFields: {
+          attackerIP: {
+            $cond: {
+              if: { $ne: ["$ipAddress", null] },
+              then: "$ipAddress",
+              else: "$ip",
+            },
+          },
+          threatType: {
+            $cond: {
+              if: { $eq: ["$type", "security"] },
+              then: "$action",
+              else: {
+                $cond: {
+                  if: { $isArray: "$securityEvents" },
+                  then: { $arrayElemAt: ["$securityEvents.type", 0] },
+                  else: "unknown",
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$attackerIP",
+          attempts: { $sum: 1 },
+          lastSeen: { $max: "$timestamp" },
+          threatTypes: { $addToSet: "$threatType" },
+          xssAttempts: {
+            $sum: {
+              $cond: [{ $eq: ["$action", "xss_attempt"] }, 1, 0],
+            },
+          },
+          noSqlAttempts: {
+            $sum: {
+              $cond: [{ $eq: ["$action", "nosql_injection_attempt"] }, 1, 0],
+            },
+          },
+        },
+      },
+      { $sort: { attempts: -1 } },
+      { $limit: 5 },
+    ]);
+
+    // Threat timeline (last 7 days)
+    const threatTimeline = await ActivityLog.aggregate([
+      { $match: { isSecurityEvent: true, timestamp: { $gte: last7d } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$timestamp" },
+            month: { $month: "$timestamp" },
+            day: { $dayOfMonth: "$timestamp" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          threats24h,
+          threats7d,
+          totalThreats,
+          xssAttempts24h,
+          xssAttempts7d,
+          noSqlAttempts24h,
+          noSqlAttempts7d,
+        },
+        threatBreakdown,
+        topAttackers,
+        threatTimeline,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching security dashboard:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch security dashboard" });
+  }
 };
