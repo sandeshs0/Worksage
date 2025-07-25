@@ -23,33 +23,10 @@ const options = {
 connectDB();
 
 const passport = require("passport");
-
-// Passport config
 require("./config/passport")(passport);
-
-// CORS Configuration - SINGLE INSTANCE ONLY
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl, postman, OAuth callbacks)
-      if (!origin) return callback(null, true);
-
-      const allowedOrigins = [
-        "https://localhost:5173",
-        "http://localhost:5173",
-        "https://127.0.0.1:3000",
-        "http://127.0.0.1:3000",
-        "https://127.0.0.1:5173",
-        "https://accounts.google.com", // Allow Google OAuth
-      ];
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("❌ CORS blocked origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: ["https://localhost:5173", "https://accounts.google.com"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
@@ -60,11 +37,9 @@ app.use(
       "Origin",
     ],
     credentials: true,
-    optionsSuccessStatus: 200, // For legacy browser support
   })
 );
 
-// Enhanced Security Headers with Helmet
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -129,7 +104,6 @@ app.use(
   })
 );
 
-// Additional custom NoSQL injection protection
 app.use(noSqlSanitizer);
 
 // Initialize security log array for tracking security events
@@ -262,10 +236,7 @@ app.use(
   csrfErrorHandler,
   require("./routes/emailAccounts")
 );
-app.use(
-  "/api/mfa",
-  require("./routes/mfa")
-);
+app.use("/api/mfa", require("./routes/mfa"));
 app.use(
   "/api/ai",
   auth,

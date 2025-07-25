@@ -326,19 +326,19 @@ function SettingsPage() {
 
     // Basic input validation
     if (!passwordData.currentPassword) {
-      setPasswordErrors({ currentPassword: 'Current password is required' });
+      setPasswordErrors({ currentPassword: "Current password is required" });
       setPasswordLoading(false);
       return;
     }
 
     if (!passwordData.newPassword) {
-      setPasswordErrors({ general: 'New password is required' });
+      setPasswordErrors({ general: "New password is required" });
       setPasswordLoading(false);
       return;
     }
 
     if (!passwordData.confirmPassword) {
-      setPasswordErrors({ confirm: 'Password confirmation is required' });
+      setPasswordErrors({ confirm: "Password confirmation is required" });
       setPasswordLoading(false);
       return;
     }
@@ -423,12 +423,12 @@ function SettingsPage() {
     }));
 
     // Clear previous errors for this field
-    setPasswordErrors(prev => {
+    setPasswordErrors((prev) => {
       const newErrors = { ...prev };
-      if (name === 'currentPassword') {
+      if (name === "currentPassword") {
         delete newErrors.currentPassword;
       }
-      if (name === 'newPassword') {
+      if (name === "newPassword") {
         // Clear all password complexity errors
         delete newErrors.length;
         delete newErrors.lowercase;
@@ -437,24 +437,27 @@ function SettingsPage() {
         delete newErrors.special;
         delete newErrors.pattern;
       }
-      if (name === 'confirmPassword') {
+      if (name === "confirmPassword") {
         delete newErrors.confirm;
       }
       return newErrors;
     });
 
     // Real-time validation for new password
-    if (name === 'newPassword' && value) {
+    if (name === "newPassword" && value) {
       const validationErrors = validatePassword(value);
       if (Object.keys(validationErrors).length > 0) {
-        setPasswordErrors(prev => ({ ...prev, ...validationErrors }));
+        setPasswordErrors((prev) => ({ ...prev, ...validationErrors }));
       }
     }
 
     // Real-time validation for password confirmation
-    if (name === 'confirmPassword' && value && passwordData.newPassword) {
+    if (name === "confirmPassword" && value && passwordData.newPassword) {
       if (value !== passwordData.newPassword) {
-        setPasswordErrors(prev => ({ ...prev, confirm: 'Passwords do not match' }));
+        setPasswordErrors((prev) => ({
+          ...prev,
+          confirm: "Passwords do not match",
+        }));
       }
     }
   };
@@ -614,7 +617,9 @@ function SettingsPage() {
     const tabParam = urlParams.get("tab");
     if (
       tabParam &&
-      ["profile", "email", "password", "security", "billing", "plans"].includes(tabParam)
+      ["profile", "email", "password", "security", "billing", "plans"].includes(
+        tabParam
+      )
     ) {
       setActiveTab(tabParam);
     }
@@ -634,7 +639,7 @@ function SettingsPage() {
             <button
               className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
                 activeTab === "profile"
-                  ? "bg-[#007991] text-white"
+                  ? "bg-[#18cb96] text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setActiveTab("profile")}
@@ -647,7 +652,7 @@ function SettingsPage() {
             <button
               className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
                 activeTab === "email"
-                  ? "bg-[#007991] text-white"
+                  ? "bg-[#18cb96] text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setActiveTab("email")}
@@ -660,7 +665,7 @@ function SettingsPage() {
             <button
               className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
                 activeTab === "password"
-                  ? "bg-[#007991] text-white"
+                  ? "bg-[#18cb96] text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setActiveTab("password")}
@@ -673,7 +678,7 @@ function SettingsPage() {
             <button
               className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
                 activeTab === "security"
-                  ? "bg-[#007991] text-white"
+                  ? "bg-[#18cb96] text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setActiveTab("security")}
@@ -686,7 +691,7 @@ function SettingsPage() {
             {/* <button
               className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
                 activeTab === "preferences"
-                  ? "bg-[#007991] text-white"
+                  ? "bg-[#18cb96] text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setActiveTab("preferences")}
@@ -699,7 +704,7 @@ function SettingsPage() {
             <button
               className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
                 activeTab === "plans"
-                  ? "bg-[#007991] text-white"
+                  ? "bg-[#18cb96] text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setActiveTab("plans")}
@@ -722,7 +727,7 @@ function SettingsPage() {
                   onClick={() =>
                     isEditing ? handleSubmit() : setIsEditing(true)
                   }
-                  className="flex items-center px-4 py-2 bg-[#007991] text-white rounded-md hover:bg-[#006980]"
+                  className="flex items-center px-4 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085]"
                   disabled={isPageLoading}
                 >
                   {isPageLoading ? (
@@ -763,14 +768,14 @@ function SettingsPage() {
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full bg-[#222E50] text-white flex items-center justify-center text-2xl font-medium">
+                      <div className="w-full h-full bg-[#18172a] text-white flex items-center justify-center text-2xl font-medium">
                         {getInitials()}
                       </div>
                     )}
                   </div>
                   <button
                     onClick={() => setIsProfilePictureModalOpen(true)}
-                    className="absolute bottom-0 right-0 bg-[#007991] text-white p-2 rounded-full cursor-pointer hover:bg-[#006980] transition-colors"
+                    className="absolute bottom-0 right-0 bg-[#18cb96] text-white p-2 rounded-full cursor-pointer hover:bg-[#14a085] transition-colors"
                     disabled={isPageLoading}
                   >
                     <Camera size={16} />
@@ -795,7 +800,7 @@ function SettingsPage() {
                             }
                             onChange={handleChange}
                             disabled={!isEditing || isPageLoading}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#007991] focus:border-[#007991] disabled:bg-gray-50"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#18cb96] focus:border-[#18cb96] disabled:bg-gray-50"
                           />
                         )}
                       </div>
@@ -813,7 +818,7 @@ function SettingsPage() {
                             value={isEditing ? formData.email : userData.email}
                             onChange={handleChange}
                             disabled={true}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#007991] focus:border-[#007991] disabled:bg-gray-50"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#18cb96] focus:border-[#18cb96] disabled:bg-gray-50"
                           />
                         )}
                       </div>
@@ -831,7 +836,7 @@ function SettingsPage() {
                             value={isEditing ? formData.role : userData.role}
                             onChange={handleChange}
                             disabled={!isEditing || isPageLoading}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#007991] focus:border-[#007991] disabled:bg-gray-50"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-[#18cb96] focus:border-[#18cb96] disabled:bg-gray-50"
                           />
                         )}
                       </div>
@@ -855,7 +860,7 @@ function SettingsPage() {
                   />
                   <p className="text-sm text-gray-600">
                     Configure your sender email address to send communications
-                    from Cubicle directly through your own email account.
+                    from WorkSage directly through your own email account.
                   </p>
                 </div>
               </div>
@@ -894,7 +899,7 @@ function SettingsPage() {
                       </p>
                     </div>
                     <button
-                      className="bg-[#007991] text-white px-4 py-2 rounded-md text-sm hover:bg-[#006980]"
+                      className="bg-[#18cb96] text-white px-4 py-2 rounded-md text-sm hover:bg-[#14a085]"
                       onClick={() => setShowAddEmailModal(true)}
                     >
                       Add Email
@@ -952,7 +957,7 @@ function SettingsPage() {
                                 onClick={() =>
                                   handleSetDefaultEmail(account._id)
                                 }
-                                className="text-gray-600 hover:text-[#007991] text-sm"
+                                className="text-gray-600 hover:text-[#18cb96] text-sm"
                               >
                                 Set Default
                               </button>
@@ -1076,7 +1081,7 @@ function SettingsPage() {
                           passwordErrors.currentPassword
                             ? "border-red-300"
                             : "border-gray-300"
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="Enter your current password"
                         disabled={passwordLoading}
                         required
@@ -1084,7 +1089,9 @@ function SettingsPage() {
                       <button
                         type="button"
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        onClick={() =>
+                          setShowCurrentPassword(!showCurrentPassword)
+                        }
                       >
                         {showCurrentPassword ? (
                           <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -1112,10 +1119,15 @@ function SettingsPage() {
                         value={passwordData.newPassword}
                         onChange={handlePasswordChange}
                         className={`w-full p-2 pr-10 border ${
-                          Object.keys(passwordErrors).some(key => 
-                            key !== 'general' && key !== 'confirm' && key !== 'currentPassword'
-                          ) ? "border-red-300" : "border-gray-300"
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                          Object.keys(passwordErrors).some(
+                            (key) =>
+                              key !== "general" &&
+                              key !== "confirm" &&
+                              key !== "currentPassword"
+                          )
+                            ? "border-red-300"
+                            : "border-gray-300"
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="Enter new password"
                         disabled={passwordLoading}
                         required
@@ -1132,26 +1144,38 @@ function SettingsPage() {
                         )}
                       </button>
                     </div>
-                    
+
                     {/* Password Requirements and Validation */}
-                    {Object.keys(passwordErrors).length > 0 && 
-                     Object.keys(passwordErrors).some(key => 
-                       key !== 'general' && key !== 'confirm' && key !== 'currentPassword'
-                     ) ? (
+                    {Object.keys(passwordErrors).length > 0 &&
+                    Object.keys(passwordErrors).some(
+                      (key) =>
+                        key !== "general" &&
+                        key !== "confirm" &&
+                        key !== "currentPassword"
+                    ) ? (
                       <div className="text-red-500 text-xs mt-1 space-y-1">
-                        <p className="font-medium">Password requirements not met:</p>
-                        {Object.entries(passwordErrors).map(([key, error]) => 
-                          key !== "general" && key !== "confirm" && key !== "currentPassword" && (
-                            <p key={key}>• {error}</p>
-                          )
+                        <p className="font-medium">
+                          Password requirements not met:
+                        </p>
+                        {Object.entries(passwordErrors).map(
+                          ([key, error]) =>
+                            key !== "general" &&
+                            key !== "confirm" &&
+                            key !== "currentPassword" && (
+                              <p key={key}>• {error}</p>
+                            )
                         )}
                       </div>
                     ) : (
                       <div className="text-xs text-gray-500 mt-1 space-y-1">
-                        <p className="font-medium">Password must meet the following requirements:</p>
+                        <p className="font-medium">
+                          Password must meet the following requirements:
+                        </p>
                         <p>• At least 12 characters long</p>
                         <p>• Include uppercase and lowercase letters</p>
-                        <p>• Include numbers and special characters (@$!%*?&)</p>
+                        <p>
+                          • Include numbers and special characters (@$!%*?&)
+                        </p>
                         <p>• Cannot reuse your last 5 passwords</p>
                       </div>
                     )}
@@ -1172,7 +1196,7 @@ function SettingsPage() {
                           passwordErrors.confirm
                             ? "border-red-300"
                             : "border-gray-300"
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="Confirm new password"
                         disabled={passwordLoading}
                         required
@@ -1180,7 +1204,9 @@ function SettingsPage() {
                       <button
                         type="button"
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
@@ -1200,7 +1226,7 @@ function SettingsPage() {
                   <div className="mt-6">
                     <button
                       type="submit"
-                      className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-[#18cb96] text-white p-2 rounded-md hover:bg-[#14a085] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={passwordLoading}
                     >
                       {passwordLoading ? (
@@ -1243,7 +1269,7 @@ function SettingsPage() {
                   <button
                     onClick={toggleDarkMode}
                     className={`relative p-2 rounded-full ${
-                      darkMode ? "bg-gray-800" : "bg-[#007991]"
+                      darkMode ? "bg-gray-800" : "bg-[#18cb96]"
                     }`}
                   >
                     {darkMode ? (
@@ -1262,7 +1288,7 @@ function SettingsPage() {
                       Select your preferred language
                     </p>
                   </div>
-                  <select className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-[#007991] focus:border-[#007991]">
+                  <select className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-[#18cb96] focus:border-[#18cb96]">
                     <option value="en">English (US)</option>
                     <option value="es">Español</option>
                     <option value="fr">Français</option>
@@ -1278,7 +1304,7 @@ function SettingsPage() {
                       Set your local time zone
                     </p>
                   </div>
-                  <select className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-[#007991] focus:border-[#007991]">
+                  <select className="border border-gray-300 rounded-md px-3 py-1.5 focus:ring-[#18cb96] focus:border-[#18cb96]">
                     <option value="UTC">UTC</option>
                     <option value="EST">Eastern Time (US & Canada)</option>
                     <option value="CST">Central Time (US & Canada)</option>
@@ -1304,7 +1330,7 @@ function SettingsPage() {
                       <div className="h-5 w-20 bg-gray-200 rounded animate-pulse mt-1"></div>
                     ) : (
                       <>
-                        <p className="text-sm font-medium text-[#007991]">
+                        <p className="text-sm font-medium text-[#18cb96]">
                           {userData.plan === "pro"
                             ? "Pro Plan"
                             : userData.plan === "vantage"
@@ -1447,11 +1473,11 @@ function SettingsPage() {
                     className={`border-2 rounded-lg p-4 hover:shadow-md transition-shadow relative ${
                       user?.plan === "pro"
                         ? "border-green-500"
-                        : "border-[#007991]"
+                        : "border-[#18cb96]"
                     }`}
                   >
                     {user?.plan !== "pro" && (
-                      <div className="absolute -top-3 -right-3 bg-[#007991] text-white text-xs px-2 py-1 rounded-md">
+                      <div className="absolute -top-3 -right-3 bg-[#18cb96] text-white text-xs px-2 py-1 rounded-md">
                         Popular
                       </div>
                     )}
@@ -1555,7 +1581,7 @@ function SettingsPage() {
                       <button
                         onClick={() => handlePlanUpgrade("pro")}
                         disabled={paymentLoading}
-                        className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980] disabled:opacity-50"
+                        className="w-full bg-[#18cb96] text-white p-2 rounded-md hover:bg-[#14a085] disabled:opacity-50"
                       >
                         {paymentLoading ? "Processing..." : "Upgrade to Pro"}
                       </button>
@@ -1679,7 +1705,7 @@ function SettingsPage() {
                       <button
                         onClick={() => handlePlanUpgrade("vantage")}
                         disabled={paymentLoading}
-                        className="w-full border border-[#007991] text-[#007991] p-2 rounded-md hover:bg-[#007991] hover:text-white transition-colors disabled:opacity-50"
+                        className="w-full border border-[#18cb96] text-[#18cb96] p-2 rounded-md hover:bg-[#18cb96] hover:text-white transition-colors disabled:opacity-50"
                       >
                         {paymentLoading
                           ? "Processing..."
@@ -1778,7 +1804,7 @@ function SettingsPage() {
 
               <p className="text-sm text-gray-500 mt-4">
                 For custom enterprise plans, please contact our sales team at{" "}
-                <a href="mailto:sales@cubicle.app" className="text-[#007991]">
+                <a href="mailto:sales@cubicle.app" className="text-[#18cb96]">
                   sales@cubicle.app
                 </a>
               </p>

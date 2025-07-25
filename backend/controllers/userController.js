@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
+const sendEmail = require("../utils/sendEmail");
 const { uploadProfileImage } = require("../middleware/upload");
 
 exports.getProfile = async (req, res) => {
@@ -23,9 +24,9 @@ exports.getProfile = async (req, res) => {
         enabled: user.mfa.enabled || false,
         setupAt: user.mfa.setupAt,
         lastUsedAt: user.mfa.lastUsedAt,
-        backupCodesRemaining: user.mfa.backupCodes 
-          ? user.mfa.backupCodes.filter(code => !code.used).length 
-          : 0
+        backupCodesRemaining: user.mfa.backupCodes
+          ? user.mfa.backupCodes.filter((code) => !code.used).length
+          : 0,
       };
     }
 
@@ -184,8 +185,35 @@ exports.forgotPassword = async (req, res) => {
     user.otpExpires = resetExpires;
     await user.save();
 
-    // TODO: Send email with reset link
-    // await sendPasswordResetEmail(user.email, resetToken);
+    // Send password reset email
+    try {
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+      const message = `You are receiving this email because you (or someone else) has requested the reset of a password.
+
+Please click on the following link, or paste this into your browser to complete the process:
+
+${resetUrl}
+
+If you did not request this, please ignore this email and your password will remain unchanged.
+
+This reset link will expire in 1 hour.
+
+For security reasons, if you didn't request this password reset, please contact our support team immediately.
+
+Best regards,
+The Worksage Team`;
+
+      await sendEmail({
+        email: user.email,
+        subject: "Password Reset Request - Worksage",
+        message,
+      });
+
+      console.log(`Password reset email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error("Error sending password reset email:", emailError);
+      // Don't fail the request if email fails, but log it
+    }
 
     res.json({
       success: true,
@@ -236,8 +264,33 @@ exports.resetPassword = async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    // TODO: Send confirmation email
-    // await sendPasswordChangedConfirmation(user.email);
+    // Send password changed confirmation email
+    try {
+      const message = `Hello,
+
+Your password for your Worksage account has been successfully reset.
+
+If you did not make this change, please contact our support team immediately as your account may have been compromised.
+
+For your security, we recommend:
+- Using a strong, unique password
+- Enabling two-factor authentication
+- Regularly reviewing your account activity
+
+Best regards,
+The Worksage Team`;
+
+      await sendEmail({
+        email: user.email,
+        subject: "Password Successfully Reset - Worksage",
+        message,
+      });
+
+      console.log(`Password reset confirmation email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error("Error sending password reset confirmation email:", emailError);
+      // Don't fail the request if email fails, but log it
+    }
 
     res.json({
       success: true,

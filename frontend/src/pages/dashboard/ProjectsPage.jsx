@@ -222,7 +222,7 @@ function ProjectsPage() {
           <h2 className="text-xl font-bold text-gray-800">Projects</h2>
           <button
             onClick={() => setShowNewProjectModal(true)}
-            className="bg-[#007991] hover:bg-opacity-90 text-white px-4 py-2 rounded-md flex items-center"
+            className="bg-[#18cb96] hover:bg-opacity-90 text-white px-4 py-2 rounded-md flex items-center"
           >
             <Plus size={18} className="mr-1" /> Add New
           </button>

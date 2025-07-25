@@ -213,7 +213,7 @@ function ProjectDetailsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div
           className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
-          style={{ borderColor: "#007991" }}
+          style={{ borderColor: "#18cb96" }}
         ></div>
       </div>
     );
@@ -254,7 +254,7 @@ function ProjectDetailsPage() {
   return (
     <div className="bg-gray-50">
       <div className="flex items-center text-lg text-gray-500 mb-4">
-        <Link to="/dashboard/projects" className="hover:text-[#007991]">
+        <Link to="/dashboard/projects" className="hover:text-[#18cb96]">
           Projects
         </Link>
         <ChevronRight size={20} className="mx-2" />
@@ -466,7 +466,7 @@ function ProjectDetailsPage() {
       {/* Only show the fixed Send Email button on mobile and when not on the Activity tab */}
       {activeTab !== "Activity" && (
         <div className="fixed bottom-8 right-8 md:hidden">
-          <button className="bg-[#007991] text-white px-4 py-3 rounded-md shadow-lg flex items-center">
+          <button className="bg-[#18cb96] text-white px-4 py-3 rounded-md shadow-lg flex items-center">
             <Mail size={16} className="mr-2" />
             Send Email
           </button>
@@ -502,7 +502,7 @@ function ProjectDetailsPage() {
                     placeholder="Enter Project Name"
                     value={projectFormData.name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                    className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                   />
                 </div>
 
@@ -516,7 +516,7 @@ function ProjectDetailsPage() {
                     value={projectFormData.description}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                    className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                   ></textarea>
                 </div>
 
@@ -531,7 +531,7 @@ function ProjectDetailsPage() {
                       placeholder="e.g. Web Development"
                       value={projectFormData.category}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                     />
                   </div>
 
@@ -545,7 +545,7 @@ function ProjectDetailsPage() {
                       placeholder="Client name"
                       value={projectFormData.client}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                     />
                   </div>
                 </div>
@@ -560,7 +560,7 @@ function ProjectDetailsPage() {
                       name="startDate"
                       value={projectFormData.startDate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                     />
                   </div>
 
@@ -573,7 +573,7 @@ function ProjectDetailsPage() {
                       name="endDate"
                       value={projectFormData.endDate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                      className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                     />
                   </div>
                 </div>
@@ -586,7 +586,7 @@ function ProjectDetailsPage() {
                     name="status"
                     value={projectFormData.status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+                    className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
                   >
                     <option value="ongoing">Ongoing</option>
                     <option value="completed">Completed</option>
@@ -608,7 +608,7 @@ function ProjectDetailsPage() {
                   type="submit"
                   disabled={isSubmitting}
                   className="px-8 py-2 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center"
-                  style={{ backgroundColor: "#007991" }}
+                  style={{ backgroundColor: "#18cb96" }}
                 >
                   {isSubmitting ? (
                     <>
@@ -736,7 +736,7 @@ function ProjectDetailsPage() {
                   className={`px-4 py-2 rounded-md text-white flex items-center ${
                     !selectedImage
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-[#007991] hover:bg-[#006680]"
+                      : "bg-[#18cb96] hover:bg-[#006680]"
                   }`}
                 >
                   {isImageUploading ? (

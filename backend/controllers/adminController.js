@@ -355,7 +355,7 @@ exports.getSecurityDashboard = async (req, res) => {
     const xssAttempts24h = await ActivityLog.countDocuments({
       $or: [
         { "securityEvents.type": "XSS_ATTEMPT" },
-        { type: "security", action: "xss_attempt" }
+        { type: "security", action: "xss_attempt" },
       ],
       timestamp: { $gte: last24h },
     });
@@ -363,7 +363,7 @@ exports.getSecurityDashboard = async (req, res) => {
     const xssAttempts7d = await ActivityLog.countDocuments({
       $or: [
         { "securityEvents.type": "XSS_ATTEMPT" },
-        { type: "security", action: "xss_attempt" }
+        { type: "security", action: "xss_attempt" },
       ],
       timestamp: { $gte: last7d },
     });
@@ -372,7 +372,7 @@ exports.getSecurityDashboard = async (req, res) => {
       $or: [
         { "securityEvents.type": "NoSQL_INJECTION_ATTEMPT" },
         { "securityEvents.type": "NOSQL_INJECTION_ATTEMPT" },
-        { type: "security", action: "nosql_injection_attempt" }
+        { type: "security", action: "nosql_injection_attempt" },
       ],
       timestamp: { $gte: last24h },
     });
@@ -381,7 +381,7 @@ exports.getSecurityDashboard = async (req, res) => {
       $or: [
         { "securityEvents.type": "NoSQL_INJECTION_ATTEMPT" },
         { "securityEvents.type": "NOSQL_INJECTION_ATTEMPT" },
-        { type: "security", action: "nosql_injection_attempt" }
+        { type: "security", action: "nosql_injection_attempt" },
       ],
       timestamp: { $gte: last7d },
     });

@@ -85,7 +85,7 @@ const generateEmailTemplate = ({
   <body>
       <div class="container">
           <div class="header">
-              <div class="logo">Cubicle</div>
+              <div class="logo">WorkSage</div>
               <div style="color: #e0e0e0;">Smart CRM for Modern Teams</div>
           </div>
           
@@ -101,7 +101,7 @@ const generateEmailTemplate = ({
               <div class="signature">
                   <div>Best regards,</div>
                   <div style="font-weight: 500;">${senderName}</div>
-                  <div>Sent via Cubicle CRM</div>
+                  <div>Sent via WorkSage CRM</div>
               </div>
           </div>
 
@@ -109,8 +109,12 @@ const generateEmailTemplate = ({
               <div style="margin-bottom: 10px;">To track this email, click the link below:</div>
               <a href="https://cubicle-server.onrender.com/api/email/track/${emailId}" class="button">Mark as Open</a>
               <img src="https://cubicle-server.onrender.com/api/email/track/${emailId}" height="1" width="1">
-              ${footerText ? `<div style="margin-bottom: 10px;">${footerText}</div>` : ""}
-            <div> 2023 Cubicle. All rights reserved.</div>
+              ${
+                footerText
+                  ? `<div style="margin-bottom: 10px;">${footerText}</div>`
+                  : ""
+              }
+            <div> 2023 WorkSage. All rights reserved.</div>
         </div>
     </body>
     </html>
@@ -128,15 +132,15 @@ const generateEmailTemplate = ({
  */
 const generateInvoiceTemplate = ({
   invoice,
-  message = 'Please find your invoice attached.',
+  message = "Please find your invoice attached.",
   senderName,
-  invoiceLink
+  invoiceLink,
 }) => {
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: invoice.currency || 'USD',
-      minimumFractionDigits: 2
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: invoice.currency || "USD",
+      minimumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -283,7 +287,7 @@ const generateInvoiceTemplate = ({
   <body>
       <div class="container">
           <div class="header">
-              <div class="logo">Cubicle</div>
+              <div class="logo">WorkSage</div>
               <div style="color: #e0e0e0;">Smart CRM for Modern Teams</div>
           </div>
           
@@ -297,16 +301,28 @@ const generateInvoiceTemplate = ({
               <div class="invoice-header">
                   <div class="invoice-info">
                       <h2>INVOICE</h2>
-                      <p><strong>Invoice #:</strong> ${invoice.invoiceNumber}</p>
-                      <p><strong>Issue Date:</strong> ${new Date(invoice.issueDate).toLocaleDateString()}</p>
-                      <p><strong>Due Date:</strong> ${new Date(invoice.dueDate).toLocaleDateString()}</p>
+                      <p><strong>Invoice #:</strong> ${
+                        invoice.invoiceNumber
+                      }</p>
+                      <p><strong>Issue Date:</strong> ${new Date(
+                        invoice.issueDate
+                      ).toLocaleDateString()}</p>
+                      <p><strong>Due Date:</strong> ${new Date(
+                        invoice.dueDate
+                      ).toLocaleDateString()}</p>
                   </div>
                   <div class="invoice-meta">
                       <p><strong>Status:</strong> 
-                          <span style="text-transform: capitalize;">${invoice.status}</span>
+                          <span style="text-transform: capitalize;">${
+                            invoice.status
+                          }</span>
                       </p>
-                      ${invoice.paidAt ? 
-                        `<p><strong>Paid On:</strong> ${new Date(invoice.paidAt).toLocaleDateString()}</p>` : ''
+                      ${
+                        invoice.paidAt
+                          ? `<p><strong>Paid On:</strong> ${new Date(
+                              invoice.paidAt
+                            ).toLocaleDateString()}</p>`
+                          : ""
                       }
                   </div>
               </div>
@@ -315,21 +331,46 @@ const generateInvoiceTemplate = ({
                   <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
                       <div>
                           <h3>Bill To:</h3>
-                          ${invoice.client ? `
-                              <p>${invoice.client.name || 'Client Name Not Available'}</p>
-                              ${invoice.billingAddress ? `
-                                  <p>${invoice.billingAddress.street || ''}</p>
-                                  <p>${invoice.billingAddress.city || ''} ${invoice.billingAddress.postalCode || ''}</p>
-                                  <p>${invoice.billingAddress.country || ''}</p>
-                              ` : ''}
-                              ${invoice.client.email ? `<p>${invoice.client.email}</p>` : ''}
-                              ${invoice.client.contactNumber ? `<p>${invoice.client.contactNumber}</p>` : ''}
-                          ` : '<p>Client information not available</p>'}
+                          ${
+                            invoice.client
+                              ? `
+                              <p>${
+                                invoice.client.name ||
+                                "Client Name Not Available"
+                              }</p>
+                              ${
+                                invoice.billingAddress
+                                  ? `
+                                  <p>${invoice.billingAddress.street || ""}</p>
+                                  <p>${invoice.billingAddress.city || ""} ${
+                                      invoice.billingAddress.postalCode || ""
+                                    }</p>
+                                  <p>${invoice.billingAddress.country || ""}</p>
+                              `
+                                  : ""
+                              }
+                              ${
+                                invoice.client.email
+                                  ? `<p>${invoice.client.email}</p>`
+                                  : ""
+                              }
+                              ${
+                                invoice.client.contactNumber
+                                  ? `<p>${invoice.client.contactNumber}</p>`
+                                  : ""
+                              }
+                          `
+                              : "<p>Client information not available</p>"
+                          }
                       </div>
                       <div>
                           <h3>From:</h3>
                           <p>${senderName}</p>
-                          ${invoice.user.email ? `<p>${invoice.user.email}</p>` : ''}
+                          ${
+                            invoice.user.email
+                              ? `<p>${invoice.user.email}</p>`
+                              : ""
+                          }
                       </div>
                   </div>
 
@@ -343,40 +384,68 @@ const generateInvoiceTemplate = ({
                           </tr>
                       </thead>
                       <tbody>
-                          ${invoice.items.map(item => `
+                          ${invoice.items
+                            .map(
+                              (item) => `
                               <tr>
                                   <td>${item.description}</td>
                                   <td>${item.quantity}</td>
                                   <td>${formatCurrency(item.unitPrice)}</td>
-                                  <td class="text-right">${formatCurrency(item.amount)}</td>
+                                  <td class="text-right">${formatCurrency(
+                                    item.amount
+                                  )}</td>
                               </tr>
-                          `).join('')}
+                          `
+                            )
+                            .join("")}
                       </tbody>
                   </table>
 
                   <div class="totals">
                       <div class="totals-row">
                           <span class="totals-label">Subtotal:</span>
-                          <span class="totals-amount">${formatCurrency(invoice.subtotal)}</span>
+                          <span class="totals-amount">${formatCurrency(
+                            invoice.subtotal
+                          )}</span>
                       </div>
                       
-                      ${invoice.taxAmount > 0 ? `
+                      ${
+                        invoice.taxAmount > 0
+                          ? `
                           <div class="totals-row">
                               <span class="totals-label">
-                                  Tax (${invoice.taxType === 'percentage' ? `${invoice.taxRate}%` : 'Fixed'}):
+                                  Tax (${
+                                    invoice.taxType === "percentage"
+                                      ? `${invoice.taxRate}%`
+                                      : "Fixed"
+                                  }):
                               </span>
-                              <span class="totals-amount">${formatCurrency(invoice.taxAmount)}</span>
+                              <span class="totals-amount">${formatCurrency(
+                                invoice.taxAmount
+                              )}</span>
                           </div>
-                      ` : ''}
+                      `
+                          : ""
+                      }
                       
-                      ${invoice.discountAmount > 0 ? `
+                      ${
+                        invoice.discountAmount > 0
+                          ? `
                           <div class="totals-row">
                               <span class="totals-label">
-                                  Discount (${invoice.discountType === 'percentage' ? `${invoice.discountValue}%` : 'Fixed'}):
+                                  Discount (${
+                                    invoice.discountType === "percentage"
+                                      ? `${invoice.discountValue}%`
+                                      : "Fixed"
+                                  }):
                               </span>
-                              <span class="totals-amount">-${formatCurrency(invoice.discountAmount)}</span>
+                              <span class="totals-amount">-${formatCurrency(
+                                invoice.discountAmount
+                              )}</span>
                           </div>
-                      ` : ''}
+                      `
+                          : ""
+                      }
                       
                       <div class="totals-row grand-total">
                           <span>Total:</span>
@@ -385,32 +454,41 @@ const generateInvoiceTemplate = ({
                   </div>
               </div>
 
-              ${invoice.paymentInstructions ? `
+              ${
+                invoice.paymentInstructions
+                  ? `
                   <div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
                       <h3>Payment Instructions</h3>
                       <p>${invoice.paymentInstructions}</p>
                   </div>
-              ` : ''}
+              `
+                  : ""
+              }
 
               <div style="margin-top: 30px; text-align: center;">
                   <a href="${invoiceLink}" class="button" style="background-color: #4CAF50;">
                       Pay Now
                   </a>
                   <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
-                      This invoice was sent by ${senderName} via Cubicle CRM.
+                      This invoice was sent by ${senderName} via WorkSage CRM.
                   </p>
               </div>
           </div>
 
           <div class="footer">
-              <p>© ${new Date().getFullYear()} Cubicle. All rights reserved.</p>
+              <p>© ${new Date().getFullYear()} WorkSage. All rights reserved.</p>
               <p>
                   <a href="${invoiceLink}" style="color: #4a6cf7; text-decoration: none;">View in Browser</a>
                   | 
                   <a href="{{unsubscribe_url}}" style="color: #4a6cf7; text-decoration: none;">Unsubscribe</a>
               </p>
               <div class="tracking-pixel">
-                  <img src="${process.env.BACKEND_URL || 'https://cubicle-server.onrender.com'}/api/invoices/track/${invoice.trackingId}" width="1" height="1" alt="">
+                  <img src="${
+                    process.env.BACKEND_URL ||
+                    "https://cubicle-server.onrender.com"
+                  }/api/invoices/track/${
+    invoice.trackingId
+  }" width="1" height="1" alt="">
               </div>
           </div>
       </div>
@@ -421,5 +499,5 @@ const generateInvoiceTemplate = ({
 
 module.exports = {
   generateEmailTemplate,
-  generateInvoiceTemplate
+  generateInvoiceTemplate,
 };

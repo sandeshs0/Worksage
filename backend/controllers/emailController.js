@@ -70,7 +70,7 @@ exports.sendEmail = async (req, res) => {
     }
 
     // Get sender's name from user object
-    const senderName = req.user.name || req.user.username || "Cubicle User";
+    const senderName = req.user.name || req.user.username || "WorkSage User";
 
     // Prepare email data
     const emailData = {
