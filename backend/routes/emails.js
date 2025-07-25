@@ -5,6 +5,7 @@ const { check, body } = require('express-validator');
 const emailController = require('../controllers/emailController');
 const auth = require('../middleware/auth');
 const { uploadMultiple } = require('../middleware/upload');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // @route   POST /api/emails
 // @desc    Send an email
@@ -12,7 +13,7 @@ const { uploadMultiple } = require('../middleware/upload');
 router.post(
     '/',
     [
-        auth,
+        authenticateToken,
         // Handle file uploads
         uploadMultiple.array('attachments', 5), // Max 5 files
         (req, res, next) => {
@@ -77,7 +78,7 @@ router.post(
 router.get(
     '/',
     [
-        auth,
+        authenticateToken,
         [
             // Optional query parameters for filtering
             check('projectId', 'Invalid project ID').optional().isMongoId(),
@@ -90,7 +91,7 @@ router.get(
 );
 
 // Email statistics
-router.get('/stats', require('../middleware/auth'), emailStatsController.getEmailStats);
+router.get('/stats', authenticateToken, emailStatsController.getEmailStats);
 
 // @route   GET /api/emails/:id
 // @desc    Get email by ID
@@ -98,7 +99,7 @@ router.get('/stats', require('../middleware/auth'), emailStatsController.getEmai
 router.get(
     '/:id',
     [
-        auth,
+        authenticateToken,
         check('id', 'Invalid email ID').isMongoId()
     ],
     emailController.getEmailById

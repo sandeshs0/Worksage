@@ -3,11 +3,12 @@ const router = express.Router();
 const { check } = require('express-validator');
 const auth = require('../middleware/auth');
 const boardController = require('../controllers/boardController');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // @route   GET /api/boards
 // @desc    Get all boards for current user
 // @access  Private
-router.get('/', auth, boardController.getUserBoards);
+router.get('/', authenticateToken, boardController.getUserBoards);
 
 // @route   POST /api/boards
 // @desc    Create a new board
@@ -15,7 +16,7 @@ router.get('/', auth, boardController.getUserBoards);
 router.post(
   '/',
   [
-    auth,
+    authenticateToken,
     [
       check('title', 'Title is required').not().isEmpty(),
       check('description', 'Description must be a string').optional().isString()
@@ -27,7 +28,7 @@ router.post(
 // @route   GET /api/boards/:id
 // @desc    Get board by ID
 // @access  Private
-router.get('/:id', auth, boardController.getBoard);
+router.get('/:id', authenticateToken, boardController.getBoard);
 
 // @route   PUT /api/boards/:id
 // @desc    Update board
@@ -35,7 +36,7 @@ router.get('/:id', auth, boardController.getBoard);
 router.put(
   '/:id',
   [
-    auth,
+    authenticateToken,
     [
       check('title', 'Title is required').optional().not().isEmpty(),
       check('description', 'Description must be a string').optional().isString()
@@ -47,6 +48,6 @@ router.put(
 // @route   DELETE /api/boards/:id
 // @desc    Delete board
 // @access  Private
-router.delete('/:id', auth, boardController.deleteBoard);
+router.delete('/:id', authenticateToken, boardController.deleteBoard);
 
 module.exports = router;

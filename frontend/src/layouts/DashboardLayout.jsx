@@ -15,9 +15,11 @@ import {
   Settings,
   Trello,
   UsersRound,
+  Shield, // New icon for sessions
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useUser } from "../context/UserContext";
 import authService from "../services/authService";
 import {
@@ -27,12 +29,13 @@ import {
 } from "../services/notificationService";
 
 function DashboardLayout() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, logout, logoutAll } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [notificationDropdownOpen, setNotificationDropdownOpen] =
-    useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [sessions, setSessions] = useState([]);
+  const [showSessionsModal, setShowSessionsModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationLoading, setNotificationLoading] = useState(false);
@@ -41,7 +44,12 @@ function DashboardLayout() {
     email: "",
     profileImage: "",
     plan: "free",
-    role: "",
+    role: "unassigned",
+    isVerified: false,
+    isActive: true,
+    googleId: null,
+    createdAt: null,
+    _id: ""
   });
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const location = useLocation();
@@ -88,16 +96,42 @@ function DashboardLayout() {
     async function fetchUserProfile() {
       try {
         setIsLoadingProfile(true);
-        const profileData = await authService.getUserProfile();
+        const response = await authService.getUserProfile();
+        
+        // Handle the new API response structure
+        const userData = response.success ? response.data : response;
+        
         setUserProfile({
-          fullName: profileData.fullName || "User",
-          email: profileData.email || "",
-          profileImage: profileData.profileImage || "",
-          plan: profileData.plan || "free",
-          role: profileData.role || "",
+          fullName: userData.fullName || userData.name || user?.name || "User",
+          email: userData.email || user?.email || "",
+          profileImage: userData.profileImage || user?.profileImage || "",
+          plan: userData.plan || user?.plan || "free",
+          role: userData.role || user?.role || "unassigned",
+          isVerified: userData.isVerified ?? user?.isVerified ?? false,
+          isActive: userData.isActive ?? user?.isActive ?? true,
+          googleId: userData.googleId || user?.googleId || null,
+          createdAt: userData.createdAt || user?.createdAt || null,
+          _id: userData._id || userData.id || user?.id || user?._id || ""
         });
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        
+        // Fallback to user context data if profile fetch fails
+        if (user) {
+          setUserProfile({
+            fullName: user.fullName || user.name || "User",
+            email: user.email || "",
+            profileImage: user.profileImage || "",
+            plan: user.plan || "free",
+            role: user.role || "unassigned",
+            isVerified: user.isVerified ?? false,
+            isActive: user.isActive ?? true,
+            googleId: user.googleId || null,
+            createdAt: user.createdAt || null,
+            _id: user._id || user.id || ""
+          });
+        }
+        
         // Handle error - maybe redirect to login if unauthorized
         if (error.response && error.response.status === 401) {
           authService.logout();
@@ -108,8 +142,11 @@ function DashboardLayout() {
       }
     }
 
-    fetchUserProfile();
-  }, [navigate]);
+    // Only fetch if user is available (to avoid unnecessary API calls during loading)
+    if (user || !isLoading) {
+      fetchUserProfile();
+    }
+  }, [navigate, user, isLoading]);
 
   // Fetch notifications
   useEffect(() => {
@@ -140,16 +177,45 @@ function DashboardLayout() {
     return () => clearInterval(interval);
   }, []);
 
+  // Load active sessions
+  const loadSessions = async () => {
+    try {
+      const response = await authService.getSessions();
+      setSessions(response.data || []);
+    } catch (error) {
+      console.error('Failed to load sessions:', error);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error during logout');
+    }
+  };
+
+  // Handle logout from all devices
+  const handleLogoutAll = async () => {
+    try {
+      await logoutAll();
+      toast.success('Logged out from all devices');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout all error:', error);
+      toast.error('Error during logout');
+    }
+  };
+
   // Get current page title
   const getPageTitle = () => {
     const path = location.pathname.split("/").pop();
     if (!path || path === "dashboard") return "Overview";
     return path.charAt(0).toUpperCase() + path.slice(1);
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    navigate("/login");
   };
 
   // Handle marking a single notification as read
@@ -473,29 +539,95 @@ function DashboardLayout() {
 
               {/* Profile dropdown */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20 border border-gray-200">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="font-medium">{userProfile.fullName}</p>
-                    <p className="text-xs text-gray-500">{userProfile.email}</p>
+                <div className="absolute right-4 top-16 bg-white rounded-lg shadow-lg border py-2 w-72 z-50">
+                  <div className="px-4 py-3 border-b">
+                    <div className="flex items-center space-x-3">
+                      {userProfile.profileImage ? (
+                        <img
+                          src={userProfile.profileImage}
+                          alt="Profile"
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-medium">
+                          {userProfile.fullName
+                            .split(" ")
+                            .map((name) => name.charAt(0))
+                            .join("")
+                            .toUpperCase()
+                            .substring(0, 2)}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{userProfile.fullName}</p>
+                        <p className="text-sm text-gray-500">{userProfile.email}</p>
+                      </div>
+                    </div>
+                    
+                    {/* User Status Indicators */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        userProfile.isVerified 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {userProfile.isVerified ? '✓ Verified' : '⚠ Unverified'}
+                      </span>
+                      
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        userProfile.isActive 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {userProfile.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                      
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {userProfile.plan.charAt(0).toUpperCase() + userProfile.plan.slice(1)} Plan
+                      </span>
+                      
+                      {userProfile.role && userProfile.role !== 'unassigned' && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          {userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1)}
+                        </span>
+                      )}
+                      
+                      {userProfile.googleId && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Google Account
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  
                   <NavLink
                     to="/dashboard/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    onClick={() => setProfileDropdownOpen(false)}
                   >
-                    Your Profile
+                    <Settings className="h-4 w-4 mr-3" />
+                    Settings
                   </NavLink>
-                  <NavLink
-                    to="/dashboard/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  
+                  {/* New Sessions option */}
+                  <button
+                    onClick={() => {
+                      loadSessions();
+                      setShowSessionsModal(true);
+                      setProfileDropdownOpen(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
-                    Account Settings
-                  </NavLink>
+                    <Shield className="h-4 w-4 mr-3" />
+                    Active Sessions
+                  </button>
+                  
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                    className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50"
                   >
-                    <LogOut size={16} className="mr-2" />
-                    Sign out
+                    <LogOut className="h-4 w-4 mr-3" />
+                    Sign Out
                   </button>
                 </div>
               )}
@@ -603,7 +735,8 @@ function DashboardLayout() {
                           {userProfile.fullName}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {userProfile.role}
+                          {userProfile.role === 'unassigned' ? 'No role assigned' : 
+                           userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1)}
                         </div>
                       </div>
                     </div>
@@ -670,6 +803,59 @@ function DashboardLayout() {
           className="fixed inset-0 bg-gray-600 bg-opacity-50 z-[5]"
           onClick={() => setSidebarOpen(false)}
         ></div>
+      )}
+
+      {/* Sessions Modal */}
+      {showSessionsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Active Sessions</h3>
+              <button
+                onClick={() => setShowSessionsModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {sessions.map((session) => (
+                <div key={session._id} className="border rounded-lg p-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium">
+                        {session.ipAddress} 
+                        {session.ipAddress === window.location.hostname && (
+                          <span className="text-green-600 text-sm ml-2">(Current)</span>
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-600">{session.userAgent}</p>
+                      <p className="text-xs text-gray-500">
+                        Last accessed: {new Date(session.lastAccessedAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 flex justify-between">
+              <button
+                onClick={handleLogoutAll}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Logout All Devices
+              </button>
+              <button
+                onClick={() => setShowSessionsModal(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

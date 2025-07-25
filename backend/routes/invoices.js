@@ -2,29 +2,30 @@ const express = require('express');
 const router = express.Router();
 const invoiceController = require('../controllers/invoiceController');
 const  auth  = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
-router.get('/stats', auth, invoiceController.getInvoiceStats);
+router.get('/stats', authenticateToken, invoiceController.getInvoiceStats);
 
 // Invoice routes
 router
   .route('/')
-  .post(auth, invoiceController.createInvoice)
-  .get(auth, invoiceController.getInvoices);
+  .post(authenticateToken, invoiceController.createInvoice)
+  .get(authenticateToken, invoiceController.getInvoices);
 
 router
   .route('/:id')
-  .get(auth, invoiceController.getInvoice)
-  .put(auth, invoiceController.updateInvoice)
-  .delete(auth, invoiceController.deleteInvoice);
+  .get(authenticateToken, invoiceController.getInvoice)
+  .put(authenticateToken, invoiceController.updateInvoice)
+  .delete(authenticateToken, invoiceController.deleteInvoice);
 
 
 // Add new payment logging route
-router.post('/:id/payments', auth, invoiceController.logPayment);
+router.post('/:id/payments', authenticateToken, invoiceController.logPayment);
 
 // Invoice statistics
 
 // Send invoice via email
-router.post('/:id/send', auth, invoiceController.sendInvoice);
+router.post('/:id/send', authenticateToken, invoiceController.sendInvoice);
 
 // Track invoice view (public endpoint)
 router.get('/track/:trackingId', invoiceController.trackInvoiceView);

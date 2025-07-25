@@ -1,73 +1,9 @@
-import axios from "axios";
+import { createApiInstance } from "./apiConfig";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://localhost:5000/api";
 
-// Create axios instance with interceptors
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true, // Important for cookies
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Request interceptor to add access token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor for automatic token refresh
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      // Check if it's a token expiration error
-      if (error.response?.data?.code === "TOKEN_EXPIRED") {
-        try {
-          // Try to refresh the token
-          const response = await axios.post(
-            `${API_URL}/auth/refresh`,
-            {},
-            { withCredentials: true }
-          );
-
-          const { accessToken } = response.data.data;
-          localStorage.setItem("accessToken", accessToken);
-
-          // Update user data if provided
-          if (response.data.data.user) {
-            localStorage.setItem(
-              "user",
-              JSON.stringify(response.data.data.user)
-            );
-          }
-
-          // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return api(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, redirect to login
-          authService.logout();
-          window.location.href = "/login";
-          return Promise.reject(refreshError);
-        }
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
+// Use shared API instance with consistent token handling
+const api = createApiInstance();
 
 const authService = {
   // Register user
@@ -206,27 +142,49 @@ const authService = {
   },
 
   // Handle OAuth callback
-  async handleOAuthCallback(token, isNewUser = false) {
+  async handleOAuthCallback(accessToken, isNewUser = false) {
     try {
-      if (token) {
-        // For legacy OAuth that returns JWT token directly
-        localStorage.setItem("accessToken", token);
+      console.log("🔐 OAuth callback started with token:", accessToken ? "✅ Present" : "❌ Missing");
+      
+      if (accessToken) {
+        // Token should already be stored by GoogleAuthCallback component
+        // but ensure it's stored here too for safety
+        localStorage.setItem("accessToken", accessToken);
+        console.log("💾 Access token confirmed in localStorage");
 
         // Get user profile to store user data
+        console.log("👤 Fetching user profile...");
         const profileResponse = await this.getUserProfile();
-        if (profileResponse.success) {
-          localStorage.setItem("user", JSON.stringify(profileResponse.data));
+        console.log("📋 Profile response:", profileResponse);
+        
+        let userData = null;
+        if (profileResponse.success && profileResponse.data) {
+          userData = profileResponse.data;
+        } else if (profileResponse.data) {
+          // Handle case where success field might be missing but data is present
+          userData = profileResponse.data;
+        } else {
+          // Still try to extract user data from different possible structures
+          userData = profileResponse.user || profileResponse;
+        }
+
+        if (userData && typeof userData === 'object' && (userData._id || userData.id)) {
+          localStorage.setItem("user", JSON.stringify(userData));
+          console.log("✅ User data stored:", userData);
+        } else {
+          console.warn("⚠️ Could not extract valid user data:", profileResponse);
         }
 
         return {
           success: true,
           isNewUser,
-          user: profileResponse.data,
+          user: userData,
         };
       }
 
-      throw new Error("No token received from OAuth");
+      throw new Error("No access token received from OAuth");
     } catch (error) {
+      console.error("❌ OAuth callback error:", error);
       throw error.response?.data || error;
     }
   },

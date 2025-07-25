@@ -1,38 +1,91 @@
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import authService from "../services/authService";
+import { useUser } from "../context/UserContext";
 
 function GoogleAuthCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get("token");
+  const { refreshUserData, setOAuthProcessing } = useUser();
 
-  console.log("Google auth token from URL:", token);
+  console.log("🔗 GoogleAuthCallback component mounted");
+  console.log("🔍 Current URL:", window.location.href);
+  console.log("🔍 Search params:", Object.fromEntries(searchParams.entries()));
+
   useEffect(() => {
-    console.log("Google auth token received:", token);
-    if (token) {
-      console.log("Google auth token received:", token);
-      // Store the token in localStorage
-      localStorage.setItem("token", token);
+    console.log("🚀 GoogleAuthCallback useEffect triggered");
+    
+    const handleCallback = async () => {
+      try {
+        // Set OAuth processing flag to prevent UserContext interference
+        setOAuthProcessing(true);
+        console.log("🔄 Set OAuth processing flag to true");
+        
+        // Get token from URL params (should already be stored by pre-processor)
+        const accessToken = searchParams.get("accessToken");
+        const isNewUser = searchParams.get("isNewUser") === "true";
 
-      // Check if user is new (needs onboarding) or existing
-      // This could be determined by additional info from the backend
-      const isNewUser = searchParams.get("isNewUser") === "true";
+        console.log("🔗 OAuth callback received:", { 
+          accessToken: accessToken ? "Present" : "Missing", 
+          isNewUser 
+        });
 
-      // Redirect to appropriate page
-      if (isNewUser) {
-        navigate("/onboarding");
-      } else {
-        navigate("/dashboard");
+        // Verify token is stored (pre-processor should have done this)
+        const storedToken = localStorage.getItem("accessToken");
+        console.log("💾 Token check:", {
+          fromURL: accessToken ? "Present" : "Missing",
+          fromStorage: storedToken ? "Present" : "Missing"
+        });
+
+        if (!storedToken && accessToken) {
+          console.log("💾 Pre-processor missed token, storing now...");
+          localStorage.setItem("accessToken", accessToken);
+        }
+
+        if (!accessToken && !storedToken) {
+          throw new Error("No access token received from OAuth");
+        }
+
+        const tokenToUse = accessToken || storedToken;
+
+        console.log("🚀 Calling authService.handleOAuthCallback...");
+        const result = await authService.handleOAuthCallback(tokenToUse, isNewUser);
+        console.log("✅ OAuth callback result:", result);
+
+        if (result.success) {
+          // Clear OAuth processing flags
+          sessionStorage.removeItem('oauthInProgress');
+          sessionStorage.removeItem('oauthIsNewUser');
+          console.log("🧹 Cleared OAuth processing flags");
+          
+          console.log("🔄 Refreshing user data...");
+          await refreshUserData(); // Refresh user context
+
+          if (isNewUser) {
+            console.log("➡️ Redirecting to onboarding...");
+            navigate("/dashboard/onboarding");
+          } else {
+            console.log("➡️ Redirecting to dashboard...");
+            navigate("/dashboard");
+          }
+        }
+      } catch (error) {
+        console.error("❌ OAuth callback error:", error);
+        // Clean up on error
+        localStorage.removeItem("accessToken");
+        sessionStorage.removeItem('oauthInProgress');
+        sessionStorage.removeItem('oauthIsNewUser');
+        navigate("/login?error=oauth_failed");
+      } finally {
+        // Clear OAuth processing flag
+        setOAuthProcessing(false);
+        console.log("🔄 Set OAuth processing flag to false");
       }
-    } else {
-      document.alert("No token found in URL parameters");
-      // No token found, redirect to login with error
-      navigate("/signup", {
-        state: { error: "Google authentication failed. Please try again." },
-      });
-    }
-  }, [token, navigate, searchParams]);
+    };
+
+    handleCallback();
+  }, [searchParams, navigate, refreshUserData, setOAuthProcessing]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

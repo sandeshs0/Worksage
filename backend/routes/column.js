@@ -3,11 +3,12 @@ const router = express.Router();
 const { check } = require('express-validator');
 const auth = require('../middleware/auth');
 const columnController = require('../controllers/columnController');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // @route   GET /api/boards/:boardId/columns
 // @desc    Get all columns for a board
 // @access  Private
-router.get('/boards/:boardId/columns', auth, columnController.getColumns);
+router.get('/boards/:boardId/columns', authenticateToken, columnController.getColumns);
 
 // @route   POST /api/columns
 // @desc    Create a new column
@@ -15,7 +16,7 @@ router.get('/boards/:boardId/columns', auth, columnController.getColumns);
 router.post(
   '/',
   [
-    auth,
+    authenticateToken,
     [
       check('title', 'Title is required').not().isEmpty(),
       check('boardId', 'Board ID is required').isMongoId()
@@ -30,7 +31,7 @@ router.post(
 router.put(
   '/:id',
   [
-    auth,
+    authenticateToken,
     [
       check('title', 'Title is required').optional().not().isEmpty(),
       check('order', 'Order must be a number').optional().isNumeric()
@@ -42,7 +43,7 @@ router.put(
 // @route   DELETE /api/columns/:id
 // @desc    Delete a column
 // @access  Private
-router.delete('/:id', auth, columnController.deleteColumn);
+router.delete('/:id', authenticateToken, columnController.deleteColumn);
 
 // @route   PUT /api/columns/:id/reorder
 // @desc    Reorder columns
@@ -50,7 +51,7 @@ router.delete('/:id', auth, columnController.deleteColumn);
 router.put(
   '/:id/reorder',
   [
-    auth,
+    authenticateToken,
     [
       check('newOrder', 'New order is required').isNumeric()
     ]

@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "test-security": "node test-security.js",
     "start": "nodemon app.js",
     "server": "nodemon app.js",
     "client": "npm start --prefix client",

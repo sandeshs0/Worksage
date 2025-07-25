@@ -1,3 +1,6 @@
+// OAuth pre-processor (must be first import)
+import "./utils/oauthPreProcessor";
+
 import { AnimatePresence } from "framer-motion";
 import {
   BrowserRouter,
@@ -16,7 +19,11 @@ import SignupPage from "./pages/SignupPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 
 import { Toaster } from "sonner";
-import { UserProvider } from "./context/UserContext";
+import { UserProvider, useUser } from "./context/UserContext";
+
+// Import debug utilities for development
+import "./utils/authDebug";
+
 // Dashboard pages
 import BoardsPage from "./pages/BoardsPage";
 import KanbanPage from "./pages/KanbanPage";
@@ -30,8 +37,18 @@ import ProjectsPage from "./pages/dashboard/ProjectsPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 // Auth guard for protected routes
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("token") !== null;
+  const { isAuthenticated, isLoading } = useUser();
 
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -49,7 +66,7 @@ function AnimatedRoutes() {
         <Route
           path="/OAuthCallback"
           element={
-            location.search.includes("token=") ? (
+            location.search.includes("accessToken=") ? (
               <GoogleAuthCallback />
             ) : (
               <Navigate to="/login" replace />

@@ -6,7 +6,9 @@ const { uploadProfileImage } = require('../middleware/upload');
 
 exports.getProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password -otp -otpExpires');
+        // Use req.user._id instead of req.user.id
+        const userId = req.user._id || req.user.id;
+        const user = await User.findById(userId).select('-password -otp -otpExpires');
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -26,8 +28,9 @@ exports.updateProfile = async (req, res) => {
         if (email) profileFields.email = email.toLowerCase();
         if (role) profileFields.role = role;
 
+        const userId = req.user._id || req.user.id;
         const user = await User.findByIdAndUpdate(
-            req.user.id,
+            userId,
             { $set: profileFields },
             { new: true, runValidators: true }
         ).select('-password -otp -otpExpires');
@@ -57,8 +60,9 @@ exports.updateProfilePicture = [
                 return res.status(400).json({ success: false, message: 'Please upload a file' });
             }
 
+            const userId = req.user._id || req.user.id;
             const user = await User.findByIdAndUpdate(
-                req.user.id,
+                userId,
                 { profileImage: req.file.path },
                 { new: true }
             ).select('-password -otp -otpExpires');
@@ -88,7 +92,8 @@ exports.changePassword = async (req, res) => {
         }
 
         // Get user
-        const user = await User.findById(req.user.id);
+        const userId = req.user._id || req.user.id;
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -199,6 +204,184 @@ exports.resetPassword = async (req, res) => {
         res.json({ success: true, message: 'Password has been reset successfully' });
     } catch (error) {
         console.error('Error resetting password:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// Admin-only methods
+
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private (Admin)
+exports.getAllUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const users = await User.find({})
+            .select('-password -otp -otpExpires -passwordHistory')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await User.countDocuments({});
+
+        res.json({
+            success: true,
+            data: {
+                users,
+                pagination: {
+                    page,
+                    pages: Math.ceil(total / limit),
+                    total,
+                    limit
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error getting all users:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private (Admin)
+exports.getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+            .select('-password -otp -otpExpires -passwordHistory');
+            
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+
+        res.json({ success: true, data: user });
+    } catch (error) {
+        console.error('Error getting user by ID:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Update user role
+// @route   PUT /api/users/:id/role
+// @access  Private (Admin)
+exports.updateUserRole = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation errors',
+                errors: errors.array()
+            });
+        }
+
+        const { role } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { role },
+            { new: true, runValidators: true }
+        ).select('-password -otp -otpExpires -passwordHistory');
+
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: `User role updated to ${role}`,
+            data: user 
+        });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Update user status (active/inactive)
+// @route   PUT /api/users/:id/status
+// @access  Private (Admin)
+exports.updateUserStatus = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation errors',
+                errors: errors.array()
+            });
+        }
+
+        const { isActive } = req.body;
+        
+        // Prevent admin from deactivating themselves
+        if (req.params.id === req.user._id.toString() && !isActive) {
+            return res.status(400).json({
+                success: false,
+                message: 'You cannot deactivate your own account'
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { isActive },
+            { new: true, runValidators: true }
+        ).select('-password -otp -otpExpires -passwordHistory');
+
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: `User account ${isActive ? 'activated' : 'deactivated'}`,
+            data: user 
+        });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private (Admin)
+exports.deleteUser = async (req, res) => {
+    try {
+        // Prevent admin from deleting themselves
+        if (req.params.id === req.user._id.toString()) {
+            return res.status(400).json({
+                success: false,
+                message: 'You cannot delete your own account'
+            });
+        }
+
+        const user = await User.findByIdAndDelete(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'User deleted successfully' 
+        });
+    } catch (error) {
+        console.error('Error deleting user:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

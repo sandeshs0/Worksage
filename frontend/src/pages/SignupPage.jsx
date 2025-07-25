@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import authService from "../services/authService"; // Adjust the import based on your project structure
+import authService from "../services/authService";
 
 function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,43 +38,114 @@ function SignupPage() {
 
   const evaluatePasswordStrength = (password) => {
     if (!password) {
-      return { score: 0, message: "", color: "" };
+      return {
+        score: 0,
+        message: "",
+        color: "",
+        requirements: getPasswordRequirements(),
+      };
     }
 
     let score = 0;
+    const requirements = getPasswordRequirements();
 
-    // Length check
-    if (password.length >= 8) score += 1;
-    if (password.length >= 12) score += 1;
+    // Length checks (enhanced)
+    if (password.length >= 12) {
+      score += 2;
+      requirements.length.met = true;
+    } else if (password.length >= 8) {
+      score += 1;
+    }
 
     // Complexity checks
-    if (/[A-Z]/.test(password)) score += 1;
-    if (/[a-z]/.test(password)) score += 1;
-    if (/[0-9]/.test(password)) score += 1;
-    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    if (/[A-Z]/.test(password)) {
+      score += 1;
+      requirements.uppercase.met = true;
+    }
+    if (/[a-z]/.test(password)) {
+      score += 1;
+      requirements.lowercase.met = true;
+    }
+    if (/[0-9]/.test(password)) {
+      score += 1;
+      requirements.number.met = true;
+    }
+    if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      score += 2;
+      requirements.special.met = true;
+    }
+
+    // Bonus for character variety
+    if (
+      requirements.uppercase.met &&
+      requirements.lowercase.met &&
+      requirements.number.met &&
+      requirements.special.met
+    ) {
+      score += 1;
+    }
+
+    // Common password check (basic patterns)
+    const commonPatterns = ["password", "123456", "qwerty", "admin", "abc123"];
+    if (
+      commonPatterns.some((pattern) => password.toLowerCase().includes(pattern))
+    ) {
+      score -= 2;
+      requirements.noCommon.met = false;
+    } else {
+      requirements.noCommon.met = true;
+    }
+
+    // Sequential patterns penalty
+    if (/123|abc|qwe/i.test(password) || /(.)\1{2,}/.test(password)) {
+      score -= 1;
+    }
+
+    // Personal info check (basic)
+    const name = formData.fullName.toLowerCase();
+    const email = formData.email.toLowerCase().split("@")[0];
+    if (
+      (name && password.toLowerCase().includes(name)) ||
+      (email && email.length > 2 && password.toLowerCase().includes(email))
+    ) {
+      score -= 1;
+      requirements.noPersonal.met = false;
+    } else {
+      requirements.noPersonal.met = true;
+    }
 
     let message = "";
     let color = "";
 
-    if (score === 0) {
+    if (score <= 1) {
       message = "Very weak";
-      color = "bg-red-500";
-    } else if (score <= 2) {
+      color = "bg-red-600";
+    } else if (score <= 3) {
       message = "Weak";
-      color = "bg-red-400";
-    } else if (score <= 4) {
+      color = "bg-red-500";
+    } else if (score <= 5) {
       message = "Medium";
       color = "bg-yellow-500";
-    } else if (score <= 5) {
+    } else if (score <= 7) {
       message = "Strong";
-      color = "bg-green-400";
+      color = "bg-green-500";
     } else {
       message = "Very strong";
       color = "bg-green-600";
     }
 
-    return { score, message, color };
+    return { score, message, color, requirements };
   };
+
+  const getPasswordRequirements = () => ({
+    length: { text: "At least 12 characters", met: false },
+    uppercase: { text: "At least one uppercase letter (A-Z)", met: false },
+    lowercase: { text: "At least one lowercase letter (a-z)", met: false },
+    number: { text: "At least one number (0-9)", met: false },
+    special: { text: "At least one special character (!@#$%^&*)", met: false },
+    noCommon: { text: "Not a common password", met: false },
+    noPersonal: { text: "Does not contain personal information", met: false },
+  });
 
   // Update password strength when password changes
   useEffect(() => {
@@ -124,13 +195,30 @@ function SignupPage() {
       isValid = false;
     }
 
-    // Validate password
+    // Validate password with enhanced requirements
     if (!formData.password) {
       newErrors.password = "Password is required";
       isValid = false;
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-      isValid = false;
+    } else {
+      const passwordValidation = evaluatePasswordStrength(formData.password);
+
+      // Check minimum requirements
+      const requirements = passwordValidation.requirements;
+      const unmetRequirements = Object.values(requirements).filter(
+        (req) => !req.met
+      );
+
+      if (formData.password.length < 12) {
+        newErrors.password = "Password must be at least 12 characters";
+        isValid = false;
+      } else if (unmetRequirements.length > 0) {
+        newErrors.password = "Password does not meet all security requirements";
+        isValid = false;
+      } else if (passwordValidation.score < 5) {
+        newErrors.password =
+          "Password is too weak. Please create a stronger password";
+        isValid = false;
+      }
     }
 
     // Validate password confirmation
@@ -375,7 +463,7 @@ function SignupPage() {
                           className={`h-full ${passwordStrength.color}`}
                           initial={{ width: 0 }}
                           animate={{
-                            width: `${(passwordStrength.score / 6) * 100}%`,
+                            width: `${(passwordStrength.score / 8) * 100}%`,
                           }}
                           transition={{ duration: 0.3 }}
                         ></motion.div>
@@ -384,6 +472,52 @@ function SignupPage() {
                         {passwordStrength.message}
                       </span>
                     </div>
+
+                    {/* Password requirements checklist */}
+                    {passwordStrength.requirements && (
+                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          Password Requirements:
+                        </p>
+                        <div className="grid grid-cols-1 gap-1">
+                          {Object.entries(passwordStrength.requirements).map(
+                            ([key, req]) => (
+                              <div
+                                key={key}
+                                className="flex items-center gap-2"
+                              >
+                                <div
+                                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                                    req.met ? "bg-green-500" : "bg-gray-300"
+                                  }`}
+                                >
+                                  {req.met && (
+                                    <svg
+                                      className="w-2.5 h-2.5 text-white"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      ></path>
+                                    </svg>
+                                  )}
+                                </div>
+                                <span
+                                  className={`text-sm ${
+                                    req.met ? "text-green-600" : "text-gray-600"
+                                  }`}
+                                >
+                                  {req.text}
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </motion.div>

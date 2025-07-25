@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import authService from "../services/authService";
 
 function LoginPage() {
@@ -22,6 +23,14 @@ function LoginPage() {
   const [retryCountdown, setRetryCountdown] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+  const { login, isAuthenticated, isLoading } = useUser();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,7 +83,8 @@ function LoginPage() {
         setIsSubmitting(true);
         setApiError("");
 
-        await authService.login({
+        // Use UserContext login function
+        await login({
           email: formData.email,
           password: formData.password,
         });
@@ -126,6 +136,11 @@ function LoginPage() {
         setIsSubmitting(false);
       }
     }
+  };
+
+  const handleGoogleLogin = () => {
+    // Redirect to Google OAuth
+    window.location.href = authService.getGoogleLoginUrl();
   };
 
   useEffect(() => {
@@ -409,8 +424,8 @@ function LoginPage() {
               </div>
 
               <motion.a
-                href={authService.getGoogleLoginUrl()}
-                className="mt-4 w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200"
+                onClick={handleGoogleLogin}
+                className="mt-4 w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                 variants={formItemVariants}
                 whileHover={{ backgroundColor: "#f9fafb" }}
                 whileTap={{ scale: 0.98 }}

@@ -4,6 +4,7 @@ const router = express.Router();
 const { check } = require('express-validator');
 const auth = require('../middleware/auth');
 const emailAccountController = require('../controllers/emailAccountController');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // @route   POST /api/email-accounts
 // @desc    Add new email account
@@ -11,7 +12,7 @@ const emailAccountController = require('../controllers/emailAccountController');
 router.post(
   '/',
   [
-    auth,
+    authenticateToken,
     [
       check('email', 'Please include a valid email').isEmail(),
       check('displayName', 'Display name is required').not().isEmpty(),
@@ -38,7 +39,7 @@ router.get(
 // @access  Private
 router.get(
   '/',
-  auth,
+  authenticateToken,
   emailAccountController.getEmailAccounts
 );
 
@@ -47,12 +48,12 @@ router.get(
 // @access  Private
 router.put(
   '/:id/set-default',
-  auth,
+  authenticateToken,
   emailAccountController.setDefaultEmailAccount
 );
 
-router.delete('/:id', auth, emailAccountController.deleteEmailAccount);
+router.delete('/:id', authenticateToken, emailAccountController.deleteEmailAccount);
 
-router.get('/check', auth, emailAccountController.checkEmailAccount);
+router.get('/check', authenticateToken, emailAccountController.checkEmailAccount);
 
 module.exports = router;
