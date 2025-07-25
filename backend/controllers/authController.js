@@ -21,7 +21,6 @@ const getClientInfo = (req) => {
 const verifyRecaptcha = require("../utils/verifyRecaptcha");
 exports.register = async (req, res) => {
   try {
-    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -33,7 +32,6 @@ exports.register = async (req, res) => {
 
     const { name, email, password, recaptchaToken } = req.body;
 
-    
     const recaptchaValid = await verifyRecaptcha(recaptchaToken);
     if (!recaptchaValid) {
       return res.status(400).json({
@@ -42,7 +40,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({
@@ -51,21 +48,18 @@ exports.register = async (req, res) => {
       });
     }
 
-    
     user = new User({
       name,
       email,
       password,
     });
 
-    
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.otp = otp;
-    user.otpExpires = Date.now() + 10 * 60 * 1000; 
+    user.otpExpires = Date.now() + 10 * 60 * 1000;
 
     await user.save();
 
-    
     const message = `Your OTP for Worksage verification is: ${otp}\nThis code will expire in 10 minutes.`;
 
     await sendEmail({
@@ -101,7 +95,6 @@ exports.verifyEmail = async (req, res) => {
 
     const { email, otp } = req.body;
 
-    
     const user = await User.findOne({
       email,
       otp,
@@ -115,13 +108,11 @@ exports.verifyEmail = async (req, res) => {
       });
     }
 
-    
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpires = undefined;
     await user.save();
 
-    
     const { ipAddress, userAgent } = getClientInfo(req);
     const tokens = await TokenService.createSession(
       user._id,
@@ -129,12 +120,11 @@ exports.verifyEmail = async (req, res) => {
       userAgent
     );
 
-    
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -173,7 +163,6 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const { ipAddress, userAgent } = getClientInfo(req);
 
-    
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
@@ -210,7 +199,7 @@ exports.login = async (req, res) => {
         success: false,
         message: "Your password has expired. Please reset your password.",
         code: "PASSWORD_EXPIRED",
-        requiresPasswordReset: true
+        requiresPasswordReset: true,
       });
     }
 
@@ -219,12 +208,11 @@ exports.login = async (req, res) => {
         success: false,
         message: "You must change your password before continuing.",
         code: "MUST_CHANGE_PASSWORD",
-        requiresPasswordChange: true
+        requiresPasswordChange: true,
       });
     }
 
     if (user.mfa && user.mfa.enabled) {
-      
       return res.json({
         success: true,
         requiresMFA: true,
@@ -232,24 +220,22 @@ exports.login = async (req, res) => {
         userId: user._id,
         tempData: {
           ipAddress,
-          userAgent
-        }
+          userAgent,
+        },
       });
     }
 
-    
     const tokens = await TokenService.createSession(
       user._id,
       ipAddress,
       userAgent
     );
 
-    
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -274,9 +260,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
-
 exports.completeMFALogin = async (req, res) => {
   try {
     const { userId, mfaToken, isBackupCode, tempData } = req.body;
@@ -284,66 +267,68 @@ exports.completeMFALogin = async (req, res) => {
     if (!userId || !mfaToken || !tempData) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields"
+        message: "Missing required fields",
       });
     }
 
-    
     let user;
 
-    
     try {
-      user = await User.findById(userId).select('+mfa.secret');
+      user = await User.findById(userId).select("+mfa.secret");
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: "User not found"
+          message: "User not found",
         });
       }
 
       if (!user.mfa.enabled) {
         return res.status(400).json({
           success: false,
-          message: 'MFA is not enabled for this user'
+          message: "MFA is not enabled for this user",
         });
       }
 
-      console.log('User MFA object for login:', {
+      console.log("User MFA object for login:", {
         enabled: user.mfa.enabled,
         hasSecret: !!user.mfa.secret,
         secretLength: user.mfa.secret ? user.mfa.secret.length : 0,
-        backupCodesCount: user.mfa.backupCodes ? user.mfa.backupCodes.length : 0
+        backupCodesCount: user.mfa.backupCodes
+          ? user.mfa.backupCodes.length
+          : 0,
       });
 
       let isValid = false;
-      const { verifyBackupCode, verifyTOTP, decryptSecret } = require('../utils/mfaUtils');
+      const {
+        verifyBackupCode,
+        verifyTOTP,
+        decryptSecret,
+      } = require("../utils/mfaUtils");
 
       if (isBackupCode) {
-        
         isValid = verifyBackupCode(mfaToken, user.mfa.backupCodes);
         if (isValid) {
-          await user.save(); 
+          await user.save();
         }
       } else {
-        
         if (!user.mfa.secret) {
           return res.status(400).json({
             success: false,
-            message: 'MFA secret not found for user'
+            message: "MFA secret not found for user",
           });
         }
-        
+
         let encryptedSecret;
         try {
           encryptedSecret = JSON.parse(user.mfa.secret);
         } catch (parseError) {
-          console.error('Failed to parse MFA secret:', parseError);
+          console.error("Failed to parse MFA secret:", parseError);
           return res.status(500).json({
             success: false,
-            message: 'Invalid MFA secret format'
+            message: "Invalid MFA secret format",
           });
         }
-        
+
         const secret = decryptSecret(encryptedSecret);
         isValid = verifyTOTP(mfaToken, secret);
       }
@@ -351,38 +336,33 @@ exports.completeMFALogin = async (req, res) => {
       if (!isValid) {
         return res.status(400).json({
           success: false,
-          message: isBackupCode ? 'Invalid backup code' : 'Invalid verification code'
+          message: isBackupCode
+            ? "Invalid backup code"
+            : "Invalid verification code",
         });
       }
 
-      
       user.mfa.lastUsedAt = new Date();
       await user.save();
-
     } catch (mfaError) {
-      console.error('MFA verification error:', mfaError);
+      console.error("MFA verification error:", mfaError);
       return res.status(500).json({
         success: false,
-        message: 'Server error during MFA verification'
+        message: "Server error during MFA verification",
       });
     }
 
-    
-    
-
-    
     const tokens = await TokenService.createSession(
       user._id,
       tempData.ipAddress,
       tempData.userAgent
     );
 
-    
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -398,7 +378,6 @@ exports.completeMFALogin = async (req, res) => {
         },
       },
     });
-
   } catch (error) {
     console.error("MFA Login error:", error);
     res.status(500).json({
@@ -443,7 +422,6 @@ exports.refreshToken = async (req, res) => {
   } catch (error) {
     console.error("Token refresh error:", error);
 
-    
     res.clearCookie("refreshToken");
 
     res.status(401).json({
@@ -562,6 +540,5 @@ exports.updateRole = async (req, res) => {
     });
   }
 };
-
 
 exports.generateToken = generateToken;
