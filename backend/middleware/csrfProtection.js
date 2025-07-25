@@ -1,6 +1,5 @@
 const csrf = require("csurf");
 
-// CSRF protection using cookies
 const csrfProtection = csrf({
   cookie: {
     httpOnly: true,
@@ -9,8 +8,6 @@ const csrfProtection = csrf({
     maxAge: 60 * 60 * 1000, // 1 ghanta
   },
 });
-
-// Custom error handler for CSRF
 function csrfErrorHandler(err, req, res, next) {
   if (err.code === "EBADCSRFTOKEN") {
     return res.status(403).json({
