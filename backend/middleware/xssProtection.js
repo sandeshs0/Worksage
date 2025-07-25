@@ -1,81 +1,73 @@
 const validator = require("validator");
 
-// XSS Protection Middleware
 const xssProtection = async (req, res, next) => {
   console.log(`🛡️ XSS Protection: Processing ${req.method} ${req.path}`);
-  
-  // Skip XSS protection for OAuth endpoints (they contain legitimate auth codes)
+
   const oauthExemptions = ["/api/auth/google", "/api/auth/google/callback"];
 
+  const htmlExemptions = [
+    "/api/invoices",
+    "/api/projects",
+    "/api/tasks",
+    "/api/emails",
+  ];
 
-  // Skip XSS protection for endpoints that allow HTML (invoices, emails, etc)
-  const htmlExemptions = ["/api/invoices", "/api/projects", "/api/tasks", "/api/emails"];
-
-  // Check if this is an OAuth endpoint
   const isOAuthEndpoint = oauthExemptions.some(
     (exemption) => req.path === exemption || req.path.startsWith(exemption)
   );
 
-
-  // Check if this is an endpoint that should be exempted from XSS blocking
   const isHtmlExemptEndpoint = htmlExemptions.some((exemption) =>
     req.path.startsWith(exemption)
   );
 
-
-  // Skip XSS protection for OAuth and HTML-exempt endpoints
   if (isOAuthEndpoint) {
     console.log(`🔓 XSS protection bypassed for OAuth endpoint: ${req.path}`);
     return next();
   }
 
   if (isHtmlExemptEndpoint) {
-    console.log(`⚠️ XSS protection bypassed for HTML-exempt endpoint: ${req.path}`);
+    console.log(
+      `⚠️ XSS protection bypassed for HTML-exempt endpoint: ${req.path}`
+    );
     return next();
   }
 
-  // XSS patterns to detect (simplified and more comprehensive)
   const xssPatterns = [
-    /<script[\s\S]*?>/gi,                // Any script tag opening
-    /<\/script>/gi,                      // Script closing tag
-    /<iframe[\s\S]*?>/gi,                // Any iframe tag opening
-    /<\/iframe>/gi,                      // Iframe closing tag
-    /javascript\s*:/gi,                  // JavaScript protocol
-    /vbscript\s*:/gi,                    // VBScript protocol
-    /data\s*:\s*text\/html/gi,           // Data URL with HTML
-    /on\w+\s*=/gi,                       // Event handlers (onclick, onload, etc.)
-    /eval\s*\(/gi,                       // eval() function
-    /expression\s*\(/gi,                 // CSS expression()
-    /document\s*\./gi,                   // Document access
-    /window\s*\./gi,                     // Window access
-    /alert\s*\(/gi,                      // Alert function
-    /confirm\s*\(/gi,                    // Confirm function
-    /prompt\s*\(/gi,                     // Prompt function
-    /<object[\s\S]*?>/gi,                // Object tag
-    /<embed[\s\S]*?>/gi,                 // Embed tag
-    /<applet[\s\S]*?>/gi,                // Applet tag
-    /<meta[\s\S]*?>/gi,                  // Meta tag
-    /<link[\s\S]*?>/gi,                  // Link tag
-    /<style[\s\S]*?>/gi,                 // Style tag opening
-    /<\/style>/gi,                       // Style tag closing
-    /&lt;script/gi,                      // HTML encoded script
-    /&gt;/gi,                           // HTML encoded >
-    /&#x3c;script/gi,                    // Hex encoded script
-    /\x3cscript/gi,                      // Hex encoded script
+    /<script[\s\S]*?>/gi, 
+    /<\/script>/gi, 
+    /<iframe[\s\S]*?>/gi, 
+    /<\/iframe>/gi, 
+    /javascript\s*:/gi, 
+    /vbscript\s*:/gi, 
+    /data\s*:\s*text\/html/gi, 
+    /on\w+\s*=/gi, 
+    /eval\s*\(/gi, 
+    /expression\s*\(/gi, 
+    /document\s*\./gi, 
+    /window\s*\./gi, 
+    /alert\s*\(/gi, 
+    /confirm\s*\(/gi, 
+    /prompt\s*\(/gi, 
+    /<object[\s\S]*?>/gi, 
+    /<embed[\s\S]*?>/gi, 
+    /<applet[\s\S]*?>/gi, 
+    /<meta[\s\S]*?>/gi, 
+    /<link[\s\S]*?>/gi, 
+    /<style[\s\S]*?>/gi, 
+    /<\/style>/gi, 
+    /&lt;script/gi, 
+    /&gt;/gi, 
+    /&#x3c;script/gi, 
+    /\x3cscript/gi, 
   ];
-
-  // Track XSS attempts
   let xssAttempts = [];
   let foundMaliciousContent = false;
-
-  // Function to check for XSS patterns (detection only)
   const detectXSS = (obj, path = "") => {
     if (typeof obj !== "string") {
       if (Array.isArray(obj)) {
         obj.forEach((item, index) => detectXSS(item, `${path}[${index}]`));
         return;
       }
-
       if (obj && typeof obj === "object") {
         for (const [key, value] of Object.entries(obj)) {
           detectXSS(value, `${path}.${key}`);
@@ -86,12 +78,12 @@ const xssProtection = async (req, res, next) => {
 
     console.log(`🔍 Checking for XSS in ${path}: "${obj.substring(0, 100)}"`);
 
-    // Check for XSS patterns
+    
     for (const pattern of xssPatterns) {
       if (pattern.test(obj)) {
         foundMaliciousContent = true;
 
-        // Log XSS attempt
+        
         console.log(
           `🚨 XSS DETECTED! Pattern: ${pattern} matched in ${path}: ${obj.substring(
             0,
@@ -99,7 +91,7 @@ const xssProtection = async (req, res, next) => {
           )}... from IP: ${req.ip}`
         );
 
-        // Record the attempt
+        
         xssAttempts.push({
           field: path,
           content: obj.substring(0, 200),
@@ -109,7 +101,7 @@ const xssProtection = async (req, res, next) => {
           timestamp: new Date(),
         });
 
-        // Add to security log
+        
         if (req.securityLog) {
           req.securityLog.push({
             type: "XSS_ATTEMPT",
@@ -120,14 +112,14 @@ const xssProtection = async (req, res, next) => {
             userAgent: req.get("User-Agent"),
           });
         }
+
         
-        // Stop checking other patterns for this field
         break;
       }
     }
   };
 
-  // Function to sanitize objects (after detection)
+  
   const sanitizeXSS = (obj, path = "") => {
     if (typeof obj !== "string") {
       if (Array.isArray(obj)) {
@@ -145,15 +137,15 @@ const xssProtection = async (req, res, next) => {
       return obj;
     }
 
-    // Sanitize the string by escaping HTML entities
+    
     return validator.escape(obj);
   };
 
   try {
-    // Initialize security log array if it doesn't exist
+    
     req.securityLog = req.securityLog || [];
 
-    // First, detect XSS in all input without sanitizing
+    
     if (req.body && typeof req.body === "object") {
       detectXSS(req.body, "body");
     }
@@ -164,9 +156,9 @@ const xssProtection = async (req, res, next) => {
       detectXSS(req.params, "params");
     }
 
-    // Block request if malicious content was found
+    
     if (foundMaliciousContent) {
-      // Log security event
+      
       const ActivityLog = require("../models/ActivityLog");
       try {
         await ActivityLog.create({
@@ -186,7 +178,7 @@ const xssProtection = async (req, res, next) => {
             blocked: true,
           },
           isSecurityEvent: true,
-          securityEvents: xssAttempts.map(attempt => ({
+          securityEvents: xssAttempts.map((attempt) => ({
             type: "XSS_ATTEMPT",
             path: attempt.field,
             value: attempt.content,
@@ -208,7 +200,7 @@ const xssProtection = async (req, res, next) => {
       });
     }
 
-    // If no XSS found, sanitize the input as a precaution
+    
     if (req.body && typeof req.body === "object") {
       req.body = sanitizeXSS(req.body, "body");
     }
@@ -230,7 +222,7 @@ const xssProtection = async (req, res, next) => {
   }
 };
 
-// Strict XSS protection - rejects requests with XSS instead of sanitizing
+
 const strictXSSProtection = (req, res, next) => {
   const xssPatterns = [
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
@@ -267,7 +259,7 @@ const strictXSSProtection = (req, res, next) => {
   };
 
   try {
-    // Check body, query, and params for XSS patterns
+    
     const hasXSS =
       checkForXSS(req.body, "body") ||
       checkForXSS(req.query, "query") ||
@@ -276,7 +268,7 @@ const strictXSSProtection = (req, res, next) => {
     if (hasXSS) {
       console.error(`🚨 XSS attempt blocked from IP: ${req.ip}`);
 
-      // Log the attempt
+      
       if (req.securityLog) {
         req.securityLog.push({
           type: "XSS_ATTEMPT",
@@ -306,7 +298,7 @@ const strictXSSProtection = (req, res, next) => {
   }
 };
 
-// Output sanitization for API responses
+
 const sanitizeOutput = (data) => {
   if (typeof data === "string") {
     return validator.escape(data);
@@ -319,7 +311,7 @@ const sanitizeOutput = (data) => {
   if (typeof data === "object" && data !== null) {
     const sanitized = {};
     for (const [key, value] of Object.entries(data)) {
-      // Don't sanitize certain safe fields
+      
       if (["_id", "id", "createdAt", "updatedAt", "timestamp"].includes(key)) {
         sanitized[key] = value;
       } else {

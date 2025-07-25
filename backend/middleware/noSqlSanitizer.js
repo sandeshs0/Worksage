@@ -1,8 +1,5 @@
 const validator = require("validator");
-
-// Custom NoSQL injection prevention middleware
 const noSqlSanitizer = (req, res, next) => {
-  // Common NoSQL injection patterns to detect and prevent
   const dangerousPatterns = [
     /\$where/gi,
     /\$ne/gi,
@@ -31,23 +28,18 @@ const noSqlSanitizer = (req, res, next) => {
     /eval\(/gi,
     /Function\(/gi,
   ];
-
-  // Function to recursively sanitize objects
   const sanitizeObject = (obj, path = "") => {
     if (obj === null || obj === undefined) return obj;
 
     if (typeof obj === "string") {
-      // Check for dangerous patterns
       for (const pattern of dangerousPatterns) {
         if (pattern.test(obj)) {
           console.warn(
-            `🚨 Potential NoSQL injection detected at ${path}: ${obj.substring(
+            `Potential NoSQL injection detected at ${path}: ${obj.substring(
               0,
               100
             )}... from IP: ${req.ip}`
           );
-
-          // Log to activity logger for security monitoring
           if (req.securityLog) {
             req.securityLog.push({
               type: "NoSQL_INJECTION_ATTEMPT",
@@ -58,13 +50,9 @@ const noSqlSanitizer = (req, res, next) => {
               userAgent: req.get("User-Agent"),
             });
           }
-
-          // Replace dangerous content or reject
           return obj.replace(pattern, "_SANITIZED_");
         }
       }
-
-      // Additional string sanitization
       return validator.escape(obj);
     }
 
