@@ -148,7 +148,6 @@ exports.verifyEmail = async (req, res) => {
     });
   }
 };
-
 exports.login = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -159,10 +158,8 @@ exports.login = async (req, res) => {
         errors: errors.array(),
       });
     }
-
     const { email, password } = req.body;
     const { ipAddress, userAgent } = getClientInfo(req);
-
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
@@ -170,7 +167,6 @@ exports.login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
-
     if (!user.isVerified) {
       return res.status(400).json({
         success: false,

@@ -1,7 +1,5 @@
-// controllers/aiController.js
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.rewriteEmail = async (req, res) => {
@@ -14,8 +12,6 @@ exports.rewriteEmail = async (req, res) => {
         message: 'Text content is required'
       });
     }
-
-    // Initialize the model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `

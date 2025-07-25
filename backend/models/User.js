@@ -130,14 +130,21 @@ UserSchema.pre("save", async function (next) {
   if (!this.isModified("password") || !this.password) {
     return next();
   }
+  console.log(`Pre-save middleware: Hashing password for user: ${this.email}`);
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  console.log(
+    `Pre-save middleware: Password hashed successfully for user: ${this.email}`
+  );
   next();
 });
 
 // Method to compare entered password with hashed password
 UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  console.log(`Comparing password for user: ${this.email}`);
+  const isMatch = await bcrypt.compare(enteredPassword, this.password);
+  console.log(`Password match result: ${isMatch}`);
+  return isMatch;
 };
 
 UserSchema.methods.isPasswordExpired = function () {
@@ -153,10 +160,9 @@ UserSchema.methods.isAccountLocked = function () {
 
 // Method to update password with history
 UserSchema.methods.updatePasswordWithHistory = async function (newPassword) {
-  const salt = await bcrypt.genSalt(12);
-  const hashedPassword = await bcrypt.hash(newPassword, salt);
+  console.log(`Updating password with history for user: ${this.email}`);
 
-  // Add current password to history
+  // Add current password to history (if it exists and is hashed)
   if (this.password) {
     this.passwordHistory.push(this.password);
 
@@ -166,13 +172,14 @@ UserSchema.methods.updatePasswordWithHistory = async function (newPassword) {
     }
   }
 
-  // Update password and related fields
-  this.password = hashedPassword;
+  // Set new password as plain text - pre-save middleware will handle hashing
+  this.password = newPassword;
   this.passwordChangedAt = new Date();
   this.passwordExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // 90 days
   this.mustChangePassword = false;
 
-  return this.save();
+  console.log(`Password update completed for user: ${this.email}`);
+  return this.save(); // Pre-save middleware will hash the password
 };
 
 // Create a virtual for full name that combines first and last name

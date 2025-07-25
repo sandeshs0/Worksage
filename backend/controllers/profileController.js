@@ -9,7 +9,6 @@ exports.getProfile = async (req, res) => {
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
-        
         res.json({
             id: user._id,
             fullName: user.fullName,

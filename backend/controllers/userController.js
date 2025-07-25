@@ -257,9 +257,12 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    // Use the robust password update method with history tracking
+    console.log(`Resetting password for user: ${user.email}`);
+    await user.updatePasswordWithHistory(password);
+    console.log(`Password reset successful for user: ${user.email}`);
+
+    // Clear reset token
     user.otp = undefined;
     user.otpExpires = undefined;
     await user.save();
@@ -288,7 +291,10 @@ The Worksage Team`;
 
       console.log(`Password reset confirmation email sent to ${user.email}`);
     } catch (emailError) {
-      console.error("Error sending password reset confirmation email:", emailError);
+      console.error(
+        "Error sending password reset confirmation email:",
+        emailError
+      );
       // Don't fail the request if email fails, but log it
     }
 
