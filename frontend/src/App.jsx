@@ -16,6 +16,8 @@ import LoginPage from "./pages/LoginPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import OtpVerificationPage from "./pages/OtpVerificationPage";
 import SignupPage from "./pages/SignupPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import { XSSProtectionProvider } from "./utils/xssHOC.jsx";
 
@@ -97,6 +99,8 @@ function AnimatedRoutes() {
         <Route path="/verify" element={<OtpVerificationPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         {/* Admin dashboard route */}
         <Route
@@ -127,7 +131,10 @@ function AnimatedRoutes() {
           <Route path="kanban" element={<KanbanPage />} />
           <Route path="help" element={<HelpCenterPage />} />
           <Route path="settings" element={<SettingsPage />} />
-          <Route path="settings/payment-callback" element={<PaymentCallbackPage />} />
+          <Route
+            path="settings/payment-callback"
+            element={<PaymentCallbackPage />}
+          />
           <Route path="boards" element={<BoardsPage />} />
           <Route path="boards/:boardId" element={<KanbanPage />} />
         </Route>

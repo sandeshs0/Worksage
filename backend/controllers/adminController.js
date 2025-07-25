@@ -2,14 +2,14 @@ const ActivityLog = require("../models/ActivityLog");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
-// Get activity logs with pagination and insights
+
 exports.getActivityLogs = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    // Build filter
+    
     const filter = {};
     if (req.query.method) filter.method = req.query.method;
     if (req.query.endpoint)
@@ -20,15 +20,15 @@ exports.getActivityLogs = async (req, res) => {
       if (req.query.from) filter.timestamp.$gte = new Date(req.query.from);
       if (req.query.to) filter.timestamp.$lte = new Date(req.query.to);
     }
-    // Only filter by user if valid ObjectId
+    
     if (req.query.user && /^[a-fA-F0-9]{24}$/.test(req.query.user.trim())) {
       filter.user = mongoose.Types.ObjectId(req.query.user.trim());
     }
 
-    // Get total count
+    
     const total = await ActivityLog.countDocuments(filter);
 
-    // Get logs with user info
+    
     const logs = await ActivityLog.find(filter)
       .populate("user", "_id name email")
       .sort({ timestamp: -1 })
@@ -36,7 +36,7 @@ exports.getActivityLogs = async (req, res) => {
       .limit(limit)
       .lean();
 
-    // Basic insights
+    
     const uniqueUsers = await ActivityLog.distinct("user", filter);
     const topEndpoints = await ActivityLog.aggregate([
       { $match: filter },
@@ -73,12 +73,12 @@ exports.getActivityLogs = async (req, res) => {
   }
 };
 
-// Clear activity logs (with optional date filtering)
+
 exports.clearActivityLogs = async (req, res) => {
   try {
     const filter = {};
 
-    // Optional date filtering - only clear logs older than specified date
+    
     if (req.body.olderThan) {
       filter.timestamp = { $lt: new Date(req.body.olderThan) };
     }
@@ -99,7 +99,7 @@ exports.clearActivityLogs = async (req, res) => {
   }
 };
 
-// List all users
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -109,7 +109,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// Change user plan
+
 exports.changeUserPlan = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -133,7 +133,7 @@ exports.changeUserPlan = async (req, res) => {
   }
 };
 
-// Delete user
+
 exports.deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -148,7 +148,7 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// System statistics
+
 exports.getSystemStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -160,19 +160,19 @@ exports.getSystemStats = async (req, res) => {
   }
 };
 
-// Get security logs specifically
+
 exports.getSecurityLogs = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    // Build filter for security events - support both old and new formats
+    
     const filter = {
       $or: [{ isSecurityEvent: true }, { type: "security" }],
     };
 
-    // Additional filters
+    
     if (req.query.eventType) {
       filter.$or.push(
         { "securityEvents.type": req.query.eventType },
@@ -194,10 +194,10 @@ exports.getSecurityLogs = async (req, res) => {
       filter.user = mongoose.Types.ObjectId(req.query.user.trim());
     }
 
-    // Get total count
+    
     const total = await ActivityLog.countDocuments(filter);
 
-    // Get security logs with user info
+    
     const logs = await ActivityLog.find(filter)
       .populate("user", "_id fullName email")
       .sort({ timestamp: -1 })
@@ -205,7 +205,7 @@ exports.getSecurityLogs = async (req, res) => {
       .limit(limit)
       .lean();
 
-    // Enhanced security insights including XSS attacks
+    
     const securityStats = await ActivityLog.aggregate([
       {
         $match: {
@@ -239,7 +239,7 @@ exports.getSecurityLogs = async (req, res) => {
       { $sort: { count: -1 } },
     ]);
 
-    // XSS specific statistics
+    
     const xssStats = await ActivityLog.aggregate([
       {
         $match: {
@@ -297,10 +297,10 @@ exports.getSecurityLogs = async (req, res) => {
       .limit(5)
       .lean();
 
-    // Calculate threat severity
+    
     const criticalThreats = await ActivityLog.countDocuments({
       $or: [{ isSecurityEvent: true }, { type: "security" }],
-      timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24h
+      timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, 
     });
 
     res.json({
@@ -330,13 +330,13 @@ exports.getSecurityLogs = async (req, res) => {
   }
 };
 
-// Get security dashboard summary
+
 exports.getSecurityDashboard = async (req, res) => {
   try {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const last7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    // Enhanced threat counts including new security format
+    
     const threats24h = await ActivityLog.countDocuments({
       $or: [{ isSecurityEvent: true }, { type: "security" }],
       timestamp: { $gte: last24h },
@@ -351,7 +351,7 @@ exports.getSecurityDashboard = async (req, res) => {
       $or: [{ isSecurityEvent: true }, { type: "security" }],
     });
 
-    // XSS-specific metrics
+    
     const xssAttempts24h = await ActivityLog.countDocuments({
       $or: [
         { "securityEvents.type": "XSS_ATTEMPT" },
@@ -386,7 +386,7 @@ exports.getSecurityDashboard = async (req, res) => {
       timestamp: { $gte: last7d },
     });
 
-    // Enhanced threat types breakdown
+    
     const threatBreakdown = await ActivityLog.aggregate([
       {
         $match: {
@@ -420,7 +420,7 @@ exports.getSecurityDashboard = async (req, res) => {
       { $sort: { count: -1 } },
     ]);
 
-    // Top attacking IPs with enhanced data
+    
     const topAttackers = await ActivityLog.aggregate([
       {
         $match: {
@@ -474,7 +474,7 @@ exports.getSecurityDashboard = async (req, res) => {
       { $limit: 5 },
     ]);
 
-    // Threat timeline (last 7 days)
+    
     const threatTimeline = await ActivityLog.aggregate([
       { $match: { isSecurityEvent: true, timestamp: { $gte: last7d } } },
       {
