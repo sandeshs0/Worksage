@@ -52,6 +52,7 @@ import OverviewPage from "./pages/dashboard/OverviewPage";
 import ProjectDetailsPage from "./pages/dashboard/ProjectDetailsPage";
 import ProjectsPage from "./pages/dashboard/ProjectsPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
+import PaymentCallbackPage from "./pages/payments/PaymentCallbackPage";
 // Auth guard for protected routes
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useUser();
@@ -126,6 +127,7 @@ function AnimatedRoutes() {
           <Route path="kanban" element={<KanbanPage />} />
           <Route path="help" element={<HelpCenterPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings/payment-callback" element={<PaymentCallbackPage />} />
           <Route path="boards" element={<BoardsPage />} />
           <Route path="boards/:boardId" element={<KanbanPage />} />
         </Route>

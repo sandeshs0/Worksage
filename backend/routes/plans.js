@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const planController = require('../controllers/planController');
-const auth = require('../middleware/auth');
-const rateLimiter = require('../middleware/rateLimiter');
-const { body, param, query, validationResult } = require('express-validator');
+const planController = require("../controllers/planController");
+const auth = require("../middleware/auth");
+const rateLimiter = require("../middleware/rateLimiter");
+const { body, param, query, validationResult } = require("express-validator");
 
 // Validation middleware
 const handleValidationErrors = (req, res, next) => {
@@ -11,73 +11,70 @@ const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      message: 'Validation error',
-      errors: errors.array()
+      message: "Validation error",
+      errors: errors.array(),
     });
   }
   next();
 };
 
-// Rate limiting for payment operations
-const paymentRateLimit = rateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 payment attempts per 15 minutes
-  message: {
-    success: false,
-    message: 'Too many payment attempts. Please try again later.',
-    code: 'RATE_LIMIT_EXCEEDED'
-  }
-});
+// // Rate limiting for payment operations
+// const paymentRateLimit = rateLimiter({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 5, // 5 payment attempts per 15 minutes
+//   message: {
+//     success: false,
+//     message: 'Too many payment attempts. Please try again later.',
+//     code: 'RATE_LIMIT_EXCEEDED'
+//   }
+// });
 
 // Rate limiting for general plan operations
-const planRateLimit = rateLimiter({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // 30 requests per minute
-  message: {
-    success: false,
-    message: 'Too many requests. Please try again later.',
-    code: 'RATE_LIMIT_EXCEEDED'
-  }
-});
-
+// const planRateLimit = rateLimiter({
+//   windowMs: 1 * 60 * 1000, // 1 minute
+//   max: 30, // 30 requests per minute
+//   message: {
+//     success: false,
+//     message: 'Too many requests. Please try again later.',
+//     code: 'RATE_LIMIT_EXCEEDED'
+//   }
+// });
 // Validation schemas
 const initiateUpgradeValidation = [
-  body('targetPlan')
-    .isIn(['pro', 'vantage'])
-    .withMessage('Target plan must be either pro or vantage'),
-  handleValidationErrors
+  body("targetPlan")
+    .isIn(["pro", "vantage"])
+    .withMessage("Target plan must be either pro or vantage"),
+  handleValidationErrors,
 ];
 
 const verifyPaymentValidation = [
-  body('pidx')
+  body("pidx")
     .notEmpty()
-    .withMessage('pidx is required')
+    .withMessage("pidx is required")
     .isLength({ min: 10 })
-    .withMessage('Invalid pidx format'),
-  handleValidationErrors
+    .withMessage("Invalid pidx format"),
+  handleValidationErrors,
 ];
 
 const paginationValidation = [
-  query('page')
+  query("page")
     .optional()
     .isInt({ min: 1 })
-    .withMessage('Page must be a positive integer'),
-  query('limit')
+    .withMessage("Page must be a positive integer"),
+  query("limit")
     .optional()
     .isInt({ min: 1, max: 50 })
-    .withMessage('Limit must be between 1 and 50'),
-  query('status')
+    .withMessage("Limit must be between 1 and 50"),
+  query("status")
     .optional()
-    .isIn(['pending', 'completed', 'failed', 'cancelled', 'expired'])
-    .withMessage('Invalid status filter'),
-  handleValidationErrors
+    .isIn(["pending", "completed", "failed", "cancelled", "expired"])
+    .withMessage("Invalid status filter"),
+  handleValidationErrors,
 ];
 
 const upgradeIdValidation = [
-  param('upgradeId')
-    .isMongoId()
-    .withMessage('Invalid upgrade ID'),
-  handleValidationErrors
+  param("upgradeId").isMongoId().withMessage("Invalid upgrade ID"),
+  handleValidationErrors,
 ];
 
 // ===== PUBLIC ROUTES (No CSRF protection needed) =====
@@ -87,14 +84,14 @@ const upgradeIdValidation = [
  * @desc    Get all available plans
  * @access  Public
  */
-router.get('/', planRateLimit, planController.getPlans);
+router.get("/", planController.getPlans);
 
 /**
  * @route   GET /api/plans/callback
  * @desc    Handle Khalti payment callback
  * @access  Public (called by Khalti - no CSRF needed)
  */
-router.get('/callback', planController.handleKhaltiCallback);
+router.get("/callback", planController.handleKhaltiCallback);
 
 // ===== PROTECTED ROUTES (Require authentication) =====
 
@@ -103,7 +100,7 @@ router.get('/callback', planController.handleKhaltiCallback);
  * @desc    Get current user's plan details
  * @access  Private
  */
-router.get('/current', auth, planRateLimit, planController.getCurrentPlan);
+router.get("/current", auth, planController.getCurrentPlan);
 
 /**
  * @route   POST /api/plans/initiate-upgrade
@@ -111,9 +108,8 @@ router.get('/current', auth, planRateLimit, planController.getCurrentPlan);
  * @access  Private
  */
 router.post(
-  '/initiate-upgrade',
+  "/initiate-upgrade",
   auth,
-  paymentRateLimit,
   initiateUpgradeValidation,
   planController.initiatePlanUpgrade
 );
@@ -124,9 +120,8 @@ router.post(
  * @access  Private
  */
 router.post(
-  '/verify-payment',
+  "/verify-payment",
   auth,
-  paymentRateLimit,
   verifyPaymentValidation,
   planController.verifyPlanUpgrade
 );
@@ -137,9 +132,8 @@ router.post(
  * @access  Private
  */
 router.get(
-  '/upgrade-history',
+  "/upgrade-history",
   auth,
-  planRateLimit,
   paginationValidation,
   planController.getPlanUpgradeHistory
 );
@@ -150,9 +144,8 @@ router.get(
  * @access  Private
  */
 router.delete(
-  '/upgrade/:upgradeId',
+  "/upgrade/:upgradeId",
   auth,
-  planRateLimit,
   upgradeIdValidation,
   planController.cancelPlanUpgrade
 );

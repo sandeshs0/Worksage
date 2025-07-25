@@ -20,6 +20,7 @@ import ProfilePictureModal from "../../components/settings/ProfilePictureModal";
 import { useUser } from "../../context/UserContext";
 import authService from "../../services/authService";
 import settingsService from "../../services/settingsService";
+import planService from '../../services/planService';
 
 function SettingsPage() {
   const { user, isLoading: userLoading, refreshUserData } = useUser();
@@ -59,6 +60,14 @@ function SettingsPage() {
   const [emailAccounts, setEmailAccounts] = useState([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   const [showAddEmailModal, setShowAddEmailModal] = useState(false);
+  
+  // Plans and payment state
+  const [plans, setPlans] = useState([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(false);
+  const [upgradeHistory, setUpgradeHistory] = useState([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  
   const [newEmailAccount, setNewEmailAccount] = useState({
     email: "",
     displayName: "",
@@ -431,6 +440,71 @@ function SettingsPage() {
       setIsLoading(false);
     }
   };
+
+  // Plan and payment functions
+  const fetchPlans = async () => {
+    try {
+      setIsLoadingPlans(true);
+      const data = await planService.getPlans();
+      setPlans(data.plans || []);
+    } catch (error) {
+      console.error('Failed to fetch plans:', error);
+      toast.error('Failed to load plans');
+    } finally {
+      setIsLoadingPlans(false);
+    }
+  };
+
+  const fetchUpgradeHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const data = await planService.getPlanUpgradeHistory();
+      setUpgradeHistory(data.upgrades || []);
+    } catch (error) {
+      console.error('Failed to fetch upgrade history:', error);
+      toast.error('Failed to load upgrade history');
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const handlePlanUpgrade = async (planType) => {
+    try {
+      setPaymentLoading(true);
+      const response = await planService.initiatePlanUpgrade(planType);
+      
+      if (response.success && response.khaltiPayment?.payment_url) {
+        // Redirect to Khalti payment page
+        window.location.href = response.khaltiPayment.payment_url;
+      } else {
+        toast.error('Failed to initialize payment');
+      }
+    } catch (error) {
+      console.error('Plan upgrade failed:', error);
+      toast.error('Failed to initiate plan upgrade', {
+        description: error.message || 'Please try again'
+      });
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  // Load plans when billing tab is active
+  useEffect(() => {
+    if (activeTab === 'billing') {
+      fetchPlans();
+      fetchUpgradeHistory();
+    }
+  }, [activeTab]);
+
+  // Handle URL parameters for tab selection
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['profile', 'email', 'password', 'billing'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, []);
 
   // Update loading state to consider both local loading and context loading
   const isPageLoading = isLoading || userLoading;
@@ -1036,277 +1110,276 @@ function SettingsPage() {
                 Available Plans
               </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Free Plan */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="font-medium text-gray-800">Free</h5>
-                    <span className="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      Current Plan
-                    </span>
-                  </div>
-
-                  <div className="mb-3">
-                    <span className="text-2xl font-bold">Free</span>
-                    {/* <span className="text-gray-500">/month</span> */}
-                  </div>
-
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Up to 3 projects
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Basic email features
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      5 GB storage
-                    </li>
-                  </ul>
-
-                  <button
-                    disabled
-                    className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
-                  >
-                    Current Plan
-                  </button>
+              {isLoadingPlans ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="border border-gray-200 rounded-lg p-4 animate-pulse">
+                      <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                      <div className="h-8 bg-gray-200 rounded mb-3"></div>
+                      <div className="space-y-2 mb-4">
+                        {[1, 2, 3, 4].map((j) => (
+                          <div key={j} className="h-4 bg-gray-200 rounded"></div>
+                        ))}
+                      </div>
+                      <div className="h-10 bg-gray-200 rounded"></div>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Free Plan */}
+                  <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="font-medium text-gray-800">Free</h5>
+                      {user?.plan === 'free' && (
+                        <span className="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          Current Plan
+                        </span>
+                      )}
+                    </div>
 
-                {/* Pro Plan */}
-                <div className="border-2 border-[#007991] rounded-lg p-4 hover:shadow-md transition-shadow relative">
-                  <div className="absolute -top-3 -right-3 bg-[#007991] text-white text-xs px-2 py-1 rounded-md">
-                    Popular
+                    <div className="mb-3">
+                      <span className="text-2xl font-bold">Rs. 0</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+
+                    <ul className="space-y-2 mb-4">
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Up to 3 projects
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Basic email features
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        5 GB storage
+                      </li>
+                    </ul>
+
+                    <button
+                      disabled
+                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
+                    >
+                      {user?.plan === 'free' ? 'Current Plan' : 'Downgrade Not Available'}
+                    </button>
                   </div>
 
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="font-medium text-gray-800">Pro</h5>
+                  {/* Pro Plan */}
+                  <div className={`border-2 rounded-lg p-4 hover:shadow-md transition-shadow relative ${
+                    user?.plan === 'pro' ? 'border-green-500' : 'border-[#007991]'
+                  }`}>
+                    {user?.plan !== 'pro' && (
+                      <div className="absolute -top-3 -right-3 bg-[#007991] text-white text-xs px-2 py-1 rounded-md">
+                        Popular
+                      </div>
+                    )}
+                    {user?.plan === 'pro' && (
+                      <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-md">
+                        Current
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="font-medium text-gray-800">Pro</h5>
+                    </div>
+
+                    <div className="mb-3">
+                      <span className="text-2xl font-bold">Rs. 3,000</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+
+                    <ul className="space-y-2 mb-4">
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Unlimited projects
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Advanced email features
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        50 GB storage
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        AI assistant features
+                      </li>
+                    </ul>
+
+                    {user?.plan === 'pro' ? (
+                      <button
+                        disabled
+                        className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
+                      >
+                        Current Plan
+                      </button>
+                    ) : user?.plan === 'vantage' ? (
+                      <button
+                        disabled
+                        className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
+                      >
+                        Downgrade Not Available
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handlePlanUpgrade('pro')}
+                        disabled={paymentLoading}
+                        className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980] disabled:opacity-50"
+                      >
+                        {paymentLoading ? 'Processing...' : 'Upgrade to Pro'}
+                      </button>
+                    )}
                   </div>
 
-                  <div className="mb-3">
-                    <span className="text-2xl font-bold">Rs799</span>
-                    <span className="text-gray-500">/month</span>
+                  {/* Vantage Plan */}
+                  <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow relative ${
+                    user?.plan === 'vantage' ? 'border-2 border-green-500' : 'border border-gray-200'
+                  }`}>
+                    {user?.plan === 'vantage' && (
+                      <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-md">
+                        Current
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="font-medium text-gray-800">Vantage</h5>
+                    </div>
+
+                    <div className="mb-3">
+                      <span className="text-2xl font-bold">Rs. 6,000</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+
+                    <ul className="space-y-2 mb-4">
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Unlimited everything
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Premium support
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        500 GB storage
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Advanced analytics
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        White labeling
+                      </li>
+                    </ul>
+
+                    {user?.plan === 'vantage' ? (
+                      <button
+                        disabled
+                        className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
+                      >
+                        Current Plan
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handlePlanUpgrade('vantage')}
+                        disabled={paymentLoading}
+                        className="w-full border border-[#007991] text-[#007991] p-2 rounded-md hover:bg-[#007991] hover:text-white transition-colors disabled:opacity-50"
+                      >
+                        {paymentLoading ? 'Processing...' : 'Upgrade to Vantage'}
+                      </button>
+                    )}
                   </div>
-
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Unlimited projects
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Advanced email features
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      50 GB storage
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      AI assistant features
-                    </li>
-                  </ul>
-
-                  <button className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980]">
-                    Upgrade to Pro
-                  </button>
                 </div>
+              )}
 
-                {/* Vantage Plan */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="font-medium text-gray-800">Vantage</h5>
+              {/* Upgrade History */}
+              <div className="mt-8">
+                <h4 className="font-medium text-gray-700 mb-4">Upgrade History</h4>
+                {isLoadingHistory ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="border border-gray-200 rounded-lg p-4 animate-pulse">
+                        <div className="flex justify-between items-center">
+                          <div className="h-4 bg-gray-200 rounded w-32"></div>
+                          <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        </div>
+                        <div className="h-4 bg-gray-200 rounded w-48 mt-2"></div>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="mb-3">
-                    <span className="text-2xl font-bold">Rs. 1,999</span>
-                    <span className="text-gray-500">/month</span>
+                ) : upgradeHistory.length > 0 ? (
+                  <div className="space-y-3">
+                    {upgradeHistory.map((upgrade) => (
+                      <div key={upgrade._id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">
+                              Upgraded to {upgrade.planType.charAt(0).toUpperCase() + upgrade.planType.slice(1)}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(upgrade.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">Rs. {(upgrade.amount / 100).toLocaleString()}</p>
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              upgrade.status === 'completed' 
+                                ? 'bg-green-100 text-green-800' 
+                                : upgrade.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {upgrade.status.charAt(0).toUpperCase() + upgrade.status.slice(1)}
+                            </span>
+                          </div>
+                        </div>
+                        {upgrade.khaltiTransactionId && (
+                          <p className="text-xs text-gray-400 mt-2">
+                            Transaction ID: {upgrade.khaltiTransactionId}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
-
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Unlimited everything
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Premium support
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      500 GB storage
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      Advanced analytics
-                    </li>
-                    <li className="flex items-center text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      White labeling
-                    </li>
-                  </ul>
-
-                  <button className="w-full border border-[#007991] text-[#007991] p-2 rounded-md hover:bg-[#007991] hover:text-white transition-colors">
-                    Upgrade to Vantage
-                  </button>
-                </div>
+                ) : (
+                  <div className="border border-gray-200 rounded-lg p-8 text-center">
+                    <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No upgrade history yet</p>
+                    <p className="text-sm text-gray-400">Upgrade to a paid plan to see your transaction history</p>
+                  </div>
+                )}
               </div>
 
               <p className="text-sm text-gray-500 mt-4">
@@ -1334,22 +1407,3 @@ function SettingsPage() {
 }
 
 export default SettingsPage;
-
-// Add this CSS to your global stylesheet or add it inline as needed
-// for the toggle switches
-const styles = `
-.toggle-checkbox:checked {
-  right: 0;
-  border-color: #007991;
-}
-.toggle-checkbox:checked + .toggle-label {
-  background-color: #007991;
-}
-.toggle-checkbox {
-  right: 0;
-  transition: all 0.3s;
-}
-.toggle-label {
-  transition: all 0.3s;
-}
-`;
