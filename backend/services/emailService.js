@@ -122,7 +122,7 @@ const getTransporter = async (userId = null) => {
         logger: true,
       }),
       fromEmail: process.env.EMAIL_USER,
-      fromName: process.env.EMAIL_FROM_NAME || "Cubicle",
+      fromName: process.env.EMAIL_FROM_NAME || "WorkSage",
       isCustom: false,
     };
   } catch (error) {
@@ -221,7 +221,7 @@ class EmailService {
       const emailHtml = generateEmailTemplate({
         senderName: senderName,
         message: html || text,
-        footerText: "This email was sent from Cubicle CRM.",
+        footerText: "This email was sent from WorkSage CRM.",
         emailId: emailRecord._id.toString(),
       });
 
@@ -462,32 +462,33 @@ class EmailService {
     from,
     fromName,
     trackingId,
-    userId
+    userId,
   }) => {
     try {
-      console.log('Sending plain email...');
-      
+      console.log("Sending plain email...");
+
       // Get appropriate transporter (custom or system)
       const transporterInfo = await getTransporter(userId);
       // const { transporter, fromEmail, fromName: systemFromName } = transporterInfo;
-      const transporter=transporterInfo.transporter;
+      const transporter = transporterInfo.transporter;
 
-      const fromEmail =transporterInfo.fromEmail;
-      const fromName= transporterInfo.fromName;
-
+      const fromEmail = transporterInfo.fromEmail;
+      const fromName = transporterInfo.fromName;
 
       // Use provided from/name or fall back to system/account defaults
 
-
       const senderEmail = from || fromEmail;
       const senderName = fromName || systemFromName;
-      
+
       // Format recipients - handle both string and array of objects
       const formatRecipients = (recipients) => {
         if (!Array.isArray(recipients)) return recipients;
-        return recipients.map(r => typeof r === 'string' ? r : r.email || '').filter(Boolean).join(', ');
+        return recipients
+          .map((r) => (typeof r === "string" ? r : r.email || ""))
+          .filter(Boolean)
+          .join(", ");
       };
-      
+
       // Prepare email options
       const mailOptions = {
         from: `"${senderName}" <${senderEmail}>`,
@@ -497,28 +498,28 @@ class EmailService {
         // Add tracking headers if trackingId is provided
         ...(trackingId && {
           headers: {
-            'X-Tracking-ID': trackingId,
-            ...(transporterInfo.messageId && { 'Message-ID': transporterInfo.messageId })
-          }
-        })
+            "X-Tracking-ID": trackingId,
+            ...(transporterInfo.messageId && {
+              "Message-ID": transporterInfo.messageId,
+            }),
+          },
+        }),
       };
-      
+
       // Send the email
       const info = await transporter.sendMail(mailOptions);
-      console.log('Email sent:', info.messageId);
-      
+      console.log("Email sent:", info.messageId);
+
       return {
         success: true,
         messageId: info.messageId,
-        customEmailUsed: !!transporterInfo.isCustom
+        customEmailUsed: !!transporterInfo.isCustom,
       };
     } catch (error) {
-      console.error('Error sending plain email:', error);
+      console.error("Error sending plain email:", error);
       throw error;
     }
-  }
-
+  };
 }
-
 
 module.exports = EmailService;

@@ -108,7 +108,6 @@ router.put(
 // @route   GET /api/users
 // @desc    Get all users (Admin only)
 // @access  Private (Admin)
-router.get("/", auth, authorizeRole("admin"), userController.getAllUsers);
 
 // @route   GET /api/users/:id
 // @desc    Get user by ID (Admin only)
@@ -137,22 +136,16 @@ router.put(
   userController.updateUserRole
 );
 
-// @route   PUT /api/users/:id/status
-// @desc    Activate/Deactivate user (Admin only)
-// @access  Private (Admin)
+router.get("/", auth, authorizeRole("admin"), userController.getAllUsers);
 router.put(
   "/:id/status",
   [
     auth,
-    // authorizeRole("admin"),
+    authorizeRole("admin"),
     check("isActive", "Status is required").isBoolean(),
   ],
   userController.updateUserStatus
 );
-
-// @route   DELETE /api/users/:id
-// @desc    Delete user (Admin only)
-// @access  Private (Admin)
 router.delete("/:id", auth, authorizeRole("admin"), userController.deleteUser);
 
 module.exports = router;

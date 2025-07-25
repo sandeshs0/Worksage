@@ -72,7 +72,6 @@ const UserSchema = new mongoose.Schema({
   passwordExpiresAt: {
     type: Date,
     default: function () {
-      // Password expires in 90 days
       return new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
     },
   },
@@ -109,7 +108,7 @@ const UserSchema = new mongoose.Schema({
     lastUsedAt: Date,
     setupAt: Date, // When MFA was first enabled
   },
-  // Account security fields
+
   accountLocked: {
     type: Boolean,
     default: false,
@@ -126,7 +125,7 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-// Encrypt password using bcrypt before saving
+// Encrypting password using bcrypt before saving
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password") || !this.password) {
     return next();
@@ -141,7 +140,6 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Method to check if password is expired
 UserSchema.methods.isPasswordExpired = function () {
   return this.passwordExpiresAt && this.passwordExpiresAt < new Date();
 };
