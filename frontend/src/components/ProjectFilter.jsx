@@ -51,7 +51,7 @@ function ProjectFilter({ onFilterChange }) {
             placeholder="Search projects..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#007991] focus:border-[#007991]"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#18cb96] focus:border-[#18cb96]"
           />
         </div>
 
@@ -60,7 +60,7 @@ function ProjectFilter({ onFilterChange }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#007991] focus:border-[#007991] bg-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#18cb96] focus:border-[#18cb96] bg-white"
           >
             <option value="">All Statuses</option>
             <option value="in progress">In Progress</option>
@@ -74,7 +74,7 @@ function ProjectFilter({ onFilterChange }) {
           <select
             value={clientFilter}
             onChange={(e) => setClientFilter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#007991] focus:border-[#007991] bg-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#18cb96] focus:border-[#18cb96] bg-white"
             disabled={isLoading}
           >
             <option value="">All Clients</option>

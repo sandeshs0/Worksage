@@ -11,7 +11,7 @@ const testimonials = [
   {
     id: 1,
     rating: 5,
-    text: "Cubicle has transformed how I manage my freelance business. The client management tools alone have saved me hours each week.",
+    text: "WorkSage has transformed how I manage my freelance business. The client management tools alone have saved me hours each week.",
     name: "Sarah Johnson",
     role: "Graphic Designer",
     color: "from-purple-500 to-pink-500",
@@ -27,7 +27,7 @@ const testimonials = [
   {
     id: 3,
     rating: 5,
-    text: "I was spending too much time on admin work before Cubicle. Now I can focus on what I love - creating content for my clients.",
+    text: "I was spending too much time on admin work before WorkSage. Now I can focus on what I love - creating content for my clients.",
     name: "Jessica Chen",
     role: "Content Writer",
     color: "from-emerald-500 to-teal-500",
@@ -240,7 +240,7 @@ export default function TestimonialSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            Here's what freelancers like you have to say about Cubicle.
+            Here's what freelancers like you have to say about WorkSage.
           </motion.p>
 
           {/* Decorative line */}

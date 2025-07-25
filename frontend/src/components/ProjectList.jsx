@@ -12,7 +12,7 @@ function ProjectList({ projects, isLoading }) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2" style={{ borderColor: '#007991' }}></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2" style={{ borderColor: '#18cb96' }}></div>
       </div>
     );
   }
@@ -71,13 +71,13 @@ function ProjectList({ projects, isLoading }) {
                     <circle
                       cx="18" cy="18" r="16"
                       fill="none"
-                      stroke="#007991"
+                      stroke="#18cb96"
                       strokeWidth="2"
                       strokeDasharray={`${100 * (project.completionRate / 100) * 3.14 * 16 / 100} 100`}
                       strokeDashoffset="0"
                       transform="rotate(-90 18 18)"
                     ></circle>
-                    <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#007991">
+                    <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#18cb96">
                       {`${project.completionRate}%`}
                     </text>
                   </svg>

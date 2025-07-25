@@ -128,7 +128,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
           onChange={handleInputChange}
           className={`w-full px-3 py-2 border ${
             errors.name ? 'border-red-500' : 'border-gray-400'
-          } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800`}
+          } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800`}
         />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
       </div>
@@ -143,7 +143,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
           value={formData.description}
           onChange={handleInputChange}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+          className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
         ></textarea>
       </div>
       
@@ -159,7 +159,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
             required
             className={`w-full px-3 py-2 border ${
               errors.client ? 'border-red-500' : 'border-gray-400'
-            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800`}
+            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800`}
             disabled={isLoadingClients}
           >
             <option value="">Select a client</option>
@@ -180,7 +180,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
             name="status"
             value={formData.status}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+            className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
           >
             <option value="not started">Not Started</option>
             <option value="in progress">In Progress</option>
@@ -202,7 +202,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
             required
             className={`w-full px-3 py-2 border ${
               errors.startDate ? 'border-red-500' : 'border-gray-400'
-            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800`}
+            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800`}
           />
           {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
         </div>
@@ -218,7 +218,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border ${
               errors.endDate ? 'border-red-500' : 'border-gray-400'
-            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800`}
+            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800`}
           />
           {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
         </div>
@@ -238,7 +238,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border ${
               errors.completionRate ? 'border-red-500' : 'border-gray-400'
-            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800`}
+            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800`}
           />
           {errors.completionRate && <p className="text-red-500 text-sm mt-1">{errors.completionRate}</p>}
         </div>
@@ -255,7 +255,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border ${
               errors.expectedRevenue ? 'border-red-500' : 'border-gray-400'
-            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800`}
+            } bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800`}
           />
           {errors.expectedRevenue && <p className="text-red-500 text-sm mt-1">{errors.expectedRevenue}</p>}
         </div>
@@ -271,7 +271,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
           value={formData.remarks}
           onChange={handleInputChange}
           rows={2}
-          className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#007991] text-gray-800"
+          className="w-full px-3 py-2 border border-gray-400 bg-gray-50 rounded-md focus:outline-none focus:ring-1 focus:border-[#18cb96] text-gray-800"
         ></textarea>
       </div>
       
@@ -280,7 +280,7 @@ function ProjectForm({ project, onSubmit, isSubmitting }) {
           type="submit"
           disabled={isSubmitting}
           className="px-6 py-2 rounded-md text-white flex items-center justify-center focus:outline-none"
-          style={{ backgroundColor: '#007991' }}
+          style={{ backgroundColor: '#18cb96' }}
         >
           {isSubmitting ? (
             <>
