@@ -1,4 +1,4 @@
-// Admin-only middleware
+
 const requireAdmin = (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({
@@ -13,10 +13,10 @@ const requireAdmin = (req, res, next) => {
 const TokenService = require("../services/tokenService");
 const User = require("../models/User");
 
-// Enhanced authentication middleware
+
 const authenticateToken = async (req, res, next) => {
   try {
-    // Get token from header
+    
     const authHeader = req.header("Authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -27,12 +27,12 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7); 
 
-    // Verify access token
+    
     const decoded = TokenService.verifyAccessToken(token);
 
-    // Get user details with role information
+    
     const user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {
@@ -43,7 +43,7 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Check if user account is active
+    
     if (user.isActive === false) {
       return res.status(401).json({
         success: false,
@@ -52,7 +52,7 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Check if email is verified
+    
     if (!user.isVerified) {
       return res.status(401).json({
         success: false,
@@ -61,7 +61,7 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Attach user to request
+    
     req.user = user;
     req.token = token;
 
@@ -93,11 +93,9 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// Role-based authorization middleware
 const authorizeRole = (...allowedRoles) => {
   return (req, res, next) => {
     try {
-      // Check if user is authenticated first
       if (!req.user) {
         return res.status(401).json({
           success: false,
@@ -105,10 +103,7 @@ const authorizeRole = (...allowedRoles) => {
           code: "AUTH_REQUIRED",
         });
       }
-
-      // Check if user has required role
       const userRole = req.user.role;
-
       if (!allowedRoles.includes(userRole)) {
         return res.status(403).json({
           success: false,
@@ -120,7 +115,6 @@ const authorizeRole = (...allowedRoles) => {
           userRole: userRole,
         });
       }
-
       next();
     } catch (error) {
       console.error("Authorization middleware error:", error);
@@ -133,21 +127,15 @@ const authorizeRole = (...allowedRoles) => {
   };
 };
 
-// Resource ownership middleware
 const authorizeOwnership = (resourceModel, resourceParam = "id") => {
   return async (req, res, next) => {
     try {
       const resourceId = req.params[resourceParam];
       const userId = req.user._id;
-
-      // Admin can access all resources
       if (req.user.role === "admin") {
         return next();
       }
-
-      // Check if resource exists and user owns it
       const resource = await resourceModel.findById(resourceId);
-
       if (!resource) {
         return res.status(404).json({
           success: false,
@@ -155,8 +143,6 @@ const authorizeOwnership = (resourceModel, resourceParam = "id") => {
           code: "RESOURCE_NOT_FOUND",
         });
       }
-
-      // Check ownership (assuming resource has userId or createdBy field)
       const isOwner =
         resource.userId?.toString() === userId.toString() ||
         resource.createdBy?.toString() === userId.toString() ||
@@ -169,8 +155,6 @@ const authorizeOwnership = (resourceModel, resourceParam = "id") => {
           code: "NOT_OWNER",
         });
       }
-
-      // Attach resource to request for further use
       req.resource = resource;
       next();
     } catch (error) {
@@ -183,25 +167,20 @@ const authorizeOwnership = (resourceModel, resourceParam = "id") => {
     }
   };
 };
-
-// Combined middleware helper
 const createAuthMiddleware = (roles = [], ownership = null) => {
   const middlewares = [authenticateToken];
 
-  // Add role authorization if specified
   if (roles.length > 0) {
     middlewares.push(authorizeRole(...roles));
   }
 
-  // Add ownership check if specified
   if (ownership) {
     middlewares.push(authorizeOwnership(ownership.model, ownership.param));
   }
-
   return middlewares;
 };
 
-// Legacy auth middleware for backward compatibility
+
 const auth = authenticateToken;
 
 module.exports = {
@@ -210,5 +189,5 @@ module.exports = {
   authorizeOwnership,
   createAuthMiddleware,
   requireAdmin,
-  auth, // Keep this for backward compatibility
+  auth, 
 };

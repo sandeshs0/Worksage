@@ -1,7 +1,7 @@
 const validator = require("validator");
 
 const xssProtection = async (req, res, next) => {
-  console.log(`🛡️ XSS Protection: Processing ${req.method} ${req.path}`);
+  console.log(`XSS Protection: Processing ${req.method} ${req.path}`);
 
   const oauthExemptions = ["/api/auth/google", "/api/auth/google/callback"];
 
@@ -76,7 +76,7 @@ const xssProtection = async (req, res, next) => {
       return;
     }
 
-    console.log(`🔍 Checking for XSS in ${path}: "${obj.substring(0, 100)}"`);
+    console.log(` Checking for XSS in ${path}: "${obj.substring(0, 100)}"`);
 
     
     for (const pattern of xssPatterns) {
@@ -85,7 +85,7 @@ const xssProtection = async (req, res, next) => {
 
         
         console.log(
-          `🚨 XSS DETECTED! Pattern: ${pattern} matched in ${path}: ${obj.substring(
+          ` XSS DETECTED! Pattern: ${pattern} matched in ${path}: ${obj.substring(
             0,
             50
           )}... from IP: ${req.ip}`
@@ -266,7 +266,7 @@ const strictXSSProtection = (req, res, next) => {
       checkForXSS(req.params, "params");
 
     if (hasXSS) {
-      console.error(`🚨 XSS attempt blocked from IP: ${req.ip}`);
+      console.error(` XSS attempt blocked from IP: ${req.ip}`);
 
       
       if (req.securityLog) {
