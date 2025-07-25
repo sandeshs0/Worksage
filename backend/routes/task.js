@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
 const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/authMiddleware');
+
 const taskController = require('../controllers/taskController');
 const { uploadTaskCover } = require('../middleware/upload');
 
@@ -11,7 +13,7 @@ const { uploadTaskCover } = require('../middleware/upload');
 router.post(
   '/',
   [
-    auth,
+    authenticateToken,
     uploadTaskCover,
     [
       check('title', 'Title is required').not().isEmpty(),
@@ -40,7 +42,7 @@ router.get('/:id', auth, taskController.getTask);
 router.put(
   '/:id',
   [
-    auth,
+    authenticateToken,
     uploadTaskCover,
     [
       check('title', 'Title is required').optional().not().isEmpty(),
@@ -62,7 +64,7 @@ router.put(
 // @route   DELETE /api/tasks/:id
 // @desc    Delete a task
 // @access  Private
-router.delete('/:id', auth, taskController.deleteTask);
+router.delete('/:id', authenticateToken, taskController.deleteTask);
 
 // @route   PUT /api/tasks/:id/move
 // @desc    Move a task to a different column
@@ -70,7 +72,7 @@ router.delete('/:id', auth, taskController.deleteTask);
 router.put(
   '/:id/move',
   [
-    auth,
+    authenticateToken,
     [
       check('columnId', 'Column ID is required').isMongoId(),
       check('position', 'Position must be a number').isNumeric()
@@ -84,7 +86,7 @@ router.put(
 // @access  Private
 router.put(
   '/:taskId/subtasks/:subtaskId/toggle',
-  auth,
+  authenticateToken,
   taskController.toggleSubtask
 );
 

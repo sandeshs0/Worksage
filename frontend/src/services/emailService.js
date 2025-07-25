@@ -1,10 +1,6 @@
-import axios from "axios";
-// import { API_BASE_URL } from '../config'; // Adjust this import based on your project structure
+import { createApiInstance } from './apiConfig';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}`;
-
-// Get token from localStorage (you might have a utility function for this)
-const getAuthToken = () => localStorage.getItem("token");
+const api = createApiInstance();
 
 /**
  * Send an email through the API
@@ -16,24 +12,17 @@ export const sendEmail = async (data) => {
     // Determine if we're sending FormData (with attachments) or JSON
     const isFormData = data instanceof FormData;
 
-    const headers = {
-      "x-auth-token": getAuthToken(),
-    };
+    const config = isFormData ? {
+      headers: {
+        // Let browser set Content-Type for FormData
+      }
+    } : {};
 
-    // Only set Content-Type for JSON data, browser sets it automatically for FormData with boundary
-    if (!isFormData) {
-      headers["Content-Type"] = "application/json";
-      // Convert regular object to JSON if not FormData
-      data = JSON.stringify(data);
-    }
-
-    const response = await axios.post(`${API_BASE_URL}/api/emails`, data, {
-      headers,
-    });
+    const response = await api.post("/emails", data, config);
     return response.data;
   } catch (error) {
     console.error("Error sending email:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -42,73 +31,111 @@ export const sendEmail = async (data) => {
  * @param {Object} params - Query parameters
  * @returns {Promise} - The API response
  */
-export const getEmails = async (
-  params = { page: 1, limit: 10, status: "sent" }
-) => {
+export const getEmails = async (params = { page: 1, limit: 10, status: "sent" }) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/emails`, {
-      headers: {
-        "x-auth-token": getAuthToken(),
-      },
-      params,
-    });
+    const response = await api.get("/emails", { params });
     return response.data;
   } catch (error) {
     console.error("Error fetching emails:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
-// Add this to your emailService.js file
-export const checkEmailAccount = async () => {
+/**
+ * Get email by ID
+ * @param {string} emailId - The email ID
+ * @returns {Promise} - The API response
+ */
+export const getEmailById = async (emailId) => {
   try {
-    const response = await axios.get(
-      `${API_BASE_URL}/api/email-accounts/check`,
-      {
-        headers: {
-          "x-auth-token": getAuthToken(),
-        },
-      }
-    );
+    const response = await api.get(`/emails/${emailId}`);
     return response.data;
   } catch (error) {
-    console.error("Error checking email account:", error);
-    throw error;
+    console.error("Error fetching email:", error);
+    throw error.response?.data || error;
   }
 };
 
-export const rewriteEmailWithAI = async ({ text, tone, length }) => {
+/**
+ * Delete email by ID
+ * @param {string} emailId - The email ID
+ * @returns {Promise} - The API response
+ */
+export const deleteEmail = async (emailId) => {
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/api/ai/rewrite-email`,
-      { text, tone, length },
-      {
-        headers: {
-          "x-auth-token": getAuthToken(),
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await api.delete(`/emails/${emailId}`);
     return response.data;
   } catch (error) {
-    console.error("Error rewriting email:", error);
-    throw error;
+    console.error("Error deleting email:", error);
+    throw error.response?.data || error;
   }
 };
 
 /**
  * Get email statistics
+ * @returns {Promise} - The API response
  */
 export const getEmailStats = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/emails/stats`, {
-      headers: {
-        "x-auth-token": getAuthToken(),
-      },
-    });
+    const response = await api.get("/emails/stats");
     return response.data;
   } catch (error) {
     console.error("Error fetching email stats:", error);
-    throw error;
+    throw error.response?.data || error;
   }
+};
+
+/**
+ * Send test email
+ * @param {Object} data - Test email data
+ * @returns {Promise} - The API response
+ */
+export const sendTestEmail = async (data) => {
+  try {
+    const response = await api.post("/email/send-test", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending test email:", error);
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Check email account status
+ * @returns {Promise} - The API response
+ */
+export const checkEmailAccount = async () => {
+  try {
+    const response = await api.get("/email-accounts/check");
+    return response.data;
+  } catch (error) {
+    console.error("Error checking email account:", error);
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Rewrite email content using AI
+ * @param {Object} data - Email content and rewrite parameters
+ * @returns {Promise} - The API response with rewritten content
+ */
+export const rewriteEmailWithAI = async (data) => {
+  try {
+    const response = await api.post("/ai/rewrite-email", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error rewriting email with AI:", error);
+    throw error.response?.data || error;
+  }
+};
+
+export default {
+  sendEmail,
+  getEmails,
+  getEmailById,
+  deleteEmail,
+  getEmailStats,
+  sendTestEmail,
+  checkEmailAccount,
+  rewriteEmailWithAI
 };

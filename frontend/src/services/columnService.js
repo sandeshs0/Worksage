@@ -1,15 +1,6 @@
-import axios from "axios";
+import { createApiInstance } from './apiConfig';
 
-const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      "x-auth-token": `${token}`,
-    },
-  };
-};
+const api = createApiInstance();
 
 /**
  * Get all columns with tasks for a board
@@ -18,14 +9,11 @@ const getAuthHeader = () => {
  */
 export const getBoardColumns = async (boardId) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/boards/${boardId}/columns`,
-      getAuthHeader()
-    );
+    const response = await api.get(`/boards/${boardId}/columns`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching columns:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -36,15 +24,11 @@ export const getBoardColumns = async (boardId) => {
  */
 export const createColumn = async (columnData) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/columns`,
-      columnData,
-      getAuthHeader()
-    );
+    const response = await api.post('/columns', columnData);
     return response.data.data;
   } catch (error) {
     console.error("Error creating column:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -56,15 +40,11 @@ export const createColumn = async (columnData) => {
  */
 export const updateColumn = async (id, columnData) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/columns/${id}`,
-      columnData,
-      getAuthHeader()
-    );
+    const response = await api.put(`/columns/${id}`, columnData);
     return response.data.data;
   } catch (error) {
     console.error("Error updating column:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -75,35 +55,36 @@ export const updateColumn = async (id, columnData) => {
  */
 export const deleteColumn = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/columns/${id}`,
-      getAuthHeader()
-    );
+    const response = await api.delete(`/columns/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting column:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
 /**
- * Reorder columns
+ * Reorder columns in a board
  * @param {string} boardId - Board ID
- * @param {Array} columnOrder - Array of column IDs in the new order
+ * @param {Array} columnOrder - Array of column IDs in new order
  * @returns {Promise} Response from the API
  */
 export const reorderColumns = async (boardId, columnOrder) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/boards/${boardId}/columns/reorder`,
-      {
-        columnOrder,
-      },
-      getAuthHeader()
-    );
+    const response = await api.patch(`/boards/${boardId}/columns/reorder`, {
+      columnOrder
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error reordering columns:", error);
-    throw error;
+    throw error.response?.data || error;
   }
+};
+
+export default {
+  getBoardColumns,
+  createColumn,
+  updateColumn,
+  deleteColumn,
+  reorderColumns
 };

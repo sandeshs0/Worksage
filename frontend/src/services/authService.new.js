@@ -101,13 +101,10 @@ const authService = {
   // Login user
   async login(credentials) {
     try {
-      console.log("🔐 Attempting login...", { email: credentials.email });
       const response = await api.post("/auth/login", credentials);
-      console.log("✅ Login response:", response.data);
 
       if (response.data.success) {
         const { accessToken, user } = response.data.data;
-        console.log("💾 Storing tokens and user data:", { user });
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("user", JSON.stringify(user));
         // Refresh token is automatically stored in HTTP-only cookie
@@ -115,7 +112,6 @@ const authService = {
 
       return response.data;
     } catch (error) {
-      console.error("❌ Login error:", error);
       throw error.response?.data || error;
     }
   },
@@ -179,12 +175,9 @@ const authService = {
   // Get user profile
   async getUserProfile() {
     try {
-      console.log("👤 Fetching user profile...");
       const response = await api.get("/users/profile");
-      console.log("✅ Profile response:", response.data);
       return response.data;
     } catch (error) {
-      console.error("❌ Profile fetch error:", error);
       throw error.response?.data || error;
     }
   },

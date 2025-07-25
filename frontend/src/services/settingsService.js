@@ -1,14 +1,6 @@
-import axios from "axios";
+import { createApiInstance } from './apiConfig';
 
-const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-/**
- * Get authentication token from local storage
- * @returns {string|null} The auth token or null if not found
- */
-const getToken = () => {
-  return localStorage.getItem("token");
-};
+const api = createApiInstance();
 
 /**
  * Add a new email account
@@ -26,149 +18,166 @@ const getToken = () => {
  */
 const addEmailAccount = async (emailData) => {
   try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    const response = await axios.post(`${API_URL}/email-accounts`, emailData, {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    });
-
+    const response = await api.post('/email-accounts', emailData);
     return response.data;
   } catch (error) {
-    if (error.response) {
-      // Server responded with an error status
-      throw new Error(
-        error.response.data.message || "Failed to add email account"
-      );
-    }
-    throw error;
-  }
-};
-
-/**
- * Verify an email account using the token sent to that email
- * @param {string} token - Verification token
- * @returns {Promise<Object>} Verification result
- */
-const verifyEmailAccount = async (token) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/email-accounts/verify/${token}`,
-      { headers: { "x-auth-token": getToken() } }
-    );
-    return response.data;
-  } catch (error) {
-    if (error.response) {
-      throw new Error(
-        error.response.data.message || "Failed to verify email account"
-      );
-    }
-    throw error;
+    console.error("Error adding email account:", error);
+    throw error.response?.data || error;
   }
 };
 
 /**
  * Get all email accounts for the current user
- * @returns {Promise<Array>} List of email accounts
+ * @returns {Promise<Array>} Array of email accounts
  */
 const getEmailAccounts = async () => {
   try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    const response = await axios.get(`${API_URL}/email-accounts`, {
-      headers: {
-        "x-auth-token": token,
-      },
-    });
-
+    const response = await api.get('/email-accounts');
     return response.data;
   } catch (error) {
-    if (error.response) {
-      throw new Error(
-        error.response.data.message || "Failed to fetch email accounts"
-      );
-    }
-    throw error;
+    console.error("Error fetching email accounts:", error);
+    throw error.response?.data || error;
   }
 };
 
 /**
- * Set an email account as the default sender
- * @param {string} id - Email account ID
- * @returns {Promise<Object>} Updated email account
+ * Update an email account
+ * @param {string} accountId - Email account ID
+ * @param {Object} emailData - Updated email account data
+ * @returns {Promise<Object>} The updated email account
  */
-const setDefaultEmailAccount = async (id) => {
+const updateEmailAccount = async (accountId, emailData) => {
   try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    const response = await axios.put(
-      `${API_URL}/email-accounts/${id}/set-default`,
-      {},
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token,
-        },
-      }
-    );
-
+    const response = await api.put(`/email-accounts/${accountId}`, emailData);
     return response.data;
   } catch (error) {
-    if (error.response) {
-      throw new Error(
-        error.response.data.message || "Failed to set default email account"
-      );
-    }
-    throw error;
+    console.error("Error updating email account:", error);
+    throw error.response?.data || error;
   }
 };
 
 /**
  * Delete an email account
- * @param {string} id - Email account ID
- * @returns {Promise<Object>} Result of deletion
+ * @param {string} accountId - Email account ID
+ * @returns {Promise<Object>} Success message
  */
-const deleteEmailAccount = async (id) => {
+const deleteEmailAccount = async (accountId) => {
   try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    const response = await axios.delete(`${API_URL}/email-accounts/${id}`, {
-      headers: {
-        "x-auth-token": token,
-      },
-    });
-
+    const response = await api.delete(`/email-accounts/${accountId}`);
     return response.data;
   } catch (error) {
-    if (error.response) {
-      throw new Error(
-        error.response.data.message || "Failed to delete email account"
-      );
-    }
-    throw error;
+    console.error("Error deleting email account:", error);
+    throw error.response?.data || error;
   }
 };
 
-const settingsService = {
-  addEmailAccount,
-  verifyEmailAccount,
-  getEmailAccounts,
-  setDefaultEmailAccount,
-  deleteEmailAccount,
+/**
+ * Test an email account connection
+ * @param {Object} emailData - Email account configuration to test
+ * @returns {Promise<Object>} Test result
+ */
+const testEmailAccount = async (emailData) => {
+  try {
+    const response = await api.post('/email-accounts/test', emailData);
+    return response.data;
+  } catch (error) {
+    console.error("Error testing email account:", error);
+    throw error.response?.data || error;
+  }
 };
 
-export default settingsService;
+/**
+ * Set default email account
+ * @param {string} accountId - Email account ID to set as default
+ * @returns {Promise<Object>} Updated account
+ */
+const setDefaultEmailAccount = async (accountId) => {
+  try {
+    const response = await api.patch(`/email-accounts/${accountId}/default`);
+    return response.data;
+  } catch (error) {
+    console.error("Error setting default email account:", error);
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Get user profile settings
+ * @returns {Promise<Object>} User profile data
+ */
+const getUserProfile = async () => {
+  try {
+    const response = await api.get('/profile');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Update user profile
+ * @param {Object} profileData - Updated profile data
+ * @returns {Promise<Object>} Updated profile
+ */
+const updateUserProfile = async (profileData) => {
+  try {
+    const response = await api.put('/profile', profileData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Update user password
+ * @param {Object} passwordData - Password change data
+ * @param {string} passwordData.currentPassword - Current password
+ * @param {string} passwordData.newPassword - New password
+ * @returns {Promise<Object>} Success message
+ */
+const updateUserPassword = async (passwordData) => {
+  try {
+    const response = await api.put('/profile/password', passwordData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error.response?.data || error;
+  }
+};
+
+/**
+ * Upload user avatar
+ * @param {File} avatarFile - Avatar image file
+ * @returns {Promise<Object>} Updated profile with new avatar URL
+ */
+const uploadAvatar = async (avatarFile) => {
+  try {
+    const formData = new FormData();
+    formData.append('avatar', avatarFile);
+
+    const response = await api.post('/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    throw error.response?.data || error;
+  }
+};
+
+export default {
+  addEmailAccount,
+  getEmailAccounts,
+  updateEmailAccount,
+  deleteEmailAccount,
+  testEmailAccount,
+  setDefaultEmailAccount,
+  getUserProfile,
+  updateUserProfile,
+  updateUserPassword,
+  uploadAvatar
+};

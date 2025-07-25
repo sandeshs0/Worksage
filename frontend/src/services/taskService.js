@@ -1,15 +1,6 @@
-import axios from "axios";
+import { createApiInstance } from './apiConfig';
 
-const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      "x-auth-token": `${token}`,
-    },
-  };
-};
+const api = createApiInstance();
 
 /**
  * Create a new task
@@ -24,47 +15,44 @@ export const createTask = async (taskData) => {
     formData.append("title", taskData.title);
     formData.append("columnId", taskData.columnId);
     formData.append("boardId", taskData.boardId);
-    if (taskData.description)
-      formData.append("description", taskData.description);
-    if (taskData.dueDate)
-      formData.append("dueDate", taskData.dueDate.toISOString());
+    if (taskData.description) formData.append("description", taskData.description);
+    if (taskData.dueDate) formData.append("dueDate", taskData.dueDate.toISOString());
     if (taskData.priority) formData.append("priority", taskData.priority);
 
-    // Handle assignedTo - append each ID individually with the same field name
+    // Handle assignedTo - append each ID individually
     if (taskData.assignedTo && taskData.assignedTo.length > 0) {
       taskData.assignedTo.forEach((userId) => {
         formData.append("assignedTo[]", userId);
       });
     } else {
-      // Empty array case
       formData.append("assignedTo", "[]");
     }
-    // Don't append anything for empty arrays - let backend handle default
 
     if (taskData.labels && taskData.labels.length > 0) {
       formData.append("labels", JSON.stringify(taskData.labels));
     }
-    // Don't append anything for empty arrays - let backend handle default
 
     if (taskData.subtasks && taskData.subtasks.length > 0) {
       formData.append("subtasks", JSON.stringify(taskData.subtasks));
     }
 
-    // Handle cover image file if it exists
-    if (taskData.coverImage instanceof File) {
-      formData.append("coverImage", taskData.coverImage);
+    // Handle file attachments
+    if (taskData.attachments && taskData.attachments.length > 0) {
+      taskData.attachments.forEach((file, index) => {
+        formData.append(`attachments`, file);
+      });
     }
 
-    const response = await axios.post(`${API_URL}/tasks`, formData, {
+    const response = await api.post('/tasks', formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
-        ...getAuthHeader().headers,
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
+    
     return response.data.data;
   } catch (error) {
     console.error("Error creating task:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -75,11 +63,11 @@ export const createTask = async (taskData) => {
  */
 export const getTask = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/tasks/${id}`, getAuthHeader());
+    const response = await api.get(`/tasks/${id}`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching task:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -93,61 +81,54 @@ export const updateTask = async (id, taskData) => {
   try {
     const formData = new FormData();
 
-    // Add all fields that might have changed
-    if (taskData.title !== undefined) formData.append("title", taskData.title);
-    if (taskData.description !== undefined)
-      formData.append("description", taskData.description);
-    if (taskData.columnId !== undefined)
-      formData.append("columnId", taskData.columnId);
-    if (taskData.dueDate !== undefined) {
-      formData.append(
-        "dueDate",
-        taskData.dueDate ? taskData.dueDate.toISOString() : ""
-      );
-    }
-    if (taskData.priority !== undefined)
-      formData.append("priority", taskData.priority);
+    // Add basic fields if they exist
+    if (taskData.title) formData.append("title", taskData.title);
+    if (taskData.description !== undefined) formData.append("description", taskData.description);
+    if (taskData.dueDate) formData.append("dueDate", taskData.dueDate.toISOString());
+    if (taskData.priority) formData.append("priority", taskData.priority);
+    if (taskData.status) formData.append("status", taskData.status);
 
-    // Handle assignedTo - correctly handle array
+    // Handle assignedTo
     if (taskData.assignedTo !== undefined) {
-      if (taskData.assignedTo && taskData.assignedTo.length > 0) {
+      if (taskData.assignedTo.length > 0) {
         taskData.assignedTo.forEach((userId) => {
           formData.append("assignedTo[]", userId);
         });
+      } else {
+        formData.append("assignedTo", "[]");
       }
-      // Don't append anything for empty arrays - let backend handle default
     }
 
-    // Handle labels - correctly handle array
     if (taskData.labels !== undefined) {
-      if (taskData.labels && taskData.labels.length > 0) {
-        formData.append("labels", JSON.stringify(taskData.labels));
-      }
-      // Don't append anything for empty arrays - let backend handle default
+      formData.append("labels", JSON.stringify(taskData.labels));
     }
 
     if (taskData.subtasks !== undefined) {
-      formData.append("subtasks", JSON.stringify(taskData.subtasks || []));
+      formData.append("subtasks", JSON.stringify(taskData.subtasks));
     }
 
-    // Handle cover image
-    if (taskData.coverImage instanceof File) {
-      formData.append("coverImage", taskData.coverImage);
-    } else if (taskData.coverImage === null) {
-      // User wants to remove the cover image
-      formData.append("removeCover", "true");
+    // Handle new file attachments
+    if (taskData.newAttachments && taskData.newAttachments.length > 0) {
+      taskData.newAttachments.forEach((file) => {
+        formData.append(`attachments`, file);
+      });
     }
 
-    const response = await axios.put(`${API_URL}/tasks/${id}`, formData, {
+    // Handle removed attachments
+    if (taskData.removedAttachments && taskData.removedAttachments.length > 0) {
+      formData.append("removedAttachments", JSON.stringify(taskData.removedAttachments));
+    }
+
+    const response = await api.put(`/tasks/${id}`, formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
-        ...getAuthHeader().headers,
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
+    
     return response.data.data;
   } catch (error) {
     console.error("Error updating task:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -158,19 +139,16 @@ export const updateTask = async (id, taskData) => {
  */
 export const deleteTask = async (id) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/tasks/${id}`,
-      getAuthHeader()
-    );
+    const response = await api.delete(`/tasks/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting task:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
 /**
- * Move a task between columns or reorder within a column
+ * Move a task to a different column/position
  * @param {string} id - Task ID
  * @param {string} columnId - Target column ID
  * @param {number} position - New position in the column
@@ -178,60 +156,55 @@ export const deleteTask = async (id) => {
  */
 export const moveTask = async (id, columnId, position) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/tasks/${id}/move`,
-      { columnId, position },
-      getAuthHeader()
-    );
+    const response = await api.put(`/tasks/${id}/move`, {
+      columnId,
+      position
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error moving task:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
 /**
  * Assign users to a task
  * @param {string} id - Task ID
- * @param {Array} userIds - Array of user IDs
+ * @param {Array} userIds - Array of user IDs to assign
  * @returns {Promise} Response from the API
  */
 export const assignTask = async (id, userIds) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/tasks/${id}/assign`,
-      { assignedTo: userIds },
-      getAuthHeader()
-    );
+    const response = await api.patch(`/tasks/${id}/assign`, {
+      assignedTo: userIds
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error assigning task:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
 /**
- * Add or update checklist items
+ * Update task checklist/subtasks
  * @param {string} id - Task ID
- * @param {Array} checklist - Array of checklist items
+ * @param {Array} checklist - Updated checklist items
  * @returns {Promise} Response from the API
  */
 export const updateTaskChecklist = async (id, checklist) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/tasks/${id}/checklist`,
-      { checklist },
-      getAuthHeader()
-    );
+    const response = await api.patch(`/tasks/${id}/checklist`, {
+      subtasks: checklist
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error updating task checklist:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
 /**
- * Toggle checklist item completion
+ * Toggle completion status of a checklist item
  * @param {string} taskId - Task ID
  * @param {string} itemId - Checklist item ID
  * @param {boolean} completed - Completion status
@@ -239,14 +212,23 @@ export const updateTaskChecklist = async (id, checklist) => {
  */
 export const toggleChecklistItem = async (taskId, itemId, completed) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/tasks/${taskId}/checklist/${itemId}/toggle`,
-      { completed },
-      getAuthHeader()
-    );
+    const response = await api.patch(`/tasks/${taskId}/checklist/${itemId}`, {
+      completed
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error toggling checklist item:", error);
-    throw error;
+    throw error.response?.data || error;
   }
+};
+
+export default {
+  createTask,
+  getTask,
+  updateTask,
+  deleteTask,
+  moveTask,
+  assignTask,
+  updateTaskChecklist,
+  toggleChecklistItem
 };

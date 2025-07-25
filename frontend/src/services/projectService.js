@@ -1,17 +1,6 @@
-import axios from "axios";
+import { createApiInstance } from './apiConfig';
 
-// Updated API URL to match the new endpoint
-const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/projects`;
-
-// Helper function to get auth headers
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      "x-auth-token": `${token}`,
-    },
-  };
-};
+const api = createApiInstance();
 
 /**
  * Get all projects
@@ -20,14 +9,13 @@ const getAuthHeader = () => {
 const getAllProjects = async () => {
   console.log("getAllProjects called");
   try {
-   
-    console.log("Making API call to:", API_URL);
-    const response = await axios.get(API_URL, getAuthHeader());
+    console.log("Making API call to: /projects");
+    const response = await api.get("/projects");
     console.log("API response:", response);
     return response.data;
   } catch (error) {
     console.error("Error in getAllProjects:", error);
-    // Return empty array to prevent further errors
+    throw error.response?.data || error;
     return [];
   }
 };
@@ -39,13 +27,11 @@ const getAllProjects = async () => {
  */
 const getProjectById = async (projectId) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/${projectId}`,
-      getAuthHeader()
-    );
+    const response = await api.get(`/projects/${projectId}`);
     return response.data;
   } catch (error) {
-    throw error;
+    console.error("Error fetching project:", error);
+    throw error.response?.data || error;
   }
 };
 
@@ -56,10 +42,11 @@ const getProjectById = async (projectId) => {
  */
 const createProject = async (projectData) => {
   try {
-    const response = await axios.post(API_URL, projectData, getAuthHeader());
+    const response = await api.post("/projects", projectData);
     return response.data;
   } catch (error) {
-    throw error;
+    console.error("Error creating project:", error);
+    throw error.response?.data || error;
   }
 };
 
@@ -71,14 +58,11 @@ const createProject = async (projectData) => {
  */
 const updateProject = async (projectId, projectData) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/${projectId}`,
-      projectData,
-      getAuthHeader()
-    );
+    const response = await api.put(`/projects/${projectId}`, projectData);
     return response.data;
   } catch (error) {
-    throw error;
+    console.error("Error updating project:", error);
+    throw error.response?.data || error;
   }
 };
 
@@ -90,14 +74,11 @@ const updateProject = async (projectId, projectData) => {
  */
 const updateProjectStatus = async (projectId, updateData) => {
   try {
-    const response = await axios.patch(
-      `${API_URL}/${projectId}/status`,
-      updateData,
-      getAuthHeader()
-    );
+    const response = await api.patch(`/projects/${projectId}/status`, updateData);
     return response.data;
   } catch (error) {
-    throw error;
+    console.error("Error updating project status:", error);
+    throw error.response?.data || error;
   }
 };
 
@@ -108,13 +89,11 @@ const updateProjectStatus = async (projectId, updateData) => {
  */
 const deleteProject = async (projectId) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/${projectId}`,
-      getAuthHeader()
-    );
+    const response = await api.delete(`/projects/${projectId}`);
     return response.data;
   } catch (error) {
-    throw error;
+    console.error("Error deleting project:", error);
+    throw error.response?.data || error;
   }
 };
 
@@ -125,14 +104,11 @@ const deleteProject = async (projectId) => {
  */
 const getProjectsByClient = async (clientId) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/client/${clientId}`,
-      getAuthHeader()
-    );
+    const response = await api.get(`/projects/client/${clientId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching client projects:", error);
-    return [];
+    throw error.response?.data || error;
   }
 };
 
@@ -143,14 +119,11 @@ const getProjectsByClient = async (clientId) => {
  */
 const getProjectsByStatus = async (status) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/status/${status}`,
-      getAuthHeader()
-    );
+    const response = await api.get(`/projects/status/${status}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching ${status} projects:`, error);
-    return [];
+    throw error.response?.data || error;
   }
 };
 
@@ -162,26 +135,19 @@ const getProjectsByStatus = async (status) => {
  */
 const updateProjectCover = async (projectId, imageFile) => {
   try {
-    // Create form data object to send file
     const formData = new FormData();
     formData.append('coverImage', imageFile);
 
-    const response = await axios.put(
-      `${API_URL}/${projectId}/cover`,
-      formData,
-      {
-        ...getAuthHeader(),
-        headers: {
-          ...getAuthHeader().headers,
-          'Content-Type': 'multipart/form-data'
-        }
+    const response = await api.put(`/projects/${projectId}/cover`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-    );
+    });
     
     return response.data;
   } catch (error) {
     console.error('Error updating project cover:', error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 

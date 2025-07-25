@@ -1,16 +1,6 @@
-import axios from "axios";
+import { createApiInstance } from './apiConfig';
 
-const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/clients`;
-
-// Helper function to get auth headers
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: {
-      "x-auth-token": `${token}`,
-    },
-  };
-};
+const api = createApiInstance();
 
 /**
  * Get all clients for authenticated user
@@ -18,10 +8,10 @@ const getAuthHeader = () => {
  */
 const getAllClients = async () => {
   try {
-    const response = await axios.get(`${API_URL}/getClients`, getAuthHeader());
+    const response = await api.get("/clients/getClients");
     return response.data;
   } catch (error) {
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -32,10 +22,10 @@ const getAllClients = async () => {
  */
 const getClientById = async (clientId) => {
   try {
-    const response = await axios.get(`${API_URL}/${clientId}`, getAuthHeader());
+    const response = await api.get(`/clients/${clientId}`);
     return response.data;
   } catch (error) {
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -46,27 +36,19 @@ const getClientById = async (clientId) => {
  */
 const createClient = async (clientData) => {
   try {
-    // Check if we're sending FormData (for file uploads)
     const isFormData = clientData instanceof FormData;
 
-    const config = {
-      ...getAuthHeader(),
+    // For FormData, don't set Content-Type - let browser handle it
+    const config = isFormData ? {
       headers: {
-        ...getAuthHeader().headers,
-        // Only set Content-Type for non-FormData requests
-        // For FormData, let the browser set the Content-Type with boundary
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      },
-    };
+        // Remove Content-Type for FormData to allow browser to set boundary
+      }
+    } : {};
 
-    const response = await axios.post(
-      `${API_URL}/createClient`,
-      clientData,
-      config
-    );
+    const response = await api.post("/clients/createClient", clientData, config);
     return response.data;
   } catch (error) {
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -78,26 +60,18 @@ const createClient = async (clientData) => {
  */
 const updateClient = async (clientId, clientData) => {
   try {
-    // Check if we're sending FormData (for file uploads)
     const isFormData = clientData instanceof FormData;
 
-    const config = {
-      ...getAuthHeader(),
+    const config = isFormData ? {
       headers: {
-        ...getAuthHeader().headers,
-        // Only set Content-Type for non-FormData requests
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      },
-    };
+        // Remove Content-Type for FormData
+      }
+    } : {};
 
-    const response = await axios.put(
-      `${API_URL}/${clientId}`,
-      clientData,
-      config
-    );
+    const response = await api.put(`/clients/${clientId}`, clientData, config);
     return response.data;
   } catch (error) {
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -108,13 +82,10 @@ const updateClient = async (clientId, clientData) => {
  */
 const deleteClient = async (clientId) => {
   try {
-    const response = await axios.delete(
-      `${API_URL}/${clientId}`,
-      getAuthHeader()
-    );
+    const response = await api.delete(`/clients/${clientId}`);
     return response.data;
   } catch (error) {
-    throw error;
+    throw error.response?.data || error;
   }
 };
 

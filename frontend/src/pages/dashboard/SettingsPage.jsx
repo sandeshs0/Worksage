@@ -155,7 +155,7 @@ function SettingsPage() {
     try {
       setIsLoading(true);
       // Call API to update user profile with the expected format
-      await authService.updateUserProfile({
+      await authService.updateProfile({
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -196,7 +196,7 @@ function SettingsPage() {
         setIsLoading(true);
         const formData = new FormData();
         formData.append("profileImage", file);
-        await authService.updateProfilePicture(formData);
+        await settingsService.uploadAvatar(formData);
 
         // Refresh user data in the context so all components get updated
         await refreshUserData();
@@ -214,7 +214,8 @@ function SettingsPage() {
 
     try {
       // Save preference to server
-      await authService.updateUserPreferences({ darkMode: newDarkMode });
+      // TODO: Implement user preferences endpoint
+      // await authService.updateUserPreferences({ darkMode: newDarkMode });
       toast.success(`${newDarkMode ? "Dark" : "Light"} mode enabled`);
     } catch (error) {
       console.error("Error updating dark mode preference:", error);
@@ -260,43 +261,58 @@ function SettingsPage() {
     }
   };
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  // Enhanced password validation
+  const validatePassword = (password) => {
+    const errors = {};
 
-    // Clear errors when user types
-    if (passwordErrors[name]) {
-      setPasswordErrors((prev) => ({ ...prev, [name]: "" }));
+    if (password.length < 12) {
+      errors.length = "Password must be at least 12 characters long";
     }
+
+    if (!/(?=.*[a-z])/.test(password)) {
+      errors.lowercase = "Password must contain at least one lowercase letter";
+    }
+
+    if (!/(?=.*[A-Z])/.test(password)) {
+      errors.uppercase = "Password must contain at least one uppercase letter";
+    }
+
+    if (!/(?=.*\d)/.test(password)) {
+      errors.number = "Password must contain at least one number";
+    }
+
+    if (!/(?=.*[@$!%*?&])/.test(password)) {
+      errors.special = "Password must contain at least one special character";
+    }
+
+    return errors;
   };
 
+  // Enhanced password submit handler
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+    setPasswordLoading(true);
+    setPasswordErrors({});
+    setPasswordSuccess(false);
 
-    // Validate form
-    const errors = {};
-    if (!passwordData.currentPassword) {
-      errors.currentPassword = "Current password is required";
+    // Validate new password
+    const passwordValidationErrors = validatePassword(passwordData.newPassword);
+
+    if (Object.keys(passwordValidationErrors).length > 0) {
+      setPasswordErrors(passwordValidationErrors);
+      setPasswordLoading(false);
+      return;
     }
-    if (!passwordData.newPassword) {
-      errors.newPassword = "New password is required";
-    } else if (passwordData.newPassword.length < 8) {
-      errors.newPassword = "Password must be at least 8 characters";
-    }
+
+    // Check password confirmation
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setPasswordErrors(errors);
+      setPasswordErrors({ confirm: "Passwords do not match" });
+      setPasswordLoading(false);
       return;
     }
 
     try {
-      setPasswordLoading(true);
-      setPasswordSuccess(false);
-
-      await authService.changePassword({
+      await authService.updatePassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
@@ -307,26 +323,32 @@ function SettingsPage() {
         newPassword: "",
         confirmPassword: "",
       });
-      toast.success("Password changed successfully");
+
+      toast.success("Password updated successfully");
     } catch (error) {
-      console.error("Failed to change password:", error);
       setPasswordErrors({
-        form: error.message || "Failed to change password. Please try again.",
+        general: error.message || "Failed to update password",
       });
-      toast.error("Failed to change password", {
-        description:
-          error.message || "Please check your current password and try again",
-      });
+      toast.error("Failed to update password");
     } finally {
       setPasswordLoading(false);
     }
+  };
+
+  // Handle password input changes
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   // Handle profile picture upload from the modal
   const handleProfilePictureUpload = async (imageBlob) => {
     try {
       setIsLoading(true);
-      const result = await authService.updateProfilePicture(imageBlob);
+      const result = await settingsService.uploadAvatar(imageBlob);
 
       if (result.profileImage) {
         setProfileImage(result.profileImage);
