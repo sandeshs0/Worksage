@@ -93,7 +93,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
   const [emailAccountInfo, setEmailAccountInfo] = useState({
     hasCustomEmail: false,
     email: "comm@cubicle.app",
-    displayName: "Cubicle",
+    displayName: "WorkSage",
   });
   const [isLoadingEmailAccount, setIsLoadingEmailAccount] = useState(false);
 
@@ -139,7 +139,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         setEmailAccountInfo({
           hasCustomEmail: false,
           systemEmail: "comm@cubicle.app",
-          displayName: "Cubicle",
+          displayName: "WorkSage",
         });
       } finally {
         setIsLoadingEmailAccount(false);
@@ -550,7 +550,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         }
       }, 30); // Adjust typing speed here (lower = faster)
 
-      toast.success("Content Rewritten by CubicleAI.");
+      toast.success("Content Rewritten by WorkSageAI.");
     } catch (err) {
       console.error("Rewrite error:", err);
       setErrors({
@@ -620,7 +620,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
             )}
           </button>
           <button
-            className="bg-[#007991] text-white px-4 py-2 rounded-md shadow flex items-center"
+            className="bg-[#18cb96] text-white px-4 py-2 rounded-md shadow flex items-center"
             onClick={toggleEmailForm}
           >
             <Mail size={16} className="mr-2" />
@@ -634,7 +634,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         <button
           className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === "history"
-              ? "bg-white text-[#007991] shadow-sm"
+              ? "bg-white text-[#18cb96] shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           }`}
           onClick={() => setActiveTab("history")}
@@ -645,7 +645,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         <button
           className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             activeTab === "insights"
-              ? "bg-white text-[#007991] shadow-sm"
+              ? "bg-white text-[#18cb96] shadow-sm"
               : "text-gray-600 hover:text-gray-900"
           }`}
           onClick={() => setActiveTab("insights")}
@@ -791,7 +791,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
                   type="text"
                   className={`w-full p-2 border ${
                     errors.subject ? "border-red-300" : "border-gray-300"
-                  } rounded-md focus:outline-none focus:ring-1 focus:ring-[#007991]`}
+                  } rounded-md focus:outline-none focus:ring-1 focus:ring-[#18cb96]`}
                   placeholder="Write a Subject"
                   value={subject}
                   onChange={(e) => {
@@ -1076,7 +1076,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
                   {/* Send button with arrow icon */}
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-[#007991] text-white rounded-md hover:bg-[#006980] transition-colors flex items-center shadow-sm disabled:opacity-70"
+                    className="px-6 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] transition-colors flex items-center shadow-sm disabled:opacity-70"
                     disabled={isSendingEmail}
                   >
                     {isSendingEmail ? (
@@ -1391,11 +1391,11 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
                                 emailStats.data.failedEmails || 0,
                               ],
                               backgroundColor: [
-                                "#007991",
+                                "#18cb96",
                                 "#10B981",
                                 "#EF4444",
                               ],
-                              borderColor: ["#005f73", "#059669", "#DC2626"],
+                              borderColor: ["#14a085", "#059669", "#DC2626"],
                               borderWidth: 1,
                             },
                           ],

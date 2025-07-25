@@ -397,7 +397,7 @@ function KanbanPage() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[80vh]">
       <div className="flex items-center text-lg text-gray-500 mb-4">
-        <Link to="/dashboard/boards" className="hover:text-[#007991]">
+        <Link to="/dashboard/boards" className="hover:text-[#18cb96]">
           Kanban Boards
         </Link>
         <ChevronRight size={20} className="mx-2" />

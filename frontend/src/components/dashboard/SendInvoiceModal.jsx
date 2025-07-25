@@ -89,7 +89,7 @@ Your Team`,
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Mail className="mr-2 h-5 w-5 text-[#007991]" />
+              <Mail className="mr-2 h-5 w-5 text-[#18cb96]" />
               Send Invoice to Client
             </h2>
             <button
@@ -107,7 +107,7 @@ Your Team`,
               <div className="flex-1 overflow-y-auto bg-white p-6">
                 <div className="mx-auto max-w-4xl">
                   <h3 className="font-medium text-gray-900 mb-4 flex items-center">
-                    <Eye className="mr-2 h-5 w-5 text-[#007991]" />
+                    <Eye className="mr-2 h-5 w-5 text-[#18cb96]" />
                     Invoice Preview
                   </h3>
 
@@ -136,13 +136,13 @@ Your Team`,
             // Form Mode - Original layout
             <div className="flex-1 overflow-y-auto">
               <div className="p-6">
-                <div className="bg-[#007991]/10 border-l-4 border-[#007991] p-4 mb-6">
+                <div className="bg-[#18cb96]/10 border-l-4 border-[#18cb96] p-4 mb-6">
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <Mail className="h-5 w-5 text-[#007991]" />
+                      <Mail className="h-5 w-5 text-[#18cb96]" />
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-[#007991]">
+                      <p className="text-sm text-[#18cb96]">
                         This invoice will be sent to the client via email. You
                         can customize the message below.
                       </p>
@@ -162,7 +162,7 @@ Your Team`,
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                       placeholder="client@example.com"
                       required
                     />
@@ -178,7 +178,7 @@ Your Team`,
                       onChange={(e) =>
                         handleInputChange("subject", e.target.value)
                       }
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                       placeholder="Invoice subject..."
                       required
                     />
@@ -194,7 +194,7 @@ Your Team`,
                         handleInputChange("message", e.target.value)
                       }
                       rows={8}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                       placeholder="Email message..."
                       required
                     />
@@ -242,7 +242,7 @@ Your Team`,
                 onClick={() => setShowPreview(!showPreview)}
                 className={`flex items-center px-3 py-2 border rounded-md transition-colors text-sm ${
                   showPreview
-                    ? "bg-[#007991]/10 text-[#007991] border-[#007991] hover:bg-[#007991]/20"
+                    ? "bg-[#18cb96]/10 text-[#18cb96] border-[#18cb96] hover:bg-[#18cb96]/20"
                     : "border-gray-300 hover:bg-gray-100"
                 }`}
               >
@@ -271,7 +271,7 @@ Your Team`,
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className="px-6 py-2 bg-[#007991] text-white rounded-md hover:bg-[#007991]/80 transition-colors disabled:opacity-50 flex items-center"
+                className="px-6 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#18cb96]/80 transition-colors disabled:opacity-50 flex items-center"
               >
                 {loading ? (
                   <>
