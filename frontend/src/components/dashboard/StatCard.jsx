@@ -38,8 +38,8 @@ const StatCard = ({
           )}
         </div>
         {Icon && (
-          <div className="p-3 bg-[#007991]/10 rounded-lg">
-            <Icon className="h-6 w-6 text-[#007991]" />
+          <div className="p-3 bg-[#18cb96]/10 rounded-lg">
+            <Icon className="h-6 w-6 text-[#18cb96]" />
           </div>
         )}
       </div>

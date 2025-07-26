@@ -127,7 +127,7 @@ export function UserProvider({ children }) {
           // Don't set user data for MFA responses
           return response;
         }
-        
+
         // Regular login - set user data
         setUser(response.data.user);
         setIsAuthenticated(true);

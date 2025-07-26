@@ -252,11 +252,11 @@ const PomodoroTimer = () => {
   const getBgColor = () => {
     switch (sessionType) {
       case "work":
-        return "bg-gradient-to-r from-[#007991]/10 to-[#007991]/20";
+        return "bg-gradient-to-r from-[#18cb96]/10 to-[#18cb96]/20";
       case "shortBreak":
-        return "bg-gradient-to-r from-[#222e50]/10 to-[#222e50]/15";
+        return "bg-gradient-to-r from-[#18172a]/10 to-[#18172a]/15";
       case "longBreak":
-        return "bg-gradient-to-r from-[#007991]/5 to-[#222e50]/10";
+        return "bg-gradient-to-r from-[#18cb96]/5 to-[#18172a]/10";
       default:
         return "bg-white";
     }
@@ -266,11 +266,11 @@ const PomodoroTimer = () => {
   const getTextColor = () => {
     switch (sessionType) {
       case "work":
-        return "text-[#007991]";
+        return "text-[#18cb96]";
       case "shortBreak":
-        return "text-[#222e50]";
+        return "text-[#18172a]";
       case "longBreak":
-        return "text-[#222e50]";
+        return "text-[#18172a]";
       default:
         return "text-gray-700";
     }
@@ -280,11 +280,11 @@ const PomodoroTimer = () => {
   const getBorderColor = () => {
     switch (sessionType) {
       case "work":
-        return "border-[#007991]/30";
+        return "border-[#18cb96]/30";
       case "shortBreak":
-        return "border-[#222e50]/30";
+        return "border-[#18172a]/30";
       case "longBreak":
-        return "border-[#007991]/20";
+        return "border-[#18cb96]/20";
       default:
         return "border-gray-200";
     }
@@ -357,7 +357,7 @@ const PomodoroTimer = () => {
               className="p-2 rounded-full hover:bg-white/20 transition-colors"
               title="Settings"
             >
-              <Settings size={20} className="text-[#007991]" />
+              <Settings size={20} className="text-[#18cb96]" />
             </button>
             <button
               onClick={toggleFullscreen}
@@ -382,7 +382,7 @@ const PomodoroTimer = () => {
           <button
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
               sessionType === "work"
-                ? "bg-white shadow-sm text-[#007991] border-b-2 border-[#007991]"
+                ? "bg-white shadow-sm text-[#18cb96] border-b-2 border-[#18cb96]"
                 : "bg-transparent text-gray-600 hover:bg-white/50"
             }`}
             onClick={() => {
@@ -397,7 +397,7 @@ const PomodoroTimer = () => {
           <button
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
               sessionType === "shortBreak"
-                ? "bg-white shadow-sm text-[#222e50] border-b-2 border-[#222e50]"
+                ? "bg-white shadow-sm text-[#18172a] border-b-2 border-[#18172a]"
                 : "bg-transparent text-gray-600 hover:bg-white/50"
             }`}
             onClick={() => {
@@ -412,7 +412,7 @@ const PomodoroTimer = () => {
           <button
             className={`flex-1 py-2 rounded-md text-sm font-medium transition-colors ${
               sessionType === "longBreak"
-                ? "bg-white shadow-sm text-[#222e50] border-b-2 border-[#222e50]"
+                ? "bg-white shadow-sm text-[#18172a] border-b-2 border-[#18172a]"
                 : "bg-transparent text-gray-600 hover:bg-white/50"
             }`}
             onClick={() => {
@@ -447,7 +447,7 @@ const PomodoroTimer = () => {
                 x2="100%"
                 y2="0%"
               >
-                <stop offset="0%" stopColor="#007991" />
+                <stop offset="0%" stopColor="#18cb96" />
                 <stop offset="100%" stopColor="#00556a" />
               </linearGradient>
               <linearGradient
@@ -457,7 +457,7 @@ const PomodoroTimer = () => {
                 x2="100%"
                 y2="0%"
               >
-                <stop offset="0%" stopColor="#222e50" />
+                <stop offset="0%" stopColor="#18172a" />
                 <stop offset="100%" stopColor="#15203c" />
               </linearGradient>
               <linearGradient
@@ -467,8 +467,8 @@ const PomodoroTimer = () => {
                 x2="100%"
                 y2="0%"
               >
-                <stop offset="0%" stopColor="#007991" />
-                <stop offset="100%" stopColor="#222e50" />
+                <stop offset="0%" stopColor="#18cb96" />
+                <stop offset="100%" stopColor="#18172a" />
               </linearGradient>
               <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="3" result="blur" />
@@ -626,7 +626,7 @@ const PomodoroTimer = () => {
             }`}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-[#222e50]">
+              <h3 className="text-lg font-semibold text-[#18172a]">
                 Timer Settings
               </h3>
               <button
@@ -651,7 +651,7 @@ const PomodoroTimer = () => {
                   onChange={(e) =>
                     updateSettings("workDuration", e.target.value)
                   }
-                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#007991] cursor-pointer"
+                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#18cb96] cursor-pointer"
                 />
                 <div className="flex justify-between mt-1">
                   <span className="text-xs text-gray-500">1 min</span>
@@ -672,7 +672,7 @@ const PomodoroTimer = () => {
                   max="20"
                   value={settings.shortBreak}
                   onChange={(e) => updateSettings("shortBreak", e.target.value)}
-                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#007991] cursor-pointer"
+                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#18cb96] cursor-pointer"
                 />
                 <div className="flex justify-between mt-1">
                   <span className="text-xs text-gray-500">1 min</span>
@@ -693,7 +693,7 @@ const PomodoroTimer = () => {
                   max="40"
                   value={settings.longBreak}
                   onChange={(e) => updateSettings("longBreak", e.target.value)}
-                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#007991] cursor-pointer"
+                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#18cb96] cursor-pointer"
                 />
                 <div className="flex justify-between mt-1">
                   <span className="text-xs text-gray-500">5 min</span>
@@ -717,7 +717,7 @@ const PomodoroTimer = () => {
                   onChange={(e) =>
                     updateSettings("longBreakInterval", e.target.value)
                   }
-                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#007991] cursor-pointer"
+                  className="w-full h-2 rounded-lg appearance-none bg-gray-200 accent-[#18cb96] cursor-pointer"
                 />
                 <div className="flex justify-between mt-1">
                   <span className="text-xs text-gray-500">1</span>
@@ -731,7 +731,7 @@ const PomodoroTimer = () => {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={toggleSettings}
-                className="px-6 py-2 bg-[#007991] text-white rounded-md hover:bg-[#005f73] transition-colors transform hover:scale-105 shadow"
+                className="px-6 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] transition-colors transform hover:scale-105 shadow"
               >
                 Save Settings
               </button>

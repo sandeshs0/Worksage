@@ -7,7 +7,7 @@ const FilesTab = ({ files = [] }) => {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-gray-600 font-medium">Files Shared with Client</h3>
         
-        <label className="bg-[#007991] text-white px-3 py-2 rounded-md shadow flex items-center cursor-pointer">
+        <label className="bg-[#18cb96] text-white px-3 py-2 rounded-md shadow flex items-center cursor-pointer">
           <Upload size={16} className="mr-2" />
           Upload File
           <input type="file" className="hidden" />
@@ -54,7 +54,7 @@ const FilesTab = ({ files = [] }) => {
             <p className="text-sm text-gray-600">
               3.45 / 5 GB Used
               <div className="w-32 bg-gray-200 rounded-full h-1.5 mt-1">
-                <div className="bg-[#007991] h-1.5 rounded-full w-[70%]"></div>
+                <div className="bg-[#18cb96] h-1.5 rounded-full w-[70%]"></div>
               </div>
               <span className="text-xs text-right block mt-1">70% Storage Full</span>
             </p>

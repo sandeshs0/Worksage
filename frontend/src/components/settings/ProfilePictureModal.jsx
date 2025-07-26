@@ -110,7 +110,7 @@ const ProfilePictureModal = ({ isOpen, onClose, onSave }) => {
           <div className="p-6">
             {!image ? (
               <div 
-                className="border-2 border-dashed border-gray-300 rounded-md p-12 text-center cursor-pointer hover:border-[#007991] transition-colors"
+                className="border-2 border-dashed border-gray-300 rounded-md p-12 text-center cursor-pointer hover:border-[#18cb96] transition-colors"
                 onClick={triggerFileInput}
               >
                 <input
@@ -188,7 +188,7 @@ const ProfilePictureModal = ({ isOpen, onClose, onSave }) => {
             
             {image && (
               <button
-                className="px-4 py-2 bg-[#007991] text-white rounded-md hover:bg-[#006980] flex items-center"
+                className="px-4 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] flex items-center"
                 onClick={handleCrop}
                 disabled={isLoading}
               >

@@ -2,9 +2,6 @@ const Column = require('../models/Column');
 const Board = require('../models/Board');
 const { validationResult } = require('express-validator');
 
-
-
-
 exports.getColumns = async (req, res) => {
   try {
     
