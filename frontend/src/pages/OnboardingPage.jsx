@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 
 function OnboardingPage() {
@@ -53,11 +53,12 @@ function OnboardingPage() {
     setError("");
 
     try {
-      await authService.updateRole(selectedRole );
+      await authService.updateRole(selectedRole);
       navigate("/dashboard");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Failed to update role. Please try again."
+        err.response?.data?.message ||
+          "Failed to update role. Please try again."
       );
     } finally {
       setLoading(false);
@@ -127,14 +128,14 @@ function OnboardingPage() {
         >
           <img
             src="src/assets/logo.png"
-            alt="Cubicle Logo"
+            alt="WorkSage Logo"
             className="w-16 h-16 mb-4"
           />
           <h1 className="text-2xl md:text-3xl font-bold text-center">
             Tell us about yourself
           </h1>
           <p className="text-gray-600 mt-2 text-center">
-            Help us personalize your experience on Cubicle
+            Help us personalize your experience on WorkSage
           </p>
         </motion.div>
 
@@ -149,7 +150,7 @@ function OnboardingPage() {
 
         <motion.div className="mb-8" variants={itemVariants}>
           <h2 className="text-lg font-medium mb-4">What's your role?</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {roles.map((role) => (
               <motion.div
@@ -159,12 +160,12 @@ function OnboardingPage() {
                 onClick={() => setSelectedRole(role.id)}
                 className={`relative cursor-pointer rounded-lg border-2 p-5 transition-all ${
                   selectedRole === role.id
-                    ? "border-[#007991] bg-[#f0f9ff]"
+                    ? "border-[#18cb96] bg-[#f0f9ff]"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 {selectedRole === role.id && (
-                  <div className="absolute top-3 right-3 text-[#007991]">
+                  <div className="absolute top-3 right-3 text-[#18cb96]">
                     <CheckCircle size={20} fill="currentColor" />
                   </div>
                 )}
@@ -180,11 +181,11 @@ function OnboardingPage() {
           <button
             onClick={handleContinue}
             disabled={loading}
-            className="bg-[#007991] hover:bg-[#005f73] text-white font-medium rounded-lg py-3 px-4 transition-colors duration-200"
+            className="bg-[#18cb96] hover:bg-[#14a085] text-white font-medium rounded-lg py-3 px-4 transition-colors duration-200"
           >
             {loading ? "Saving..." : "Continue"}
           </button>
-          
+
           <button
             onClick={handleSkip}
             className="text-gray-500 hover:text-gray-700 py-2 font-medium transition-colors duration-200"

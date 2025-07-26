@@ -30,11 +30,11 @@ function LoginPage() {
   const [apiError, setApiError] = useState("");
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [retryCountdown, setRetryCountdown] = useState(0);
-  
+
   // MFA state
   const [showMFAModal, setShowMFAModal] = useState(false);
   const [mfaUserData, setMfaUserData] = useState(null);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isLoading, user, refreshUserData } =
@@ -58,11 +58,7 @@ function LoginPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    // Sanitize input for XSS protection
     const sanitizedValue = protectInput(value, name);
-
-    // Validate for potential XSS attempts
     const validation = validateXSS(value);
     if (!validation.isValid) {
       console.warn(`XSS attempt detected in ${name}:`, validation.threats);
@@ -137,13 +133,25 @@ function LoginPage() {
         }
       } catch (error) {
         console.error("Login error:", error);
+        console.log("Error response:", error.response);
+        console.log("Error status:", error.response?.status);
+        console.log("Error data:", error.response?.data);
 
         // Handle different error types
-        if (error.response?.status === 429) {
-          // Rate limit error
-          const retryAfter = error.response?.data?.retryAfter;
+        // Check if it's a direct error object from authService (rate limit, etc.)
+        if (error.status === 429 || error.retryAfter) {
+          // Rate limit error (direct error object)
+          const retryAfter = error.retryAfter;
           const errorMessage =
-            error.response?.data?.error || "Too many requests from this IP";
+            error.error ||
+            error.message ||
+            "Too many authentication attempts from this IP";
+
+          console.log("Rate limit error detected (direct):", {
+            retryAfter,
+            errorMessage,
+            error,
+          });
 
           setIsRateLimited(true);
 
@@ -153,15 +161,50 @@ function LoginPage() {
             setRetryCountdown(Math.max(waitTime, 0));
 
             const minutes = Math.ceil(waitTime / 60);
-            setApiError(`${errorMessage} Try again in ${minutes} minutes.`);
+            setApiError(
+              `${errorMessage} Please try again in ${minutes} minutes.`
+            );
           } else {
             setApiError(errorMessage);
             setRetryCountdown(900); // Default to 15 minutes
           }
-        } else if (error.response?.status === 400) {
-          // Invalid credentials
+        } else if (error.response?.status === 429) {
+          // Rate limit error (Axios response format)
+          const retryAfter = error.response?.data?.retryAfter;
           const errorMessage =
-            error.response?.data?.msg || error.response?.data?.message;
+            error.response?.data?.error ||
+            error.response?.data?.message ||
+            "Too many authentication attempts from this IP";
+
+          console.log("Rate limit error detected (axios):", {
+            retryAfter,
+            errorMessage,
+            responseData: error.response?.data,
+          });
+
+          setIsRateLimited(true);
+
+          if (retryAfter) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            const waitTime = retryAfter - currentTime;
+            setRetryCountdown(Math.max(waitTime, 0));
+
+            const minutes = Math.ceil(waitTime / 60);
+            setApiError(
+              `${errorMessage} Please try again in ${minutes} minutes.`
+            );
+          } else {
+            setApiError(errorMessage);
+            setRetryCountdown(900); // Default to 15 minutes
+          }
+        } else if (error.response?.status === 400 || error.status === 400) {
+          // Invalid credentials (handle both direct error and axios response)
+          const errorMessage =
+            error.message ||
+            error.msg ||
+            error.response?.data?.msg ||
+            error.response?.data?.message;
+
           if (errorMessage === "Invalid credentials") {
             setApiError(
               "Invalid email or password. Please check your credentials and try again."
@@ -171,13 +214,15 @@ function LoginPage() {
               errorMessage || "Login failed. Please check your credentials."
             );
           }
-        } else if (error.response?.status >= 500) {
+        } else if (error.response?.status >= 500 || error.status >= 500) {
           // Server errors
           setApiError("Server error occurred. Please try again later.");
         } else {
           // Other errors
           setApiError(
-            error.response?.data?.message ||
+            error.message ||
+              error.msg ||
+              error.response?.data?.message ||
               error.response?.data?.msg ||
               "Login failed. Please check your credentials."
           );
@@ -192,15 +237,15 @@ function LoginPage() {
     try {
       // Update UserContext with the successful login
       await refreshUserData();
-      
+
       // Navigate based on user role
       const user = loginData.user;
-      if (user?.role === 'admin') {
+      if (user?.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/dashboard");
       }
-      
+
       setShowMFAModal(false);
       setMfaUserData(null);
     } catch (error) {
@@ -333,12 +378,12 @@ function LoginPage() {
             <div className="w-18 h-18 rounded-lg flex items-center justify-center mr-3">
               <img
                 src="src/assets/logo.png"
-                alt="Cubicle Logo"
+                alt="WorkSage Logo"
                 className="w-10 h-10 md:w-14 md:h-14"
               />
             </div>
             <span className="text-xl md:text-2xl font-semibold text-gray-900">
-              Cubicle
+              WorkSage
             </span>
           </motion.div>
 
@@ -387,7 +432,7 @@ function LoginPage() {
                   </label>
                   <Link
                     to="/forgot-password"
-                    className="text-sm text-[#007991] hover:text-[#005f73]"
+                    className="text-sm text-[#18cb96] hover:text-[#14a085]"
                   >
                     Forgot password?
                   </Link>
@@ -429,7 +474,7 @@ function LoginPage() {
                 <input
                   type="checkbox"
                   id="remember"
-                  className="h-4 w-4 text-[#007991] focus:ring-[#007991] border-gray-300 rounded"
+                  className="h-4 w-4 text-[#18cb96] focus:ring-[#18cb96] border-gray-300 rounded"
                 />
                 <label
                   htmlFor="remember"
@@ -445,7 +490,7 @@ function LoginPage() {
                 className={`w-full py-2.5 md:py-3 px-4 rounded-full font-bold transition-colors duration-200 mt-6 md:mt-8 ${
                   isRateLimited
                     ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                    : "bg-[#007991] text-white hover:bg-[#005f73]"
+                    : "bg-[#18cb96] text-white hover:bg-[#14a085]"
                 }`}
                 variants={formItemVariants}
                 whileTap={!isRateLimited ? { scale: 0.97 } : {}}
@@ -470,10 +515,14 @@ function LoginPage() {
                   : "Login"}
               </motion.button>
 
+              {/* Error Message Display */}
               {apiError && (
                 <motion.div
-                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-4"
                   variants={formItemVariants}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                 >
                   {apiError}
                 </motion.div>
@@ -488,7 +537,7 @@ function LoginPage() {
               Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="text-[#007991] hover:text-[#005f73] font-medium"
+                className="text-[#18cb96] hover:text-[#14a085] font-medium"
               >
                 Sign up
               </Link>
@@ -546,7 +595,7 @@ function LoginPage() {
 
       {/* Left side - Hero Section (hidden on small screens) */}
       <motion.div
-        className="hidden md:flex flex-1 bg-[#222E50] flex-col text-center justify-center items-center p-8 text-white m-4 rounded-xl"
+        className="hidden md:flex flex-1 bg-[#18172a] flex-col text-center justify-center items-center p-8 text-white m-4 rounded-xl"
         variants={heroVariants}
         initial="hidden"
         animate="visible"

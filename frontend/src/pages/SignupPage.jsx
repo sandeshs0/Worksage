@@ -381,12 +381,12 @@ function SignupPage() {
             <div className="w-18 h-18 rounded-lg flex items-center justify-center mr-3">
               <img
                 src="src/assets/logo.png"
-                alt="Cubicle Logo"
+                alt="WorkSage Logo"
                 className="w-10 h-10 md:w-14 md:h-14"
               />
             </div>
             <span className="text-xl md:text-2xl font-semibold text-gray-900">
-              Cubicle
+              WorkSage
             </span>
           </motion.div>
 
@@ -667,11 +667,11 @@ function SignupPage() {
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#007991] text-white py-2.5 md:py-3 px-4 rounded-full font-bold hover:bg-[#005f73] transition-colors duration-200 mt-6 md:mt-8"
+                className="w-full bg-[#18cb96] text-white py-2.5 md:py-3 px-4 rounded-full font-bold hover:bg-[#14a085] transition-colors duration-200 mt-6 md:mt-8"
                 variants={formItemVariants}
                 whileTap={{ scale: 0.97 }}
                 whileHover={{
-                  backgroundColor: "#0f766e",
+                  backgroundColor: "#14a085",
                   boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                 }}
               >
@@ -687,7 +687,7 @@ function SignupPage() {
               Already Have an Account?{" "}
               <Link
                 to="/login"
-                className="text-[#007991] hover:text-[#005f73] font-medium"
+                className="text-[#18cb96] hover:text-[#14a085] font-medium"
               >
                 Sign in
               </Link>
@@ -698,7 +698,7 @@ function SignupPage() {
 
       {/* Right side - Hero Section (hidden on small screens) */}
       <motion.div
-        className="hidden md:flex flex-1 bg-[#222E50] flex-col justify-center items-center text-white relative overflow-hidden m-4 rounded-xl"
+        className="hidden md:flex flex-1 bg-[#18172a] flex-col justify-center items-center text-white relative overflow-hidden m-4 rounded-xl"
         variants={heroVariants}
         initial="hidden"
         animate="visible"

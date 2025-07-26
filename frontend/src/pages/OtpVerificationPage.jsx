@@ -149,7 +149,7 @@ function OtpVerificationPage() {
           <div className="w-16 h-16 rounded-lg flex items-center justify-center">
             <img
               src="src/assets/logo.png"
-              alt="Cubicle Logo"
+              alt="WorkSage Logo"
               className="w-16 h-16"
             />
           </div>
@@ -194,14 +194,14 @@ function OtpVerificationPage() {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onPaste={index === 0 ? handlePaste : null}
-                className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-bold border rounded-lg focus:ring-2 focus:ring-[#007991] focus:border-[#007991] outline-none"
+                className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-bold border rounded-lg focus:ring-2 focus:ring-[#18cb96] focus:border-[#18cb96] outline-none"
               />
             ))}
           </motion.div>
 
           <motion.button
             type="submit"
-            className="w-full bg-[#007991] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#005f73] transition-colors duration-200 flex justify-center items-center"
+            className="w-full bg-[#18cb96] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#14a085] transition-colors duration-200 flex justify-center items-center"
             disabled={loading}
             variants={itemVariants}
             whileTap={{ scale: 0.97 }}
@@ -215,7 +215,7 @@ function OtpVerificationPage() {
             Didn't receive the code?{" "}
             <button
               onClick={handleResendOtp}
-              className="text-[#007991] hover:text-[#005f73] font-medium"
+              className="text-[#18cb96] hover:text-[#14a085] font-medium"
             >
               Resend OTP
             </button>

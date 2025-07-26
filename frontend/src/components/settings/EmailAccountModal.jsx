@@ -173,7 +173,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={handleChange}
                         className={`w-full pl-10 p-2 border ${
                           errors.email ? 'border-red-300' : 'border-gray-300'
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="john.doe@example.com"
                         disabled={isLoading}
                       />
@@ -198,7 +198,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={handleChange}
                         className={`w-full pl-10 p-2 border ${
                           errors.displayName ? 'border-red-300' : 'border-gray-300'
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="John Doe"
                         disabled={isLoading}
                       />
@@ -228,7 +228,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={handleChange}
                         className={`w-full pl-10 p-2 border ${
                           errors['smtp.host'] ? 'border-red-300' : 'border-gray-300'
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="smtp.example.com"
                         disabled={isLoading}
                       />
@@ -250,7 +250,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={handleChange}
                         className={`w-full p-2 border ${
                           errors['smtp.port'] ? 'border-red-300' : 'border-gray-300'
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="587"
                         disabled={isLoading}
                       />
@@ -266,7 +266,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         name="smtp.secure"
                         checked={formData.smtp.secure}
                         onChange={handleChange}
-                        className="w-4 h-4 text-[#007991] focus:ring-[#007991] border-gray-300 rounded"
+                        className="w-4 h-4 text-[#18cb96] focus:ring-[#18cb96] border-gray-300 rounded"
                         disabled={isLoading}
                       />
                       <label htmlFor="secure" className="ml-2 block text-sm font-medium text-gray-700">
@@ -295,7 +295,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={handleChange}
                         className={`w-full pl-10 p-2 border ${
                           errors['auth.user'] ? 'border-red-300' : 'border-gray-300'
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="Usually your email address"
                         disabled={isLoading}
                       />
@@ -320,7 +320,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={handleChange}
                         className={`w-full pl-10 p-2 border ${
                           errors['auth.pass'] ? 'border-red-300' : 'border-gray-300'
-                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        } rounded-md focus:ring-[#18cb96] focus:border-[#18cb96]`}
                         placeholder="Your password or app password"
                         disabled={isLoading}
                       />
@@ -330,7 +330,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     )}
                     <p className="text-xs text-gray-500 mt-1">
                       For Gmail, you may need to use an App Password. 
-                      <a href="https://support.google.com/accounts/answer/185833" target="_blank" rel="noopener noreferrer" className="text-[#007991] ml-1">
+                      <a href="https://support.google.com/accounts/answer/185833" target="_blank" rel="noopener noreferrer" className="text-[#18cb96] ml-1">
                         Learn more
                       </a>
                     </p>
@@ -350,7 +350,7 @@ const EmailAccountModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#007991] text-white rounded-md hover:bg-[#006980] flex items-center"
+                  className="px-4 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] flex items-center"
                   disabled={isLoading}
                 >
                   {isLoading ? (
