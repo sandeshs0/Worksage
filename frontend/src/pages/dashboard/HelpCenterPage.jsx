@@ -62,7 +62,7 @@ function HelpCenterPage() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 min-h-[80vh] flex flex-col items-center">
-      <h2 className="text-2xl font-semibold text-[#222E50] text-center">Help Center</h2>
+      <h2 className="text-2xl font-semibold text-[#18172a] text-center">Help Center</h2>
       <hr className="w-full border-gray-200 mb-2" />
       <h3 className="text-3xl font-bold text-center mb-8 mt-2" style={{fontFamily:'inherit'}}>Frequently Asked Questions</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mb-8">
@@ -73,11 +73,11 @@ function HelpCenterPage() {
             onClick={() => handleAccordion(idx)}
           >
             <div className="flex items-start gap-3">
-              <span className="mt-1 text-[#007991]">
+              <span className="mt-1 text-[#18cb96]">
                 {openIndex === idx ? <Minus size={20}/> : <Plus size={20}/>} 
               </span>
               <div>
-                <div className="font-semibold text-lg md:text-xl text-[#222E50]">{faq.question}</div>
+                <div className="font-semibold text-lg md:text-xl text-[#18172a]">{faq.question}</div>
                 <AnimatePresence initial={false}>
                   {openIndex === idx && (
                     <motion.div
@@ -98,7 +98,7 @@ function HelpCenterPage() {
         ))}
       </div>
       <button
-        className="flex items-center gap-2 bg-[#007991] hover:bg-[#005f73] text-white px-6 py-2 rounded-lg font-semibold shadow transition mb-8"
+        className="flex items-center gap-2 bg-[#18cb96] hover:bg-[#14a085] text-white px-6 py-2 rounded-lg font-semibold shadow transition mb-8"
         onClick={() => setShowSupport(true)}
       >
         <UploadCloud size={20} /> Contact Support
@@ -114,13 +114,13 @@ function HelpCenterPage() {
             >
               ×
             </button>
-            <h3 className="text-xl font-semibold text-center mb-6 text-[#222E50]">Contact Customer Support</h3>
+            <h3 className="text-xl font-semibold text-center mb-6 text-[#18172a]">Contact Customer Support</h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block font-medium mb-1">Issue Faced</label>
                 <input
                   type="text"
-                  className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                  className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                   placeholder="Eg. Authentication, File Upload, UI issue"
                   value={issue}
                   onChange={e => setIssue(e.target.value)}
@@ -130,7 +130,7 @@ function HelpCenterPage() {
               <div className="mb-4">
                 <label className="block font-medium mb-1">Description</label>
                 <textarea
-                  className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#007991]"
+                  className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#18cb96]"
                   rows={4}
                   placeholder="Describe the exact situation of the issue you encountered."
                   value={desc}
@@ -165,7 +165,7 @@ function HelpCenterPage() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-[#007991] hover:bg-[#005f73] text-white py-2 rounded font-semibold transition"
+                className="w-full bg-[#18cb96] hover:bg-[#14a085] text-white py-2 rounded font-semibold transition"
               >
                 Submit
               </button>

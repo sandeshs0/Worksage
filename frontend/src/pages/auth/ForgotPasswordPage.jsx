@@ -1,10 +1,10 @@
+import { motion } from "framer-motion";
+import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 import authService from "../../services/authService";
 import { handleAuthError } from "../../utils/authUtils";
-import { toast } from "sonner";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -36,11 +36,11 @@ const ForgotPasswordPage = () => {
 
     try {
       const response = await authService.forgotPassword(email);
-      
+
       if (response.success) {
         setIsSubmitted(true);
         toast.success("Password reset instructions sent to your email");
-        
+
         // In development, show the token
         if (response.token) {
           toast.info(`Development Token: ${response.token}`, {
@@ -50,14 +50,14 @@ const ForgotPasswordPage = () => {
       }
     } catch (error) {
       console.error("Forgot password error:", error);
-      
-      const errorResponse = handleAuthError(error, 'send reset instructions');
-      
+
+      const errorResponse = handleAuthError(error, "send reset instructions");
+
       setErrors({
         general: errorResponse.general,
-        email: errorResponse.field
+        email: errorResponse.field,
       });
-      
+
       toast.error(errorResponse.toast);
     } finally {
       setIsLoading(false);
@@ -88,7 +88,7 @@ const ForgotPasswordPage = () => {
             <p className="text-sm text-gray-500">
               Didn't receive the email? Check your spam folder or try again.
             </p>
-            
+
             <button
               onClick={() => {
                 setIsSubmitted(false);
@@ -130,7 +130,8 @@ const ForgotPasswordPage = () => {
             Forgot Password?
           </h1>
           <p className="text-gray-600">
-            No worries! Enter your email address and we'll send you a link to reset your password.
+            No worries! Enter your email address and we'll send you a link to
+            reset your password.
           </p>
         </div>
 

@@ -211,7 +211,7 @@ function ClientDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#007991]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#18cb96]"></div>
       </div>
     );
   }
@@ -227,7 +227,7 @@ function ClientDetailsPage() {
         </p>
         <Link
           to="/dashboard/clients"
-          className="inline-flex items-center px-4 py-2 bg-[#007991] text-white rounded-md hover:bg-[#005f73] text-lg"
+          className="inline-flex items-center px-4 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] text-lg"
         >
           Return to Clients
         </Link>
@@ -239,7 +239,7 @@ function ClientDetailsPage() {
     <div>
       {/* Breadcrumb navigation */}
       <div className="flex items-center text-lg text-gray-500 mb-4">
-        <Link to="/dashboard/clients" className="hover:text-[#007991]">
+        <Link to="/dashboard/clients" className="hover:text-[#18cb96]">
           Clients
         </Link>
         <ChevronRight size={20} className="mx-2" />
@@ -249,13 +249,13 @@ function ClientDetailsPage() {
       {/* Client Header Section */}
       <div className="rounded-lg overflow-hidden mb-8">
         {/* Teal header background */}
-        <div className="bg-[#007991] h-40"></div>
+        <div className="bg-[#18cb96] h-40"></div>
 
         {/* Client info card */}
         <div className="bg-white rounded-b-lg shadow-sm px-8 pt-0 pb-8 relative">
           {/* Profile image - LARGER */}
           <div className="absolute -top-20 left-10">
-            <div className="w-40 h-40 rounded-full border-4 border-[#007991] overflow-hidden shadow-lg">
+            <div className="w-40 h-40 rounded-full border-4 border-[#18cb96] overflow-hidden shadow-lg">
               {client.profileImage ? (
                 <img
                   src={client.profileImage}
@@ -263,7 +263,7 @@ function ClientDetailsPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-[#f0f9ff] flex items-center justify-center text-[#007991] text-5xl font-bold">
+                <div className="w-full h-full bg-[#f0f9ff] flex items-center justify-center text-[#18cb96] text-5xl font-bold">
                   {client.name.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -509,7 +509,7 @@ function ClientDetailsPage() {
                     <div className="w-full sm:w-auto mt-3 sm:mt-0 flex space-x-2">
                       <Link
                         to={`/dashboard/invoices/${invoice._id}`}
-                        className="p-2 text-gray-600 hover:text-[#007991] hover:bg-gray-100 rounded-md"
+                        className="p-2 text-gray-600 hover:text-[#18cb96] hover:bg-gray-100 rounded-md"
                         title="View Invoice"
                       >
                         <Eye size={20} />
@@ -518,7 +518,7 @@ function ClientDetailsPage() {
                       {invoice.status !== "paid" && (
                         <>
                           <button
-                            className="p-2 text-gray-600 hover:text-[#007991] hover:bg-gray-100 rounded-md"
+                            className="p-2 text-gray-600 hover:text-[#18cb96] hover:bg-gray-100 rounded-md"
                             title="Send Invoice"
                           >
                             <Send size={20} />
@@ -547,7 +547,7 @@ function ClientDetailsPage() {
         <div className="flex space-x-4">
           <button
             onClick={() => setEditModalOpen(true)}
-            className="px-5 py-2 bg-[#007991] text-white text-base rounded-md hover:bg-[#005f73] focus:outline-none focus:ring-2 focus:ring-[#007991] focus:ring-offset-2"
+            className="px-5 py-2 bg-[#18cb96] text-white text-base rounded-md hover:bg-[#14a085] focus:outline-none focus:ring-2 focus:ring-[#18cb96] focus:ring-offset-2"
           >
             Edit Client
           </button>
@@ -599,7 +599,7 @@ function ClientDetailsPage() {
 
                   {/* Edit icon overlay */}
                   <div
-                    className="absolute bottom-0 right-0 bg-[#005f73] rounded-full p-1 cursor-pointer hover:bg-[#004a5c]"
+                    className="absolute bottom-0 right-0 bg-[#14a085] rounded-full p-1 cursor-pointer hover:bg-[#004a5c]"
                     onClick={triggerFileInput}
                   >
                     <Pencil size={16} className="text-white" />
