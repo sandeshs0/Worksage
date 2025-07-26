@@ -33,7 +33,7 @@ function VerifyEmailPage() {
           {status === 'loading' && (
             <>
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Loader size={32} className="text-[#007991] animate-spin" />
+                <Loader size={32} className="text-[#18cb96] animate-spin" />
               </div>
               <h1 className="text-xl font-bold text-gray-800 mb-2">Verifying Email</h1>
               <p className="text-center text-gray-600">
@@ -53,7 +53,7 @@ function VerifyEmailPage() {
               </p>
               <Link 
                 to="/dashboard/settings" 
-                className="px-6 py-2 bg-[#007991] text-white rounded-md hover:bg-[#006980] transition-colors"
+                className="px-6 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] transition-colors"
               >
                 Go to Settings
               </Link>
@@ -72,7 +72,7 @@ function VerifyEmailPage() {
               <div className="space-y-2">
                 <Link 
                   to="/dashboard/settings" 
-                  className="block px-6 py-2 bg-[#007991] text-white rounded-md hover:bg-[#006980] transition-colors text-center"
+                  className="block px-6 py-2 bg-[#18cb96] text-white rounded-md hover:bg-[#14a085] transition-colors text-center"
                 >
                   Return to Settings
                 </Link>

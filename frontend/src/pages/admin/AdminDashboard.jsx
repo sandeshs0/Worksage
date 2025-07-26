@@ -1831,22 +1831,25 @@ function SecurityMonitoring() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {securityLogs.map((log, index) => {
                       // Enhanced threat type detection supporting multiple log formats
-                      const isXSS = 
+                      const isXSS =
                         log.securityEvents?.[0]?.type === "XSS_ATTEMPT" ||
                         log.action === "xss_attempt" ||
-                        (log.type === "security" && log.action === "xss_attempt");
-                      
-                      const isNoSQL = 
-                        log.securityEvents?.[0]?.type === "NOSQL_INJECTION_ATTEMPT" ||
+                        (log.type === "security" &&
+                          log.action === "xss_attempt");
+
+                      const isNoSQL =
+                        log.securityEvents?.[0]?.type ===
+                          "NOSQL_INJECTION_ATTEMPT" ||
                         log.action === "nosql_injection_attempt" ||
-                        (log.type === "security" && log.action === "nosql_injection_attempt");
-                      
+                        (log.type === "security" &&
+                          log.action === "nosql_injection_attempt");
+
                       // Get threat type for display
-                      const threatType = 
-                        log.securityEvents?.[0]?.type || 
-                        log.action || 
+                      const threatType =
+                        log.securityEvents?.[0]?.type ||
+                        log.action ||
                         "UNKNOWN_THREAT";
-                      
+
                       return (
                         <tr
                           key={index}
@@ -1929,42 +1932,52 @@ function SecurityMonitoring() {
                                   {log.securityEvents?.[0]?.path || log.path}
                                 </div>
                               )}
-                              {isXSS && (log.securityEvents?.[0]?.details || log.details) && (
-                                <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                                  <span className="font-medium">
-                                    XSS Pattern:
-                                  </span>
-                                  <code className="block mt-1 break-all">
-                                    {typeof (log.securityEvents?.[0]?.details || log.details) ===
-                                    "string"
-                                      ? (log.securityEvents?.[0]?.details || log.details).substring(
-                                          0,
-                                          80
-                                        ) + "..."
-                                      : JSON.stringify(
-                                          log.securityEvents?.[0]?.details || log.details
-                                        ).substring(0, 80) + "..."}
-                                  </code>
-                                </div>
-                              )}
-                              {isNoSQL && (log.securityEvents?.[0]?.details || log.details) && (
-                                <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
-                                  <span className="font-medium">
-                                    NoSQL Pattern:
-                                  </span>
-                                  <code className="block mt-1 break-all">
-                                    {typeof (log.securityEvents?.[0]?.details || log.details) ===
-                                    "string"
-                                      ? (log.securityEvents?.[0]?.details || log.details).substring(
-                                          0,
-                                          80
-                                        ) + "..."
-                                      : JSON.stringify(
-                                          log.securityEvents?.[0]?.details || log.details
-                                        ).substring(0, 80) + "..."}
-                                  </code>
-                                </div>
-                              )}
+                              {isXSS &&
+                                (log.securityEvents?.[0]?.details ||
+                                  log.details) && (
+                                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                                    <span className="font-medium">
+                                      XSS Pattern:
+                                    </span>
+                                    <code className="block mt-1 break-all">
+                                      {typeof (
+                                        log.securityEvents?.[0]?.details ||
+                                        log.details
+                                      ) === "string"
+                                        ? (
+                                            log.securityEvents?.[0]?.details ||
+                                            log.details
+                                          ).substring(0, 80) + "..."
+                                        : JSON.stringify(
+                                            log.securityEvents?.[0]?.details ||
+                                              log.details
+                                          ).substring(0, 80) + "..."}
+                                    </code>
+                                  </div>
+                                )}
+                              {isNoSQL &&
+                                (log.securityEvents?.[0]?.details ||
+                                  log.details) && (
+                                  <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
+                                    <span className="font-medium">
+                                      NoSQL Pattern:
+                                    </span>
+                                    <code className="block mt-1 break-all">
+                                      {typeof (
+                                        log.securityEvents?.[0]?.details ||
+                                        log.details
+                                      ) === "string"
+                                        ? (
+                                            log.securityEvents?.[0]?.details ||
+                                            log.details
+                                          ).substring(0, 80) + "..."
+                                        : JSON.stringify(
+                                            log.securityEvents?.[0]?.details ||
+                                              log.details
+                                          ).substring(0, 80) + "..."}
+                                    </code>
+                                  </div>
+                                )}
                               {log.severity && (
                                 <span
                                   className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${
