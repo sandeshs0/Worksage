@@ -6,6 +6,7 @@ const {
   authorizeRole,
   authorizeOwnership,
 } = require("../middleware/authMiddleware");
+const { passwordPolicyMiddleware } = require("../middleware/passwordPolicy");
 const userController = require("../controllers/userController");
 const User = require("../models/User");
 
@@ -85,14 +86,7 @@ router.put(
   [
     auth,
     check("currentPassword", "Current password is required").exists(),
-    check("newPassword", "Please enter a password with 12 or more characters")
-      .isLength({ min: 12 })
-      .matches(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
-      )
-      .withMessage(
-        "Password must contain uppercase, lowercase, number and special character"
-      ),
+    passwordPolicyMiddleware, // Use robust password policy
   ],
   userController.changePassword
 );
@@ -105,14 +99,7 @@ router.put(
   [
     auth,
     check("currentPassword", "Current password is required").exists(),
-    check("newPassword", "Please enter a password with 12 or more characters")
-      .isLength({ min: 12 })
-      .matches(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
-      )
-      .withMessage(
-        "Password must contain uppercase, lowercase, number and special character"
-      ),
+    passwordPolicyMiddleware, // Use robust password policy
   ],
   userController.changePassword
 );

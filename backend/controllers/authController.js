@@ -210,6 +210,26 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check if password has expired
+    if (user.isPasswordExpired()) {
+      return res.status(401).json({
+        success: false,
+        message: "Your password has expired. Please reset your password.",
+        code: "PASSWORD_EXPIRED",
+        requiresPasswordReset: true
+      });
+    }
+
+    // Check if user must change password
+    if (user.mustChangePassword) {
+      return res.status(401).json({
+        success: false,
+        message: "You must change your password before continuing.",
+        code: "MUST_CHANGE_PASSWORD",
+        requiresPasswordChange: true
+      });
+    }
+
     // Create session with new token system
     const tokens = await TokenService.createSession(
       user._id,

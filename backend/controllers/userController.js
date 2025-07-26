@@ -93,55 +93,54 @@ exports.changePassword = async (req, res) => {
 
     // Validate input
     if (!currentPassword || !newPassword) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Please provide current and new password",
-        });
-    }
-
-    if (newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Password must be at least 8 characters long",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Please provide current and new password",
+      });
     }
 
     // Get user
     const userId = req.user._id || req.user.id;
     const user = await User.findById(userId);
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     // Check if user has a password (OAuth users might not have one)
     if (!user.password) {
       return res.status(400).json({
         success: false,
-        message: "Please use the password reset option instead",
+        message:
+          "You signed up with Google Account. Please use the password reset option instead",
       });
     }
 
+    // Verify current password
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Current password is incorrect" });
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-    await user.save();
+    // Use the robust password update method with history tracking
+    await user.updatePasswordWithHistory(newPassword);
 
-    res.json({ success: true, message: "Password updated successfully" });
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+      passwordExpiresAt: user.passwordExpiresAt,
+    });
   } catch (error) {
     console.error("Error changing password:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 

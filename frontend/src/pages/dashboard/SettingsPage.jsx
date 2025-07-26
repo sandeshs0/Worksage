@@ -4,6 +4,8 @@ import {
   ChevronRight,
   CreditCard,
   Edit,
+  Eye,
+  EyeOff,
   Loader,
   Lock,
   Mail,
@@ -19,8 +21,8 @@ import EmailAccountModal from "../../components/settings/EmailAccountModal";
 import ProfilePictureModal from "../../components/settings/ProfilePictureModal";
 import { useUser } from "../../context/UserContext";
 import authService from "../../services/authService";
+import planService from "../../services/planService";
 import settingsService from "../../services/settingsService";
-import planService from '../../services/planService';
 
 function SettingsPage() {
   const { user, isLoading: userLoading, refreshUserData } = useUser();
@@ -52,6 +54,11 @@ function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
+  // Password visibility state
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   // Profile picture modal state
   const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] =
     useState(false);
@@ -60,14 +67,14 @@ function SettingsPage() {
   const [emailAccounts, setEmailAccounts] = useState([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   const [showAddEmailModal, setShowAddEmailModal] = useState(false);
-  
+
   // Plans and payment state
   const [plans, setPlans] = useState([]);
   const [isLoadingPlans, setIsLoadingPlans] = useState(false);
   const [upgradeHistory, setUpgradeHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
-  
+
   const [newEmailAccount, setNewEmailAccount] = useState({
     email: "",
     displayName: "",
@@ -290,7 +297,19 @@ function SettingsPage() {
     }
 
     if (!/(?=.*[@$!%*?&])/.test(password)) {
-      errors.special = "Password must contain at least one special character";
+      errors.special =
+        "Password must contain at least one special character (@$!%*?&)";
+    }
+
+    // Check for common weak patterns
+    const commonPatterns = [
+      /(.)\1{2,}/, // Repeated characters
+      /123456|abcdef|qwerty/i, // Common sequences
+      /password|admin|user/i, // Common words
+    ];
+
+    if (commonPatterns.some((pattern) => pattern.test(password))) {
+      errors.pattern = "Password contains common patterns and is too weak";
     }
 
     return errors;
@@ -303,9 +322,27 @@ function SettingsPage() {
     setPasswordErrors({});
     setPasswordSuccess(false);
 
-    // Validate new password
-    const passwordValidationErrors = validatePassword(passwordData.newPassword);
+    // Basic input validation
+    if (!passwordData.currentPassword) {
+      setPasswordErrors({ currentPassword: 'Current password is required' });
+      setPasswordLoading(false);
+      return;
+    }
 
+    if (!passwordData.newPassword) {
+      setPasswordErrors({ general: 'New password is required' });
+      setPasswordLoading(false);
+      return;
+    }
+
+    if (!passwordData.confirmPassword) {
+      setPasswordErrors({ confirm: 'Password confirmation is required' });
+      setPasswordLoading(false);
+      return;
+    }
+
+    // Validate new password complexity
+    const passwordValidationErrors = validatePassword(passwordData.newPassword);
     if (Object.keys(passwordValidationErrors).length > 0) {
       setPasswordErrors(passwordValidationErrors);
       setPasswordLoading(false);
@@ -320,7 +357,7 @@ function SettingsPage() {
     }
 
     try {
-      await authService.updatePassword({
+      const response = await authService.updatePassword({
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
@@ -332,24 +369,92 @@ function SettingsPage() {
         confirmPassword: "",
       });
 
-      toast.success("Password updated successfully");
+      // Hide password visibility
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+
+      // Refresh user data to get new password expiry date
+      await refreshUserData();
+
+      toast.success(
+        "Password updated successfully! Your new password will expire in 90 days."
+      );
     } catch (error) {
-      setPasswordErrors({
-        general: error.message || "Failed to update password",
-      });
+      console.error("Password update error:", error);
+
+      // Handle specific error cases
+      if (error.code === "PASSWORD_REUSED") {
+        setPasswordErrors({
+          general:
+            "Cannot reuse your current password or any of your last 5 passwords",
+        });
+      } else if (error.errors) {
+        // Handle validation errors from backend
+        const errorMap = {};
+        error.errors.forEach((err) => {
+          errorMap[err.field || "general"] = err.message;
+        });
+        setPasswordErrors(errorMap);
+      } else if (error.response?.data?.message) {
+        setPasswordErrors({
+          general: error.response.data.message,
+        });
+      } else {
+        setPasswordErrors({
+          general: error.message || "Failed to update password",
+        });
+      }
+
       toast.error("Failed to update password");
     } finally {
       setPasswordLoading(false);
     }
   };
 
-  // Handle password input changes
+  // Handle password input changes with real-time validation
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    // Clear previous errors for this field
+    setPasswordErrors(prev => {
+      const newErrors = { ...prev };
+      if (name === 'currentPassword') {
+        delete newErrors.currentPassword;
+      }
+      if (name === 'newPassword') {
+        // Clear all password complexity errors
+        delete newErrors.length;
+        delete newErrors.lowercase;
+        delete newErrors.uppercase;
+        delete newErrors.number;
+        delete newErrors.special;
+        delete newErrors.pattern;
+      }
+      if (name === 'confirmPassword') {
+        delete newErrors.confirm;
+      }
+      return newErrors;
+    });
+
+    // Real-time validation for new password
+    if (name === 'newPassword' && value) {
+      const validationErrors = validatePassword(value);
+      if (Object.keys(validationErrors).length > 0) {
+        setPasswordErrors(prev => ({ ...prev, ...validationErrors }));
+      }
+    }
+
+    // Real-time validation for password confirmation
+    if (name === 'confirmPassword' && value && passwordData.newPassword) {
+      if (value !== passwordData.newPassword) {
+        setPasswordErrors(prev => ({ ...prev, confirm: 'Passwords do not match' }));
+      }
+    }
   };
 
   // Handle profile picture upload from the modal
@@ -448,8 +553,8 @@ function SettingsPage() {
       const data = await planService.getPlans();
       setPlans(data.plans || []);
     } catch (error) {
-      console.error('Failed to fetch plans:', error);
-      toast.error('Failed to load plans');
+      console.error("Failed to fetch plans:", error);
+      toast.error("Failed to load plans");
     } finally {
       setIsLoadingPlans(false);
     }
@@ -457,12 +562,15 @@ function SettingsPage() {
 
   const fetchUpgradeHistory = async () => {
     try {
+      console.log("🔄 Fetching upgrade history...");
       setIsLoadingHistory(true);
       const data = await planService.getPlanUpgradeHistory();
+      console.log("📋 Upgrade history response:", data);
       setUpgradeHistory(data.upgrades || []);
+      console.log("✅ Upgrade history set:", data.upgrades || []);
     } catch (error) {
-      console.error('Failed to fetch upgrade history:', error);
-      toast.error('Failed to load upgrade history');
+      console.error("❌ Failed to fetch upgrade history:", error);
+      toast.error("Failed to load upgrade history");
     } finally {
       setIsLoadingHistory(false);
     }
@@ -472,17 +580,17 @@ function SettingsPage() {
     try {
       setPaymentLoading(true);
       const response = await planService.initiatePlanUpgrade(planType);
-      
+
       if (response.success && response.khaltiPayment?.payment_url) {
         // Redirect to Khalti payment page
         window.location.href = response.khaltiPayment.payment_url;
       } else {
-        toast.error('Failed to initialize payment');
+        toast.error("Failed to initialize payment");
       }
     } catch (error) {
-      console.error('Plan upgrade failed:', error);
-      toast.error('Failed to initiate plan upgrade', {
-        description: error.message || 'Please try again'
+      console.error("Plan upgrade failed:", error);
+      toast.error("Failed to initiate plan upgrade", {
+        description: error.message || "Please try again",
       });
     } finally {
       setPaymentLoading(false);
@@ -491,7 +599,8 @@ function SettingsPage() {
 
   // Load plans when billing tab is active
   useEffect(() => {
-    if (activeTab === 'billing') {
+    if (activeTab === "billing" || activeTab === "plans") {
+      console.log("📋 Active tab changed to billing/plans, fetching data...");
       fetchPlans();
       fetchUpgradeHistory();
     }
@@ -500,8 +609,11 @@ function SettingsPage() {
   // Handle URL parameters for tab selection
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    if (tabParam && ['profile', 'email', 'password', 'billing'].includes(tabParam)) {
+    const tabParam = urlParams.get("tab");
+    if (
+      tabParam &&
+      ["profile", "email", "password", "billing", "plans"].includes(tabParam)
+    ) {
       setActiveTab(tabParam);
     }
   }, []);
@@ -860,6 +972,43 @@ function SettingsPage() {
             <div>
               <h3 className="text-xl font-medium mb-6">Change Password</h3>
 
+              {/* Password Security Info */}
+              <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-md mb-6">
+                <div className="flex items-start">
+                  <AlertCircle
+                    size={20}
+                    className="text-blue-500 mt-0.5 mr-2"
+                  />
+                  <div>
+                    <p className="text-sm font-medium mb-2">
+                      Password Security Policy
+                    </p>
+                    <ul className="text-xs space-y-1">
+                      <li>• Passwords expire every 90 days</li>
+                      <li>• Cannot reuse your last 5 passwords</li>
+                      <li>• Must be at least 12 characters long</li>
+                      <li>
+                        • Must contain uppercase, lowercase, numbers, and
+                        special characters
+                      </li>
+                    </ul>
+                    {user?.passwordExpiresAt && (
+                      <p className="text-xs mt-2">
+                        <strong>Current password expires:</strong>{" "}
+                        {new Date(user.passwordExpiresAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {passwordSuccess && (
                 <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-md mb-6 flex items-center">
                   <svg
@@ -873,11 +1022,12 @@ function SettingsPage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Password changed successfully!
+                  Password changed successfully! Your new password will expire
+                  in 90 days.
                 </div>
               )}
 
-              {passwordErrors.form && (
+              {passwordErrors.general && (
                 <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md mb-6 flex items-center">
                   <svg
                     className="w-5 h-5 mr-2"
@@ -890,29 +1040,44 @@ function SettingsPage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  {passwordErrors.form}
+                  {passwordErrors.general}
                 </div>
               )}
 
               <form className="max-w-lg" onSubmit={handlePasswordSubmit}>
                 <div className="space-y-4">
+                  {/* Current Password */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Current Password
                     </label>
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      className={`w-full p-2 border ${
-                        passwordErrors.currentPassword
-                          ? "border-red-300"
-                          : "border-gray-300"
-                      } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
-                      placeholder="Enter your current password"
-                      disabled={passwordLoading}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        name="currentPassword"
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordChange}
+                        className={`w-full p-2 pr-10 border ${
+                          passwordErrors.currentPassword
+                            ? "border-red-300"
+                            : "border-gray-300"
+                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        placeholder="Enter your current password"
+                        disabled={passwordLoading}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      >
+                        {showCurrentPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                    </div>
                     {passwordErrors.currentPassword && (
                       <p className="text-red-500 text-xs mt-1">
                         {passwordErrors.currentPassword}
@@ -920,63 +1085,107 @@ function SettingsPage() {
                     )}
                   </div>
 
+                  {/* New Password */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       New Password
                     </label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      className={`w-full p-2 border ${
-                        passwordErrors.newPassword
-                          ? "border-red-300"
-                          : "border-gray-300"
-                      } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
-                      placeholder="Enter new password"
-                      disabled={passwordLoading}
-                    />
-                    {passwordErrors.newPassword ? (
-                      <p className="text-red-500 text-xs mt-1">
-                        {passwordErrors.newPassword}
-                      </p>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        name="newPassword"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        className={`w-full p-2 pr-10 border ${
+                          Object.keys(passwordErrors).some(key => 
+                            key !== 'general' && key !== 'confirm' && key !== 'currentPassword'
+                          ) ? "border-red-300" : "border-gray-300"
+                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        placeholder="Enter new password"
+                        disabled={passwordLoading}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                    </div>
+                    
+                    {/* Password Requirements and Validation */}
+                    {Object.keys(passwordErrors).length > 0 && 
+                     Object.keys(passwordErrors).some(key => 
+                       key !== 'general' && key !== 'confirm' && key !== 'currentPassword'
+                     ) ? (
+                      <div className="text-red-500 text-xs mt-1 space-y-1">
+                        <p className="font-medium">Password requirements not met:</p>
+                        {Object.entries(passwordErrors).map(([key, error]) => 
+                          key !== "general" && key !== "confirm" && key !== "currentPassword" && (
+                            <p key={key}>• {error}</p>
+                          )
+                        )}
+                      </div>
                     ) : (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Password must be at least 8 characters and include a mix
-                        of letters, numbers, and special characters.
-                      </p>
+                      <div className="text-xs text-gray-500 mt-1 space-y-1">
+                        <p className="font-medium">Password must meet the following requirements:</p>
+                        <p>• At least 12 characters long</p>
+                        <p>• Include uppercase and lowercase letters</p>
+                        <p>• Include numbers and special characters (@$!%*?&)</p>
+                        <p>• Cannot reuse your last 5 passwords</p>
+                      </div>
                     )}
                   </div>
 
+                  {/* Confirm Password */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Confirm New Password
                     </label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className={`w-full p-2 border ${
-                        passwordErrors.confirmPassword
-                          ? "border-red-300"
-                          : "border-gray-300"
-                      } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
-                      placeholder="Confirm new password"
-                      disabled={passwordLoading}
-                    />
-                    {passwordErrors.confirmPassword && (
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        className={`w-full p-2 pr-10 border ${
+                          passwordErrors.confirm
+                            ? "border-red-300"
+                            : "border-gray-300"
+                        } rounded-md focus:ring-[#007991] focus:border-[#007991]`}
+                        placeholder="Confirm new password"
+                        disabled={passwordLoading}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        )}
+                      </button>
+                    </div>
+                    {passwordErrors.confirm && (
                       <p className="text-red-500 text-xs mt-1">
-                        {passwordErrors.confirmPassword}
+                        {passwordErrors.confirm}
                       </p>
                     )}
                   </div>
 
+                  {/* Submit Button */}
                   <div className="mt-6">
                     <button
                       type="submit"
-                      className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980] flex items-center justify-center"
+                      className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={passwordLoading}
                     >
                       {passwordLoading ? (
@@ -1113,12 +1322,18 @@ function SettingsPage() {
               {isLoadingPlans ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="border border-gray-200 rounded-lg p-4 animate-pulse">
+                    <div
+                      key={i}
+                      className="border border-gray-200 rounded-lg p-4 animate-pulse"
+                    >
                       <div className="h-6 bg-gray-200 rounded mb-3"></div>
                       <div className="h-8 bg-gray-200 rounded mb-3"></div>
                       <div className="space-y-2 mb-4">
                         {[1, 2, 3, 4].map((j) => (
-                          <div key={j} className="h-4 bg-gray-200 rounded"></div>
+                          <div
+                            key={j}
+                            className="h-4 bg-gray-200 rounded"
+                          ></div>
                         ))}
                       </div>
                       <div className="h-10 bg-gray-200 rounded"></div>
@@ -1131,7 +1346,7 @@ function SettingsPage() {
                   <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-3">
                       <h5 className="font-medium text-gray-800">Free</h5>
-                      {user?.plan === 'free' && (
+                      {user?.plan === "free" && (
                         <span className="text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded-full">
                           Current Plan
                         </span>
@@ -1145,20 +1360,50 @@ function SettingsPage() {
 
                     <ul className="space-y-2 mb-4">
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Up to 3 projects
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Basic email features
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         5 GB storage
                       </li>
@@ -1168,20 +1413,26 @@ function SettingsPage() {
                       disabled
                       className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
                     >
-                      {user?.plan === 'free' ? 'Current Plan' : 'Downgrade Not Available'}
+                      {user?.plan === "free"
+                        ? "Current Plan"
+                        : "Downgrade Not Available"}
                     </button>
                   </div>
 
                   {/* Pro Plan */}
-                  <div className={`border-2 rounded-lg p-4 hover:shadow-md transition-shadow relative ${
-                    user?.plan === 'pro' ? 'border-green-500' : 'border-[#007991]'
-                  }`}>
-                    {user?.plan !== 'pro' && (
+                  <div
+                    className={`border-2 rounded-lg p-4 hover:shadow-md transition-shadow relative ${
+                      user?.plan === "pro"
+                        ? "border-green-500"
+                        : "border-[#007991]"
+                    }`}
+                  >
+                    {user?.plan !== "pro" && (
                       <div className="absolute -top-3 -right-3 bg-[#007991] text-white text-xs px-2 py-1 rounded-md">
                         Popular
                       </div>
                     )}
-                    {user?.plan === 'pro' && (
+                    {user?.plan === "pro" && (
                       <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-md">
                         Current
                       </div>
@@ -1198,39 +1449,79 @@ function SettingsPage() {
 
                     <ul className="space-y-2 mb-4">
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Unlimited projects
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Advanced email features
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         50 GB storage
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         AI assistant features
                       </li>
                     </ul>
 
-                    {user?.plan === 'pro' ? (
+                    {user?.plan === "pro" ? (
                       <button
                         disabled
                         className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
                       >
                         Current Plan
                       </button>
-                    ) : user?.plan === 'vantage' ? (
+                    ) : user?.plan === "vantage" ? (
                       <button
                         disabled
                         className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
@@ -1239,20 +1530,24 @@ function SettingsPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => handlePlanUpgrade('pro')}
+                        onClick={() => handlePlanUpgrade("pro")}
                         disabled={paymentLoading}
                         className="w-full bg-[#007991] text-white p-2 rounded-md hover:bg-[#006980] disabled:opacity-50"
                       >
-                        {paymentLoading ? 'Processing...' : 'Upgrade to Pro'}
+                        {paymentLoading ? "Processing..." : "Upgrade to Pro"}
                       </button>
                     )}
                   </div>
 
                   {/* Vantage Plan */}
-                  <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow relative ${
-                    user?.plan === 'vantage' ? 'border-2 border-green-500' : 'border border-gray-200'
-                  }`}>
-                    {user?.plan === 'vantage' && (
+                  <div
+                    className={`border rounded-lg p-4 hover:shadow-md transition-shadow relative ${
+                      user?.plan === "vantage"
+                        ? "border-2 border-green-500"
+                        : "border border-gray-200"
+                    }`}
+                  >
+                    {user?.plan === "vantage" && (
                       <div className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-md">
                         Current
                       </div>
@@ -1269,38 +1564,88 @@ function SettingsPage() {
 
                     <ul className="space-y-2 mb-4">
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Unlimited everything
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Premium support
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         500 GB storage
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         Advanced analytics
                       </li>
                       <li className="flex items-center text-sm">
-                        <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        <svg
+                          className="w-4 h-4 mr-2 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
                         </svg>
                         White labeling
                       </li>
                     </ul>
 
-                    {user?.plan === 'vantage' ? (
+                    {user?.plan === "vantage" ? (
                       <button
                         disabled
                         className="w-full bg-gray-300 text-gray-500 cursor-not-allowed p-2 rounded-md"
@@ -1309,11 +1654,13 @@ function SettingsPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => handlePlanUpgrade('vantage')}
+                        onClick={() => handlePlanUpgrade("vantage")}
                         disabled={paymentLoading}
                         className="w-full border border-[#007991] text-[#007991] p-2 rounded-md hover:bg-[#007991] hover:text-white transition-colors disabled:opacity-50"
                       >
-                        {paymentLoading ? 'Processing...' : 'Upgrade to Vantage'}
+                        {paymentLoading
+                          ? "Processing..."
+                          : "Upgrade to Vantage"}
                       </button>
                     )}
                   </div>
@@ -1322,11 +1669,16 @@ function SettingsPage() {
 
               {/* Upgrade History */}
               <div className="mt-8">
-                <h4 className="font-medium text-gray-700 mb-4">Upgrade History</h4>
+                <h4 className="font-medium text-gray-700 mb-4">
+                  Upgrade History
+                </h4>
                 {isLoadingHistory ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="border border-gray-200 rounded-lg p-4 animate-pulse">
+                      <div
+                        key={i}
+                        className="border border-gray-200 rounded-lg p-4 animate-pulse"
+                      >
                         <div className="flex justify-between items-center">
                           <div className="h-4 bg-gray-200 rounded w-32"></div>
                           <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -1338,30 +1690,47 @@ function SettingsPage() {
                 ) : upgradeHistory.length > 0 ? (
                   <div className="space-y-3">
                     {upgradeHistory.map((upgrade) => (
-                      <div key={upgrade._id} className="border border-gray-200 rounded-lg p-4">
+                      <div
+                        key={upgrade._id}
+                        className="border border-gray-200 rounded-lg p-4"
+                      >
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="font-medium">
-                              Upgraded to {upgrade.toPlan ? upgrade.toPlan.charAt(0).toUpperCase() + upgrade.toPlan.slice(1) : 'Unknown Plan'}
+                              Upgraded to{" "}
+                              {upgrade.toPlan
+                                ? upgrade.toPlan.charAt(0).toUpperCase() +
+                                  upgrade.toPlan.slice(1)
+                                : "Unknown Plan"}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {new Date(upgrade.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
+                              {new Date(upgrade.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">Rs. {(upgrade.amount / 100).toLocaleString()}</p>
-                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                              upgrade.status === 'completed' 
-                                ? 'bg-green-100 text-green-800' 
-                                : upgrade.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {upgrade.status ? upgrade.status.charAt(0).toUpperCase() + upgrade.status.slice(1) : 'Unknown Status'}
+                            <p className="font-medium">
+                              Rs. {(upgrade.amount / 100).toLocaleString()}
+                            </p>
+                            <span
+                              className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                upgrade.status === "completed"
+                                  ? "bg-green-100 text-green-800"
+                                  : upgrade.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {upgrade.status
+                                ? upgrade.status.charAt(0).toUpperCase() +
+                                  upgrade.status.slice(1)
+                                : "Unknown Status"}
                             </span>
                           </div>
                         </div>
@@ -1377,7 +1746,9 @@ function SettingsPage() {
                   <div className="border border-gray-200 rounded-lg p-8 text-center">
                     <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">No upgrade history yet</p>
-                    <p className="text-sm text-gray-400">Upgrade to a paid plan to see your transaction history</p>
+                    <p className="text-sm text-gray-400">
+                      Upgrade to a paid plan to see your transaction history
+                    </p>
                   </div>
                 )}
               </div>

@@ -559,20 +559,91 @@ exports.getPlanUpgradeHistory = async (req, res) => {
     const userId = req.user.id;
     const { page = 1, limit = 10, status } = req.query;
 
-    const query = { userId };
-    if (status) {
-      query.status = status;
+    console.log('📋 Getting upgrade history for user:', userId);
+    console.log('📋 Query params:', { page, limit, status });
+    console.log('📋 User object:', req.user);
+
+    // First, let's check if there are any upgrades at all
+    const allUpgrades = await PlanUpgrade.find({});
+    console.log('📋 Total upgrades in database:', allUpgrades.length);
+    
+    if (allUpgrades.length > 0) {
+      console.log('📋 Sample upgrade:', {
+        _id: allUpgrades[0]._id,
+        userId: allUpgrades[0].userId,
+        userIdType: typeof allUpgrades[0].userId,
+        requestUserId: userId,
+        requestUserIdType: typeof userId,
+        match: allUpgrades[0].userId.toString() === userId.toString()
+      });
+      
+      // Show all user IDs in database
+      console.log('📋 All user IDs in database:', allUpgrades.map(u => u.userId.toString()));
     }
 
-    const upgrades = await PlanUpgrade.find(query)
+    // Let's try a simple query first without any user filtering
+    console.log('📋 Testing query without user filter...');
+    const testUpgrades = await PlanUpgrade.find({}).limit(5);
+    console.log('📋 Test upgrades found:', testUpgrades.length);
+
+    // Now try with exact user ID matching
+    console.log('📋 Testing with exact userId:', userId);
+    const exactMatch = await PlanUpgrade.find({ userId: userId });
+    console.log('📋 Exact match found:', exactMatch.length);
+
+    // Try with string conversion
+    const stringMatch = await PlanUpgrade.find({ userId: userId.toString() });
+    console.log('📋 String match found:', stringMatch.length);
+
+    // Try with ObjectId conversion
+    const mongoose = require('mongoose');
+    let objectIdMatch = [];
+    if (mongoose.Types.ObjectId.isValid(userId)) {
+      objectIdMatch = await PlanUpgrade.find({ userId: new mongoose.Types.ObjectId(userId) });
+      console.log('📋 ObjectId match found:', objectIdMatch.length);
+    }
+
+    // Use the match that works
+    let finalUpgrades = [];
+    let finalQuery = {};
+    
+    if (exactMatch.length > 0) {
+      finalQuery = { userId: userId };
+      finalUpgrades = exactMatch;
+      console.log('📋 Using exact match');
+    } else if (stringMatch.length > 0) {
+      finalQuery = { userId: userId.toString() };
+      finalUpgrades = stringMatch;
+      console.log('📋 Using string match');
+    } else if (objectIdMatch.length > 0) {
+      finalQuery = { userId: new mongoose.Types.ObjectId(userId) };
+      finalUpgrades = objectIdMatch;
+      console.log('📋 Using ObjectId match');
+    } else {
+      console.log('📋 No matches found with any method');
+      finalQuery = { userId: userId };
+    }
+
+    if (status) {
+      finalQuery.status = status;
+    }
+
+    console.log('📋 Final query:', JSON.stringify(finalQuery, null, 2));
+
+    // Get paginated results
+    const upgrades = await PlanUpgrade.find(finalQuery)
       .sort({ createdAt: -1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .select("-paymentDetails.khalti_response"); // Exclude sensitive payment data
+      .skip((page - 1) * limit);
 
-    const total = await PlanUpgrade.countDocuments(query);
+    const total = await PlanUpgrade.countDocuments(finalQuery);
 
-    res.json({
+    console.log('📋 Final results:', {
+      upgradesFound: upgrades.length,
+      totalCount: total
+    });
+
+    const response = {
       success: true,
       upgrades,
       pagination: {
@@ -582,7 +653,9 @@ exports.getPlanUpgradeHistory = async (req, res) => {
         hasNext: page < Math.ceil(total / limit),
         hasPrev: page > 1,
       },
-    });
+    };
+
+    res.json(response);
   } catch (error) {
     console.error("Get plan upgrade history error:", error);
     res.status(500).json({
