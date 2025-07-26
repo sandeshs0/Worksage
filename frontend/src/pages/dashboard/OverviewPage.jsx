@@ -49,7 +49,7 @@ function OverviewPage() {
     {
       value: "0",
       label: "Clients",
-      icon: <Users size={20} className="text-[#007991]" />,
+      icon: <Users size={20} className="text-[#18cb96]" />,
       bgColor: "bg-[#f0f9ff]",
     },
     {

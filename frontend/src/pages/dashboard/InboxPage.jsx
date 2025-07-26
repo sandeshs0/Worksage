@@ -99,11 +99,11 @@ function InboxPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
             <div className="flex items-center space-x-2">
-              <span className="bg-[#007991] text-white text-xs px-2 py-1 rounded-full">
+              <span className="bg-[#18cb96] text-white text-xs px-2 py-1 rounded-full">
                 3
               </span>
               <button className="p-1 hover:bg-gray-100 rounded">
-                <Plus size={18} className="text-[#007991]" />
+                <Plus size={18} className="text-[#18cb96]" />
               </button>
             </div>
           </div>
@@ -117,7 +117,7 @@ function InboxPage() {
             <input
               type="text"
               placeholder="Search messages"
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007991]/20 focus:border-[#007991]"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#18cb96]/20 focus:border-[#18cb96]"
             />
           </div>
         </div>
@@ -130,7 +130,7 @@ function InboxPage() {
               onClick={() => setSelectedConversation(index)}
               className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
                 selectedConversation === index
-                  ? "bg-[#007991]/5 border-r-2 border-r-[#007991]"
+                  ? "bg-[#18cb96]/5 border-r-2 border-r-[#18cb96]"
                   : ""
               }`}
             >
@@ -157,7 +157,7 @@ function InboxPage() {
                   </div>
 
                   {conversation.project && (
-                    <div className="text-xs text-[#007991] bg-[#007991]/10 px-2 py-1 rounded mb-1 inline-block">
+                    <div className="text-xs text-[#18cb96] bg-[#18cb96]/10 px-2 py-1 rounded mb-1 inline-block">
                       {conversation.project}
                     </div>
                   )}
@@ -167,7 +167,7 @@ function InboxPage() {
                   </p>
 
                   {conversation.unread && (
-                    <div className="w-2 h-2 bg-[#007991] rounded-full mt-1"></div>
+                    <div className="w-2 h-2 bg-[#18cb96] rounded-full mt-1"></div>
                   )}
                 </div>
               </div>
@@ -200,7 +200,7 @@ function InboxPage() {
               </div>
 
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                Cubicle Messaging
+                WorkSage Messaging
               </h3>
               <p className="text-gray-500">Select a conversation</p>
             </div>
@@ -267,10 +267,10 @@ function InboxPage() {
                   )}
 
                   {message.sender === "me" && (
-                    <div className="bg-[#007991] text-white max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
+                    <div className="bg-[#18cb96] text-white max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
                       <p className="text-sm">{message.text}</p>
                       {message.time !== "typing" && (
-                        <p className="text-xs mt-1 text-[#007991]/70">
+                        <p className="text-xs mt-1 text-[#18cb96]/70">
                           {message.time}
                         </p>
                       )}
@@ -290,7 +290,7 @@ function InboxPage() {
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007991]/20 focus:border-[#007991] pr-12"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#18cb96]/20 focus:border-[#18cb96] pr-12"
                   />
                 </div>
                 <button
@@ -298,7 +298,7 @@ function InboxPage() {
                   disabled={!messageInput.trim()}
                   className={`p-3 rounded-lg transition-colors ${
                     messageInput.trim()
-                      ? "bg-[#007991] text-white hover:bg-[#007991]/90"
+                      ? "bg-[#18cb96] text-white hover:bg-[#18cb96]/90"
                       : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
                 >

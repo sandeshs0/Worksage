@@ -442,7 +442,7 @@ function ClientsPage() {
         <h1 className="text-2xl font-bold text-gray-800">Manage Clients</h1>
         <button
           onClick={handleAddClient}
-          className="bg-[#007991] hover:bg-[#005f73] text-white px-4 py-2 rounded-md flex items-center transition-colors"
+          className="bg-[#18cb96] hover:bg-[#14a085] text-white px-4 py-2 rounded-md flex items-center transition-colors"
         >
           <Plus size={18} className="mr-1" /> Add New
         </button>
@@ -474,7 +474,7 @@ function ClientsPage() {
             <input
               type="text"
               placeholder="Search clients by name or email"
-              className="pl-10 pr-3 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007991] focus:border-[#007991]"
+              className="pl-10 pr-3 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-[#18cb96] focus:border-[#18cb96]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -522,7 +522,7 @@ function ClientsPage() {
               <div className="w-full sm:w-auto">
                 <button
                   onClick={() => setFilters({ revenueMin: "", revenueMax: "" })}
-                  className="px-3 py-2 text-sm text-[#007991] hover:text-[#005f73]"
+                  className="px-3 py-2 text-sm text-[#18cb96] hover:text-[#14a085]"
                 >
                   Clear Filters
                 </button>
@@ -563,7 +563,7 @@ function ClientsPage() {
                     setSearchTerm("");
                     setFilters({ revenueMin: "", revenueMax: "" });
                   }}
-                  className="mt-2 text-sm text-[#007991] hover:text-[#005f73] underline"
+                  className="mt-2 text-sm text-[#18cb96] hover:text-[#14a085] underline"
                 >
                   Clear all filters
                 </button>
@@ -573,7 +573,7 @@ function ClientsPage() {
                 <p>You haven't added any clients yet.</p>
                 <button
                   onClick={handleAddClient}
-                  className="mt-2 px-4 py-2 bg-[#007991] hover:bg-[#005f73] text-white rounded-md flex items-center transition-colors mx-auto"
+                  className="mt-2 px-4 py-2 bg-[#18cb96] hover:bg-[#14a085] text-white rounded-md flex items-center transition-colors mx-auto"
                 >
                   <Plus size={18} className="mr-1" /> Add New Client
                 </button>
@@ -695,7 +695,7 @@ function ClientsPage() {
                             onClick={() => paginate(pageNumber)}
                             className={`w-8 h-8 flex items-center justify-center rounded-md ${
                               currentPage === pageNumber
-                                ? "bg-[#007991] text-white"
+                                ? "bg-[#18cb96] text-white"
                                 : "text-gray-700 hover:bg-gray-100"
                             }`}
                           >
@@ -766,7 +766,7 @@ function ClientsPage() {
 
                   {/* Edit icon overlay */}
                   <div
-                    className="absolute bottom-0 right-0 bg-[#005f73] rounded-full p-1 cursor-pointer hover:bg-[#004a5c]"
+                    className="absolute bottom-0 right-0 bg-[#14a085] rounded-full p-1 cursor-pointer hover:bg-[#004a5c]"
                     onClick={triggerFileInput}
                   >
                     <Pencil size={14} className="text-white" />

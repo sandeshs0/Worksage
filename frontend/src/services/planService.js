@@ -29,7 +29,7 @@ const planService = {
   initiatePlanUpgrade: async (targetPlan) => {
     try {
       const response = await api.post("/plans/initiate-upgrade", {
-        targetPlan
+        targetPlan,
       });
       return response.data;
     } catch (error) {
@@ -42,7 +42,7 @@ const planService = {
   verifyPlanUpgrade: async (pidx) => {
     try {
       const response = await api.post("/plans/verify-payment", {
-        pidx
+        pidx,
       });
       return response.data;
     } catch (error) {
@@ -56,7 +56,7 @@ const planService = {
     try {
       const params = new URLSearchParams({ page, limit });
       if (status) params.append("status", status);
-      
+
       const response = await api.get(`/plans/upgrade-history?${params}`);
       return response.data;
     } catch (error) {
@@ -74,7 +74,7 @@ const planService = {
       console.error("Error cancelling plan upgrade:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default planService;
