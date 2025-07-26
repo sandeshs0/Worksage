@@ -6,6 +6,7 @@ const apiLimiter = rateLimit({
   message: {
     error: "Too many requests from this IP, please try again after 15 minutes.",
     retryAfter: 15 * 60,
+    status: 429,
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -14,6 +15,7 @@ const apiLimiter = rateLimit({
       error:
         "Too many requests from this IP, please try again after 15 minutes.",
       retryAfter: Math.ceil(req.rateLimit.resetTime / 1000),
+      status: 429,
     });
   },
 });
@@ -34,6 +36,7 @@ const authLimiter = rateLimit({
       error:
         "Too many authentication attempts from this IP, please try again after 15 minutes.",
       retryAfter: Math.ceil(req.rateLimit.resetTime / 1000),
+      status: 429,
     });
   },
 });
