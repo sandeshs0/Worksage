@@ -23,12 +23,16 @@ function LoginPage() {
   const [retryCountdown, setRetryCountdown] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, isLoading } = useUser();
+  const { login, isAuthenticated, isLoading, user, refreshUserData } = useUser();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      navigate("/dashboard", { replace: true });
+      if (user?.isAdmin) {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [isAuthenticated, isLoading, navigate]);
 
@@ -89,8 +93,16 @@ function LoginPage() {
           password: formData.password,
         });
 
-        // Navigate to dashboard on successful login
-        navigate("/dashboard");
+        // Refresh user data to ensure context is up-to-date
+        await refreshUserData();
+
+        // Use the latest user context for redirect
+        const updatedUser = authService.getCurrentUser();
+        if (updatedUser?.isAdmin) {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       } catch (error) {
         console.error("Login error:", error);
 
@@ -98,7 +110,8 @@ function LoginPage() {
         if (error.response?.status === 429) {
           // Rate limit error
           const retryAfter = error.response?.data?.retryAfter;
-          const errorMessage = error.response?.data?.error || "Too many requests from this IP";
+          const errorMessage =
+            error.response?.data?.error || "Too many requests from this IP";
 
           setIsRateLimited(true);
 
@@ -115,11 +128,16 @@ function LoginPage() {
           }
         } else if (error.response?.status === 400) {
           // Invalid credentials
-          const errorMessage = error.response?.data?.msg || error.response?.data?.message;
+          const errorMessage =
+            error.response?.data?.msg || error.response?.data?.message;
           if (errorMessage === "Invalid credentials") {
-            setApiError("Invalid email or password. Please check your credentials and try again.");
+            setApiError(
+              "Invalid email or password. Please check your credentials and try again."
+            );
           } else {
-            setApiError(errorMessage || "Login failed. Please check your credentials.");
+            setApiError(
+              errorMessage || "Login failed. Please check your credentials."
+            );
           }
         } else if (error.response?.status >= 500) {
           // Server errors
@@ -128,8 +146,8 @@ function LoginPage() {
           // Other errors
           setApiError(
             error.response?.data?.message ||
-            error.response?.data?.msg ||
-            "Login failed. Please check your credentials."
+              error.response?.data?.msg ||
+              "Login failed. Please check your credentials."
           );
         }
       } finally {
@@ -372,18 +390,25 @@ function LoginPage() {
                 }`}
                 variants={formItemVariants}
                 whileTap={!isRateLimited ? { scale: 0.97 } : {}}
-                whileHover={!isRateLimited ? {
-                  backgroundColor: "#0f766e",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                } : {}}
+                whileHover={
+                  !isRateLimited
+                    ? {
+                        backgroundColor: "#0f766e",
+                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                      }
+                    : {}
+                }
                 disabled={isSubmitting || isRateLimited}
               >
                 {isRateLimited
-                  ? `Try again in ${Math.floor(retryCountdown / 60)}:${(retryCountdown % 60).toString().padStart(2, '0')}`
+                  ? `Try again in ${Math.floor(retryCountdown / 60)}:${(
+                      retryCountdown % 60
+                    )
+                      .toString()
+                      .padStart(2, "0")}`
                   : isSubmitting
-                    ? "Logging in..."
-                    : "Login"
-                }
+                  ? "Logging in..."
+                  : "Login"}
               </motion.button>
 
               {apiError && (

@@ -1,4 +1,4 @@
-import { createApiInstance } from './apiConfig';
+import { createApiInstance } from "./apiConfig";
 
 const api = createApiInstance();
 
@@ -12,11 +12,13 @@ export const sendEmail = async (data) => {
     // Determine if we're sending FormData (with attachments) or JSON
     const isFormData = data instanceof FormData;
 
-    const config = isFormData ? {
-      headers: {
-        // Let browser set Content-Type for FormData
-      }
-    } : {};
+    const config = isFormData
+      ? {
+          headers: {
+            // Let browser set Content-Type for FormData
+          },
+        }
+      : {};
 
     const response = await api.post("/emails", data, config);
     return response.data;
@@ -31,7 +33,9 @@ export const sendEmail = async (data) => {
  * @param {Object} params - Query parameters
  * @returns {Promise} - The API response
  */
-export const getEmails = async (params = { page: 1, limit: 10, status: "sent" }) => {
+export const getEmails = async (
+  params = { page: 1, limit: 10, status: "sent" }
+) => {
   try {
     const response = await api.get("/emails", { params });
     return response.data;
@@ -137,5 +141,5 @@ export default {
   getEmailStats,
   sendTestEmail,
   checkEmailAccount,
-  rewriteEmailWithAI
+  rewriteEmailWithAI,
 };

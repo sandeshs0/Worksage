@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 
 function SignupPage() {
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,6 +31,8 @@ function SignupPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [recaptchaError, setRecaptchaError] = useState("");
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -236,6 +240,11 @@ function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setRecaptchaError("");
+    if (!recaptchaToken) {
+      setRecaptchaError("Please complete the captcha before submitting.");
+      return;
+    }
     if (validateForm()) {
       try {
         setIsSubmitting(true);
@@ -245,6 +254,7 @@ function SignupPage() {
           name: formData.fullName,
           email: formData.email,
           password: formData.password,
+          recaptchaToken,
         });
 
         // Navigate to OTP verification with email context
@@ -572,6 +582,24 @@ function SignupPage() {
                   {apiError}
                 </motion.div>
               )}
+
+              {/* reCAPTCHA */}
+              <motion.div
+                variants={formItemVariants}
+                className="flex flex-col items-center"
+              >
+                <ReCAPTCHA
+                  sitekey={RECAPTCHA_SITE_KEY}
+                  onChange={(token) => {
+                    setRecaptchaToken(token);
+                    setRecaptchaError("");
+                  }}
+                  onExpired={() => setRecaptchaToken(null)}
+                />
+                {recaptchaError && (
+                  <p className="text-red-500 text-sm mt-2">{recaptchaError}</p>
+                )}
+              </motion.div>
 
               {/* Register Button */}
               <motion.button

@@ -44,7 +44,7 @@ router.post(
   [
     body("email").isEmail().normalizeEmail(),
     body("otp").isLength({ min: 6, max: 6 }).isNumeric(),
-    authLimiter,
+    // authLimiter,
   ],
   verifyEmail
 );

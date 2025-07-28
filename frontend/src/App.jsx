@@ -20,6 +20,22 @@ import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 
 import { Toaster } from "sonner";
 import { UserProvider, useUser } from "./context/UserContext";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+// Admin route protection
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isLoading, user } = useUser();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  if (!isAuthenticated || !user?.isAdmin) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 // Import debug utilities for development
 import "./utils/authDebug";
@@ -79,6 +95,16 @@ function AnimatedRoutes() {
         <Route path="/verify" element={<OtpVerificationPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+
+        {/* Admin dashboard route */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
 
         {/* Dashboard routes */}
         <Route

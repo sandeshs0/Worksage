@@ -20,6 +20,7 @@ const getClientInfo = (req) => {
   };
 };
 
+const verifyRecaptcha = require("../utils/verifyRecaptcha");
 exports.register = async (req, res) => {
   try {
     // Check validation errors
@@ -32,7 +33,16 @@ exports.register = async (req, res) => {
       });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const recaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!recaptchaValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Captcha verification failed. Please try again.",
+      });
+    }
 
     // Check if user already exists
     let user = await User.findOne({ email });

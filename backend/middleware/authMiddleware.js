@@ -1,3 +1,15 @@
+// Admin-only middleware
+const requireAdmin = (req, res, next) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required.",
+      code: "ADMIN_ONLY",
+    });
+  }
+  next();
+};
+
 const TokenService = require("../services/tokenService");
 const User = require("../models/User");
 
@@ -197,5 +209,6 @@ module.exports = {
   authorizeRole,
   authorizeOwnership,
   createAuthMiddleware,
+  requireAdmin,
   auth, // Keep this for backward compatibility
 };
