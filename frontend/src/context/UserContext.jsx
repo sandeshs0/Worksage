@@ -122,6 +122,13 @@ export function UserProvider({ children }) {
     try {
       const response = await authService.login(credentials);
       if (response.success) {
+        // Check if MFA is required
+        if (response.requiresMFA) {
+          // Don't set user data for MFA responses
+          return response;
+        }
+        
+        // Regular login - set user data
         setUser(response.data.user);
         setIsAuthenticated(true);
         return response;

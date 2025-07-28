@@ -296,30 +296,87 @@ exports.completeMFALogin = async (req, res) => {
       });
     }
 
-    // Verify MFA token
-    const mfaController = require('./mfaController');
-    const mfaResult = await mfaController.verifyMFA({
-      body: { token: mfaToken, isBackupCode, userId }
-    }, {
-      status: (code) => ({ json: (data) => ({ code, data }) }),
-      json: (data) => data
-    });
+    // Declare user variable for later use
+    let user;
 
-    if (mfaResult.code && mfaResult.code !== 200) {
-      return res.status(400).json({
+    // Verify MFA token directly
+    try {
+      user = await User.findById(userId).select('+mfa.secret');
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.mfa.enabled) {
+        return res.status(400).json({
+          success: false,
+          message: 'MFA is not enabled for this user'
+        });
+      }
+
+      console.log('User MFA object for login:', {
+        enabled: user.mfa.enabled,
+        hasSecret: !!user.mfa.secret,
+        secretLength: user.mfa.secret ? user.mfa.secret.length : 0,
+        backupCodesCount: user.mfa.backupCodes ? user.mfa.backupCodes.length : 0
+      });
+
+      let isValid = false;
+      const { verifyBackupCode, verifyTOTP, decryptSecret } = require('../utils/mfaUtils');
+
+      if (isBackupCode) {
+        // Verify backup code
+        isValid = verifyBackupCode(mfaToken, user.mfa.backupCodes);
+        if (isValid) {
+          await user.save(); // Save the updated backup codes
+        }
+      } else {
+        // Verify TOTP
+        if (!user.mfa.secret) {
+          return res.status(400).json({
+            success: false,
+            message: 'MFA secret not found for user'
+          });
+        }
+        
+        let encryptedSecret;
+        try {
+          encryptedSecret = JSON.parse(user.mfa.secret);
+        } catch (parseError) {
+          console.error('Failed to parse MFA secret:', parseError);
+          return res.status(500).json({
+            success: false,
+            message: 'Invalid MFA secret format'
+          });
+        }
+        
+        const secret = decryptSecret(encryptedSecret);
+        isValid = verifyTOTP(mfaToken, secret);
+      }
+
+      if (!isValid) {
+        return res.status(400).json({
+          success: false,
+          message: isBackupCode ? 'Invalid backup code' : 'Invalid verification code'
+        });
+      }
+
+      // Update last used timestamp
+      user.mfa.lastUsedAt = new Date();
+      await user.save();
+
+    } catch (mfaError) {
+      console.error('MFA verification error:', mfaError);
+      return res.status(500).json({
         success: false,
-        message: "Invalid MFA token"
+        message: 'Server error during MFA verification'
       });
     }
 
-    // Get user and create session
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
+    // Get user for session creation
+    // User is already fetched above during MFA verification
 
     // Create session with original login data
     const tokens = await TokenService.createSession(

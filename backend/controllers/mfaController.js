@@ -7,7 +7,8 @@ const {
   verifyBackupCode,
   encryptSecret,
   decryptSecret,
-  hasUnusedBackupCodes
+  hasUnusedBackupCodes,
+  resetUserMFA
 } = require('../utils/mfaUtils');
 const { decodeHTMLEntities } = require('../utils/htmlUtils');
 
@@ -78,7 +79,7 @@ exports.verifyMFASetup = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('+mfa.secret');
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -337,7 +338,7 @@ exports.verifyMFA = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('+mfa.secret');
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -362,7 +363,28 @@ exports.verifyMFA = async (req, res) => {
       }
     } else {
       // Verify TOTP
-      const encryptedSecret = JSON.parse(user.mfa.secret);
+      console.log('Verifying TOTP for user:', userId);
+      console.log('User MFA object:', user.mfa);
+      console.log('User MFA secret:', user.mfa.secret);
+      
+      if (!user.mfa.secret) {
+        return res.status(400).json({
+          success: false,
+          message: 'MFA secret not found for user'
+        });
+      }
+      
+      let encryptedSecret;
+      try {
+        encryptedSecret = JSON.parse(user.mfa.secret);
+      } catch (parseError) {
+        console.error('Failed to parse MFA secret:', parseError);
+        return res.status(500).json({
+          success: false,
+          message: 'Invalid MFA secret format'
+        });
+      }
+      
       const secret = decryptSecret(encryptedSecret);
       isValid = verifyTOTP(token, secret);
     }
@@ -388,6 +410,34 @@ exports.verifyMFA = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to verify MFA'
+    });
+  }
+};
+
+// @desc    Reset MFA for a user (emergency function)
+// @route   POST /api/mfa/reset
+// @access  Private
+exports.resetMFA = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const success = await resetUserMFA(userId);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'MFA has been reset. You can now set it up again.'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to reset MFA'
+      });
+    }
+  } catch (error) {
+    console.error('Error resetting MFA:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset MFA'
     });
   }
 };

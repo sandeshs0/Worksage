@@ -7,7 +7,8 @@ const {
   disableMFA,
   getMFAStatus,
   regenerateBackupCodes,
-  verifyMFA
+  verifyMFA,
+  resetMFA
 } = require('../controllers/mfaController');
 
 // All MFA routes require authentication except verify (during login)
@@ -38,9 +39,14 @@ router.post('/disable', auth, disableMFA);
 // @access  Private
 router.post('/regenerate-backup-codes', auth, regenerateBackupCodes);
 
-// @route   POST /api/auth/mfa/verify
+// @route   POST /api/mfa/verify
 // @desc    Verify MFA token during login
 // @access  Public (special case during login flow)
 router.post('/verify', verifyMFA);
+
+// @route   POST /api/mfa/reset
+// @desc    Reset MFA for user (emergency function)
+// @access  Private
+router.post('/reset', auth, resetMFA);
 
 module.exports = router;

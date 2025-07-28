@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import MFALoginModal from "../components/auth/MFALoginModal";
 import { useUser } from "../context/UserContext";
 import authService from "../services/authService";
 import { useXSSProtection } from "../utils/xssHOC.jsx";
@@ -29,6 +30,11 @@ function LoginPage() {
   const [apiError, setApiError] = useState("");
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [retryCountdown, setRetryCountdown] = useState(0);
+  
+  // MFA state
+  const [showMFAModal, setShowMFAModal] = useState(false);
+  const [mfaUserData, setMfaUserData] = useState(null);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isLoading, user, refreshUserData } =
@@ -106,13 +112,20 @@ function LoginPage() {
         setIsSubmitting(true);
         setApiError("");
 
-        // Use UserContext login function
-        await login({
+        // Attempt login using UserContext
+        const response = await login({
           email: formData.email,
           password: formData.password,
         });
 
-        // Refresh user data to ensure context is up-to-date
+        // Check if MFA is required
+        if (response && response.requiresMFA) {
+          setMfaUserData(response);
+          setShowMFAModal(true);
+          return;
+        }
+
+        // Regular login successful - refresh user data to ensure context is up-to-date
         await refreshUserData();
 
         // Use the latest user context for redirect
@@ -173,6 +186,33 @@ function LoginPage() {
         setIsSubmitting(false);
       }
     }
+  };
+
+  const handleMFAComplete = async (loginData) => {
+    try {
+      // Update UserContext with the successful login
+      await refreshUserData();
+      
+      // Navigate based on user role
+      const user = loginData.user;
+      if (user?.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+      
+      setShowMFAModal(false);
+      setMfaUserData(null);
+    } catch (error) {
+      console.error("Error completing MFA login:", error);
+      setApiError("Login completed but failed to load user data");
+    }
+  };
+
+  const handleMFACancel = () => {
+    setShowMFAModal(false);
+    setMfaUserData(null);
+    setApiError("");
   };
 
   const handleGoogleLogin = () => {
@@ -540,6 +580,14 @@ function LoginPage() {
           The Ultimate CRM and Project Management tool.
         </motion.p>
       </motion.div>
+
+      {/* MFA Login Modal */}
+      <MFALoginModal
+        isOpen={showMFAModal}
+        onClose={handleMFACancel}
+        onComplete={handleMFAComplete}
+        userData={mfaUserData}
+      />
     </motion.div>
   );
 }

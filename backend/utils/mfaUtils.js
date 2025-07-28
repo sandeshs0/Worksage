@@ -6,13 +6,25 @@ const crypto = require('crypto');
 const ENCRYPTION_KEY = process.env.MFA_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 const ALGORITHM = 'aes-256-gcm';
 
+// Ensure we have a proper 32-byte key
+const getEncryptionKey = () => {
+  if (ENCRYPTION_KEY.length === 64) {
+    // If it's a hex string, convert to buffer
+    return Buffer.from(ENCRYPTION_KEY, 'hex');
+  } else {
+    // If it's not 64 chars (32 bytes in hex), create a proper key
+    return crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+  }
+};
+
 /**
  * Encrypt a secret for secure storage
  */
 const encryptSecret = (text) => {
   try {
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher(ALGORITHM, ENCRYPTION_KEY);
+    const key = getEncryptionKey();
+    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
     
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -31,19 +43,40 @@ const encryptSecret = (text) => {
 };
 
 /**
- * Decrypt a secret from storage
+ * Decrypt a secret from storage with backward compatibility
  */
 const decryptSecret = (encryptedData) => {
   try {
     const { encrypted, iv, authTag } = encryptedData;
-    const decipher = crypto.createDecipher(ALGORITHM, ENCRYPTION_KEY);
+    const key = getEncryptionKey();
     
-    decipher.setAuthTag(Buffer.from(authTag, 'hex'));
-    
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    
-    return decrypted;
+    // Try new method first (with IV)
+    try {
+      const decipher = crypto.createDecipheriv(ALGORITHM, key, Buffer.from(iv, 'hex'));
+      decipher.setAuthTag(Buffer.from(authTag, 'hex'));
+      
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      
+      return decrypted;
+    } catch (newMethodError) {
+      console.log('New decryption method failed, trying legacy method...');
+      
+      // Fallback to old method (deprecated but for backward compatibility)
+      try {
+        const decipher = crypto.createDecipher(ALGORITHM, ENCRYPTION_KEY);
+        decipher.setAuthTag(Buffer.from(authTag, 'hex'));
+        
+        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        
+        console.log('Legacy decryption successful - consider re-encrypting this secret');
+        return decrypted;
+      } catch (legacyError) {
+        console.error('Both decryption methods failed:', { newMethodError, legacyError });
+        throw new Error('Failed to decrypt secret with both methods');
+      }
+    }
   } catch (error) {
     console.error('Error decrypting secret:', error);
     throw new Error('Failed to decrypt secret');
@@ -162,6 +195,29 @@ const hasUnusedBackupCodes = (backupCodes) => {
   return backupCodes && backupCodes.some(code => !code.used);
 };
 
+/**
+ * Reset MFA for a user (useful for fixing encryption issues)
+ */
+const resetUserMFA = async (userId) => {
+  try {
+    const User = require('../models/User');
+    await User.findByIdAndUpdate(userId, {
+      $set: {
+        'mfa.enabled': false,
+        'mfa.secret': null,
+        'mfa.backupCodes': [],
+        'mfa.lastUsedAt': null,
+        'mfa.setupAt': null
+      }
+    });
+    console.log(`MFA reset for user: ${userId}`);
+    return true;
+  } catch (error) {
+    console.error('Error resetting MFA:', error);
+    return false;
+  }
+};
+
 module.exports = {
   encryptSecret,
   decryptSecret,
@@ -170,5 +226,6 @@ module.exports = {
   verifyTOTP,
   generateBackupCodes,
   verifyBackupCode,
-  hasUnusedBackupCodes
+  hasUnusedBackupCodes,
+  resetUserMFA
 };

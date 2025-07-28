@@ -80,6 +80,16 @@ class MFAService {
       throw error.response?.data || { message: 'Failed to complete MFA login' };
     }
   }
+
+  // Reset MFA (emergency function)
+  async resetMFA() {
+    try {
+      const response = await api.post('/mfa/reset');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to reset MFA' };
+    }
+  }
 }
 
 export default new MFAService();

@@ -1,21 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Shield, AlertTriangle, Copy, Eye, EyeOff, RefreshCw } from 'lucide-react';
-import mfaService from '../../services/mfaService';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Copy,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Shield,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import mfaService from "../../services/mfaService";
 
 const MFASettings = () => {
   const [mfaStatus, setMfaStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [setupStep, setSetupStep] = useState(0); // 0: disabled, 1: setup, 2: verify, 3: enabled
-  const [qrCode, setQrCode] = useState('');
-  const [manualCode, setManualCode] = useState('');
-  const [tempSecret, setTempSecret] = useState('');
+  const [qrCode, setQrCode] = useState("");
+  const [manualCode, setManualCode] = useState("");
+  const [tempSecret, setTempSecret] = useState("");
   const [backupCodes, setBackupCodes] = useState([]);
-  const [verificationToken, setVerificationToken] = useState('');
-  const [password, setPassword] = useState('');
+  const [verificationToken, setVerificationToken] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showBackupCodes, setShowBackupCodes] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -25,14 +34,14 @@ const MFASettings = () => {
   const loadMFAStatus = async () => {
     try {
       setLoading(true);
-      console.log('Loading MFA status...');
+      console.log("Loading MFA status...");
       const response = await mfaService.getMFAStatus();
-      console.log('MFA status response:', response);
+      console.log("MFA status response:", response);
       setMfaStatus(response.data);
       setSetupStep(response.data.enabled ? 3 : 0);
     } catch (error) {
-      console.error('Error loading MFA status:', error);
-      setError(error.message || 'Failed to load MFA status');
+      console.error("Error loading MFA status:", error);
+      setError(error.message || "Failed to load MFA status");
     } finally {
       setLoading(false);
     }
@@ -41,20 +50,20 @@ const MFASettings = () => {
   const startMFASetup = async () => {
     try {
       setActionLoading(true);
-      setError('');
-      
-      console.log('Starting MFA setup...');
+      setError("");
+
+      console.log("Starting MFA setup...");
       const response = await mfaService.setupMFA();
-      console.log('MFA setup response:', response);
-      console.log('TempSecret received:', response.tempSecret);
-      console.log('Type of tempSecret:', typeof response.tempSecret);
+      console.log("MFA setup response:", response);
+      console.log("TempSecret received:", response.tempSecret);
+      console.log("Type of tempSecret:", typeof response.tempSecret);
       setQrCode(response.data.qrCode);
       setManualCode(response.data.manualEntryKey);
       setTempSecret(response.tempSecret);
       setSetupStep(1);
     } catch (error) {
-      console.error('Error starting MFA setup:', error);
-      setError(error.message || 'Failed to start MFA setup');
+      console.error("Error starting MFA setup:", error);
+      setError(error.message || "Failed to start MFA setup");
     } finally {
       setActionLoading(false);
     }
@@ -63,24 +72,27 @@ const MFASettings = () => {
   const verifyMFASetup = async () => {
     try {
       setActionLoading(true);
-      setError('');
-      
+      setError("");
+
       if (!verificationToken || verificationToken.length !== 6) {
-        setError('Please enter a valid 6-digit code');
+        setError("Please enter a valid 6-digit code");
         return;
       }
 
-      console.log('Verifying MFA setup with token:', verificationToken);
-      console.log('TempSecret being sent:', tempSecret);
-      console.log('Type of tempSecret being sent:', typeof tempSecret);
-      const response = await mfaService.verifyMFASetup(verificationToken, tempSecret);
-      console.log('MFA verification response:', response);
+      console.log("Verifying MFA setup with token:", verificationToken);
+      console.log("TempSecret being sent:", tempSecret);
+      console.log("Type of tempSecret being sent:", typeof tempSecret);
+      const response = await mfaService.verifyMFASetup(
+        verificationToken,
+        tempSecret
+      );
+      console.log("MFA verification response:", response);
       setBackupCodes(response.data.backupCodes);
       setSetupStep(2);
-      setSuccess('MFA setup completed successfully!');
+      setSuccess("MFA setup completed successfully!");
     } catch (error) {
-      console.error('Error verifying MFA setup:', error);
-      setError(error.message || 'Failed to verify MFA setup');
+      console.error("Error verifying MFA setup:", error);
+      setError(error.message || "Failed to verify MFA setup");
     } finally {
       setActionLoading(false);
     }
@@ -89,30 +101,30 @@ const MFASettings = () => {
   const finishSetup = () => {
     setSetupStep(3);
     setMfaStatus({ ...mfaStatus, enabled: true });
-    setQrCode('');
-    setManualCode('');
-    setTempSecret('');
-    setVerificationToken('');
+    setQrCode("");
+    setManualCode("");
+    setTempSecret("");
+    setVerificationToken("");
     setBackupCodes([]);
   };
 
   const disableMFA = async () => {
     try {
       setActionLoading(true);
-      setError('');
-      
+      setError("");
+
       if (!password) {
-        setError('Password is required to disable MFA');
+        setError("Password is required to disable MFA");
         return;
       }
 
       await mfaService.disableMFA(password);
       setMfaStatus({ ...mfaStatus, enabled: false });
       setSetupStep(0);
-      setPassword('');
-      setSuccess('MFA disabled successfully');
+      setPassword("");
+      setSuccess("MFA disabled successfully");
     } catch (error) {
-      setError(error.message || 'Failed to disable MFA');
+      setError(error.message || "Failed to disable MFA");
     } finally {
       setActionLoading(false);
     }
@@ -121,20 +133,53 @@ const MFASettings = () => {
   const regenerateBackupCodes = async () => {
     try {
       setActionLoading(true);
-      setError('');
-      
+      setError("");
+
       if (!password) {
-        setError('Password is required to regenerate backup codes');
+        setError("Password is required to regenerate backup codes");
         return;
       }
 
       const response = await mfaService.regenerateBackupCodes(password);
       setBackupCodes(response.data.backupCodes);
       setShowBackupCodes(true);
-      setPassword('');
-      setSuccess('Backup codes regenerated successfully');
+      setPassword("");
+      setSuccess("Backup codes regenerated successfully");
     } catch (error) {
-      setError(error.message || 'Failed to regenerate backup codes');
+      setError(error.message || "Failed to regenerate backup codes");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const resetMFA = async () => {
+    try {
+      setActionLoading(true);
+      setError("");
+
+      if (
+        !confirm(
+          "Are you sure you want to reset MFA? You will need to set it up again."
+        )
+      ) {
+        return;
+      }
+
+      await mfaService.resetMFA();
+      setMfaStatus({ enabled: false });
+      setSetupStep(0);
+      setPassword("");
+      setSuccess("MFA has been reset. You can now set it up again.");
+
+      // Clear any existing state
+      setQrCode("");
+      setManualCode("");
+      setTempSecret("");
+      setVerificationToken("");
+      setBackupCodes([]);
+      setShowBackupCodes(false);
+    } catch (error) {
+      setError(error.message || "Failed to reset MFA");
     } finally {
       setActionLoading(false);
     }
@@ -142,12 +187,12 @@ const MFASettings = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    setSuccess('Copied to clipboard!');
-    setTimeout(() => setSuccess(''), 2000);
+    setSuccess("Copied to clipboard!");
+    setTimeout(() => setSuccess(""), 2000);
   };
 
   const copyAllBackupCodes = () => {
-    const codesText = backupCodes.join('\n');
+    const codesText = backupCodes.join("\n");
     copyToClipboard(codesText);
   };
 
@@ -164,7 +209,9 @@ const MFASettings = () => {
       {/* Header */}
       <div className="flex items-center space-x-3">
         <Shield className="h-6 w-6 text-blue-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Multi-Factor Authentication</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Multi-Factor Authentication
+        </h3>
       </div>
 
       {/* Success/Error Messages */}
@@ -201,7 +248,10 @@ const MFASettings = () => {
           </div>
           {setupStep === 3 && (
             <span className="text-xs text-gray-500">
-              Last used: {mfaStatus?.lastUsedAt ? new Date(mfaStatus.lastUsedAt).toLocaleDateString() : 'Never'}
+              Last used:{" "}
+              {mfaStatus?.lastUsedAt
+                ? new Date(mfaStatus.lastUsedAt).toLocaleDateString()
+                : "Never"}
             </span>
           )}
         </div>
@@ -214,20 +264,25 @@ const MFASettings = () => {
             <div className="flex items-start space-x-3">
               <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h4 className="font-medium text-blue-900">Secure Your Account</h4>
+                <h4 className="font-medium text-blue-900">
+                  Secure Your Account
+                </h4>
                 <p className="text-sm text-blue-700 mt-1">
-                  Add an extra layer of security to your account with two-factor authentication using your smartphone.
+                  Add an extra layer of security to your account with two-factor
+                  authentication using your smartphone.
                 </p>
               </div>
             </div>
           </div>
-          
+
           <button
             onClick={startMFASetup}
             disabled={actionLoading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {actionLoading ? 'Setting up...' : 'Enable Two-Factor Authentication'}
+            {actionLoading
+              ? "Setting up..."
+              : "Enable Two-Factor Authentication"}
           </button>
         </div>
       )}
@@ -236,28 +291,29 @@ const MFASettings = () => {
       {setupStep === 1 && (
         <div className="space-y-4">
           <div className="text-center">
-            <h4 className="font-medium text-gray-900 mb-4">Step 1: Scan QR Code</h4>
-            
+            <h4 className="font-medium text-gray-900 mb-4">
+              Step 1: Scan QR Code
+            </h4>
+
             {qrCode && (
               <div className="flex flex-col items-center space-y-4">
                 <div className="p-4 bg-white border rounded-lg">
                   <img src={qrCode} alt="MFA QR Code" className="w-48 h-48" />
                 </div>
-                
+
                 <div className="text-sm text-gray-600 max-w-md">
                   <p className="mb-2">
-                    1. Open your authenticator app (Google Authenticator, Microsoft Authenticator, etc.)
+                    1. Open your authenticator app (Google Authenticator,
+                    Microsoft Authenticator, etc.)
                   </p>
-                  <p className="mb-2">
-                    2. Tap "Add Account" or "+"
-                  </p>
-                  <p>
-                    3. Scan this QR code with your phone
-                  </p>
+                  <p className="mb-2">2. Tap "Add Account" or "+"</p>
+                  <p>3. Scan this QR code with your phone</p>
                 </div>
 
                 <div className="border-t pt-4 w-full">
-                  <p className="text-sm text-gray-600 mb-2">Can't scan? Enter this code manually:</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Can't scan? Enter this code manually:
+                  </p>
                   <div className="flex items-center space-x-2">
                     <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1 text-center">
                       {manualCode}
@@ -282,7 +338,9 @@ const MFASettings = () => {
               type="text"
               maxLength="6"
               value={verificationToken}
-              onChange={(e) => setVerificationToken(e.target.value.replace(/[^0-9]/g, ''))}
+              onChange={(e) =>
+                setVerificationToken(e.target.value.replace(/[^0-9]/g, ""))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
               placeholder="000000"
             />
@@ -300,7 +358,7 @@ const MFASettings = () => {
               disabled={actionLoading || verificationToken.length !== 6}
               className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {actionLoading ? 'Verifying...' : 'Verify & Continue'}
+              {actionLoading ? "Verifying..." : "Verify & Continue"}
             </button>
           </div>
         </div>
@@ -313,7 +371,8 @@ const MFASettings = () => {
             <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h4 className="font-medium text-gray-900 mb-2">Setup Complete!</h4>
             <p className="text-sm text-gray-600">
-              Save these backup codes in a safe place. You can use them to access your account if you lose your phone.
+              Save these backup codes in a safe place. You can use them to
+              access your account if you lose your phone.
             </p>
           </div>
 
@@ -330,7 +389,10 @@ const MFASettings = () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {backupCodes.map((code, index) => (
-                <div key={index} className="bg-white px-3 py-2 rounded border font-mono text-sm text-center">
+                <div
+                  key={index}
+                  className="bg-white px-3 py-2 rounded border font-mono text-sm text-center"
+                >
                   {code}
                 </div>
               ))}
@@ -356,9 +418,12 @@ const MFASettings = () => {
             <div className="flex items-center space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <div>
-                <h4 className="font-medium text-green-900">Two-Factor Authentication Enabled</h4>
+                <h4 className="font-medium text-green-900">
+                  Two-Factor Authentication Enabled
+                </h4>
                 <p className="text-sm text-green-700">
-                  Your account is now protected with an additional security layer.
+                  Your account is now protected with an additional security
+                  layer.
                 </p>
               </div>
             </div>
@@ -366,7 +431,7 @@ const MFASettings = () => {
 
           <div className="space-y-4">
             <h5 className="font-medium text-gray-900">Manage MFA</h5>
-            
+
             {/* Show backup codes */}
             <div className="space-y-3">
               <label className="block text-sm font-medium text-gray-700">
@@ -392,14 +457,18 @@ const MFASettings = () => {
                   )}
                 </button>
               </div>
-              
+
               <button
                 onClick={regenerateBackupCodes}
                 disabled={actionLoading || !password}
                 className="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
               >
                 <RefreshCw className="h-4 w-4" />
-                <span>{actionLoading ? 'Regenerating...' : 'Regenerate Backup Codes'}</span>
+                <span>
+                  {actionLoading
+                    ? "Regenerating..."
+                    : "Regenerate Backup Codes"}
+                </span>
               </button>
             </div>
 
@@ -407,7 +476,9 @@ const MFASettings = () => {
             {showBackupCodes && backupCodes.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h5 className="font-medium text-yellow-800">New Backup Codes</h5>
+                  <h5 className="font-medium text-yellow-800">
+                    New Backup Codes
+                  </h5>
                   <button
                     onClick={copyAllBackupCodes}
                     className="text-yellow-700 hover:text-yellow-900 text-sm flex items-center space-x-1"
@@ -418,7 +489,10 @@ const MFASettings = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {backupCodes.map((code, index) => (
-                    <div key={index} className="bg-white px-3 py-2 rounded border font-mono text-sm text-center">
+                    <div
+                      key={index}
+                      className="bg-white px-3 py-2 rounded border font-mono text-sm text-center"
+                    >
                       {code}
                     </div>
                   ))}
@@ -431,7 +505,9 @@ const MFASettings = () => {
 
             {/* Disable MFA */}
             <div className="border-t pt-4">
-              <h6 className="font-medium text-gray-900 mb-3">Disable Two-Factor Authentication</h6>
+              <h6 className="font-medium text-gray-900 mb-3">
+                Disable Two-Factor Authentication
+              </h6>
               <div className="space-y-3">
                 <div className="relative">
                   <input
@@ -453,15 +529,35 @@ const MFASettings = () => {
                     )}
                   </button>
                 </div>
-                
+
                 <button
                   onClick={disableMFA}
                   disabled={actionLoading || !password}
                   className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {actionLoading ? 'Disabling...' : 'Disable Two-Factor Authentication'}
+                  {actionLoading
+                    ? "Disabling..."
+                    : "Disable Two-Factor Authentication"}
                 </button>
               </div>
+            </div>
+
+            {/* Reset MFA */}
+            <div className="border-t pt-4">
+              <h6 className="font-medium text-gray-900 mb-3">
+                Reset Two-Factor Authentication
+              </h6>
+              <p className="text-sm text-gray-600 mb-3">
+                If you're experiencing issues with MFA, you can reset it and set
+                it up again from scratch.
+              </p>
+              <button
+                onClick={resetMFA}
+                disabled={actionLoading}
+                className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {actionLoading ? "Resetting..." : "Reset MFA Setup"}
+              </button>
             </div>
           </div>
         </div>
