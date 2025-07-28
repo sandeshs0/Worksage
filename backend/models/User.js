@@ -80,6 +80,35 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // MFA fields
+  mfa: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+    secret: {
+      type: String, // Encrypted TOTP secret
+      select: false, // Don't include in queries by default
+    },
+    backupCodes: [
+      {
+        code: {
+          type: String,
+          required: true,
+        },
+        used: {
+          type: Boolean,
+          default: false,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    lastUsedAt: Date,
+    setupAt: Date, // When MFA was first enabled
+  },
   // Account security fields
   accountLocked: {
     type: Boolean,
