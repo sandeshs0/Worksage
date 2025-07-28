@@ -150,43 +150,6 @@ export const getInvoiceStats = async () => {
   }
 };
 
-/**
- * Log a payment for an invoice
- * @param {string} invoiceId - Invoice ID
- * @param {Object} paymentData - Payment details
- * @returns {Promise} Response from the API
- */
-export const logPayment = async (invoiceId, paymentData) => {
-  try {
-    const response = await api.post(
-      `/invoices/${invoiceId}/payments`,
-      paymentData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error logging payment:", error);
-    throw error.response?.data || error;
-  }
-};
-
-/**
- * Track invoice view (public endpoint)
- * @param {string} trackingId - Invoice tracking ID
- * @returns {Promise} Response from the API
- */
-export const trackInvoiceView = async (trackingId) => {
-  try {
-    const response = await api.get(`/invoices/track/${trackingId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error tracking invoice view:", error);
-    throw error.response?.data || error;
-  }
-};
-
-// Export sendInvoice as an alias for backward compatibility
-export const sendInvoice = sendInvoiceEmail;
-
 export default {
   createInvoice,
   getInvoices,
@@ -195,9 +158,6 @@ export default {
   deleteInvoice,
   updateInvoiceStatus,
   sendInvoiceEmail,
-  sendInvoice, // Add alias to default export
-  logPayment,
-  trackInvoiceView,
   generateInvoicePDF,
   getInvoiceStats,
 };

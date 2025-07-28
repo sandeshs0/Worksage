@@ -1,4 +1,4 @@
-import { createApiInstance } from './apiConfig';
+import { createApiInstance } from "./apiConfig";
 
 const api = createApiInstance();
 
@@ -16,7 +16,6 @@ const getAllProjects = async () => {
   } catch (error) {
     console.error("Error in getAllProjects:", error);
     throw error.response?.data || error;
-    return [];
   }
 };
 
@@ -74,7 +73,10 @@ const updateProject = async (projectId, projectData) => {
  */
 const updateProjectStatus = async (projectId, updateData) => {
   try {
-    const response = await api.patch(`/projects/${projectId}/status`, updateData);
+    const response = await api.patch(
+      `/projects/${projectId}/status`,
+      updateData
+    );
     return response.data;
   } catch (error) {
     console.error("Error updating project status:", error);
@@ -136,17 +138,17 @@ const getProjectsByStatus = async (status) => {
 const updateProjectCover = async (projectId, imageFile) => {
   try {
     const formData = new FormData();
-    formData.append('coverImage', imageFile);
+    formData.append("coverImage", imageFile);
 
     const response = await api.put(`/projects/${projectId}/cover`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
-    
+
     return response.data;
   } catch (error) {
-    console.error('Error updating project cover:', error);
+    console.error("Error updating project cover:", error);
     throw error.response?.data || error;
   }
 };
