@@ -263,6 +263,10 @@ app.use(
   require("./routes/emailAccounts")
 );
 app.use(
+  "/api/mfa",
+  require("./routes/mfa")
+);
+app.use(
   "/api/ai",
   auth,
   csrfProtection,
