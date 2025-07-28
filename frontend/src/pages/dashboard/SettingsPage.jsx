@@ -11,6 +11,7 @@ import {
   Mail,
   Moon,
   Save,
+  Shield,
   Sun,
   User,
 } from "lucide-react";
@@ -18,6 +19,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 import EmailAccountModal from "../../components/settings/EmailAccountModal";
+import MFASettings from "../../components/settings/MFASettings";
 import ProfilePictureModal from "../../components/settings/ProfilePictureModal";
 import { useUser } from "../../context/UserContext";
 import authService from "../../services/authService";
@@ -612,7 +614,7 @@ function SettingsPage() {
     const tabParam = urlParams.get("tab");
     if (
       tabParam &&
-      ["profile", "email", "password", "billing", "plans"].includes(tabParam)
+      ["profile", "email", "password", "security", "billing", "plans"].includes(tabParam)
     ) {
       setActiveTab(tabParam);
     }
@@ -665,6 +667,19 @@ function SettingsPage() {
             >
               <Lock size={18} className="mr-3" />
               <span>Change Password</span>
+              <ChevronRight size={18} className="ml-auto" />
+            </button>
+
+            <button
+              className={`flex items-center w-full px-4 py-3 text-left rounded-md ${
+                activeTab === "security"
+                  ? "bg-[#007991] text-white"
+                  : "hover:bg-gray-100"
+              }`}
+              onClick={() => setActiveTab("security")}
+            >
+              <Shield size={18} className="mr-3" />
+              <span>Two-Factor Authentication</span>
               <ChevronRight size={18} className="ml-auto" />
             </button>
 
@@ -1200,6 +1215,14 @@ function SettingsPage() {
                   </div>
                 </div>
               </form>
+            </div>
+          )}
+
+          {/* Security (MFA) Settings */}
+          {activeTab === "security" && (
+            <div>
+              <h3 className="text-xl font-medium mb-6">Security Settings</h3>
+              <MFASettings />
             </div>
           )}
 

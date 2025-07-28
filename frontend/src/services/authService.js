@@ -43,6 +43,13 @@ const authService = {
       console.log("✅ Login response:", response.data);
 
       if (response.data.success) {
+        // Check if MFA is required
+        if (response.data.requiresMFA) {
+          console.log("🔐 MFA required for login");
+          return response.data;
+        }
+
+        // Regular successful login
         const { accessToken, user } = response.data.data;
         console.log("💾 Storing tokens and user data:", { user });
         localStorage.setItem("accessToken", accessToken);
