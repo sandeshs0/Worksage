@@ -13,15 +13,12 @@ const { noSqlSanitizer } = require("./middleware/noSqlSanitizer");
 const { xssProtection } = require("./middleware/xssProtection");
 
 const app = express();
-
 const options = {
   key: fs.readFileSync(path.join(__dirname, "cert", "key.pem")),
   cert: fs.readFileSync(path.join(__dirname, "cert", "cert.pem")),
 };
 
-// Connect to Database
 connectDB();
-
 const passport = require("passport");
 require("./config/passport")(passport);
 app.use(
@@ -61,7 +58,7 @@ app.use(
         upgradeInsecureRequests: [],
       },
     },
-    crossOriginEmbedderPolicy: false, // Disable COEP for compatibility
+    crossOriginEmbedderPolicy: false,
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
@@ -69,24 +66,22 @@ app.use(
     },
     noSniff: true,
     frameguard: { action: "deny" },
-    xssFilter: false, // Disable helmet's XSS filter as we have custom XSS protection
+    xssFilter: false,
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   })
 );
+app.use(xssProtection);
 
-// Additional custom security headers for enhanced protection
-
-// Body parsing middleware
 app.use(
   express.json({
     extended: false,
-    limit: "10mb", // Prevent large payload attacks
+    limit: "10mb",
   })
 );
 
 app.use(
   express.urlencoded({
-    extended: true, // Use qs library instead of querystring for better handling
+    extended: true,
     limit: "10mb",
   })
 );
@@ -106,23 +101,16 @@ app.use(
 
 app.use(noSqlSanitizer);
 
-// Initialize security log array for tracking security events
 app.use((req, res, next) => {
   req.securityLog = [];
   next();
 });
 
-// XSS Protection
-app.use(xssProtection);
-
-// Passport middleware
 app.use(passport.initialize());
 
-// Activity logging middleware (logs all API requests)
 const activityLogger = require("./middleware/activityLogger");
 app.use(activityLogger);
 
-// Logging middleware for debugging (optional, can remove if not needed)
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - Origin: ${req.get("origin")}`);
   next();
@@ -136,18 +124,15 @@ app.get("/", (req, res) =>
   })
 );
 
-// Define Routes
 const auth = require("./middleware/auth");
 
 // app.use("/api", apiLimiter);
 
-// CSRF Protection
 const {
   csrfProtection,
   csrfErrorHandler,
 } = require("./middleware/csrfProtection");
 
-// Expose CSRF token for frontend to fetch
 app.get("/api/csrf-token", csrfProtection, (req, res) => {
   res.json({
     success: true,
@@ -155,30 +140,27 @@ app.get("/api/csrf-token", csrfProtection, (req, res) => {
   });
 });
 
-// OAuth Routes with conditional CSRF protection and query preservation
 app.use(
   "/api/auth",
   (req, res, next) => {
-    // Preserve original query for OAuth routes before any encoding
     if (req.path === "/google/callback" && req.url.includes("code=")) {
       console.log("🔧 Preserving original OAuth query parameters");
-      // Extract the raw code from the URL
+
       const rawUrl = req.url;
       const codeMatch = rawUrl.match(/code=([^&]+)/);
       if (codeMatch) {
         const rawCode = decodeURIComponent(codeMatch[1]);
         console.log("📝 Raw OAuth code:", rawCode.substring(0, 20) + "...");
-        // Store the clean code
+
         req.rawOAuthCode = rawCode;
       }
     }
 
-    // Skip CSRF for OAuth routes that come from external domains
     if (req.path === "/google" || req.path === "/google/callback") {
       console.log(`🔓 Skipping CSRF for OAuth route: ${req.path}`);
       return next();
     }
-    // Apply CSRF protection for all other auth routes
+
     console.log(`🔒 Applying CSRF for auth route: ${req.path}`);
     csrfProtection(req, res, next);
   },
@@ -186,7 +168,6 @@ app.use(
   require("./routes/auth")
 );
 
-// Protected Routes (require authentication)
 app.use(
   "/api/users",
   auth,
@@ -253,10 +234,8 @@ app.use(
 );
 app.use("/api/security", require("./routes/security"));
 
-// Plans callback route (no CSRF protection - called by Khalti)
 app.get("/api/plans/callback", require("./routes/plans"));
 
-// Other plans routes (with CSRF protection)
 app.use(
   "/api/plans",
   auth,
@@ -294,7 +273,6 @@ app.use(
   require("./routes/notifications")
 );
 
-// Admin routes
 app.use(
   "/api/admin",
   csrfProtection,
@@ -304,7 +282,6 @@ app.use(
   require("./routes/admin")
 );
 
-// Error handling middleware (should be last)
 app.use((err, req, res, next) => {
   console.error("Error:", err.message);
 

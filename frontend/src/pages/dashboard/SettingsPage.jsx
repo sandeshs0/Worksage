@@ -1322,46 +1322,7 @@ function SettingsPage() {
               <h3 className="text-xl font-medium mb-6">Plans & Billing</h3>
 
               {/* Current Plan */}
-              <div className="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-medium text-gray-800">Current Plan</h4>
-                    {isPageLoading ? (
-                      <div className="h-5 w-20 bg-gray-200 rounded animate-pulse mt-1"></div>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-[#18cb96]">
-                          {userData.plan === "pro"
-                            ? "Pro Plan"
-                            : userData.plan === "vantage"
-                            ? "Vantage Plan"
-                            : "Free Plan"}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {userData.plan === "free"
-                            ? "Your plan includes basic features with limits"
-                            : "Your plan includes premium features"}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                  <div>
-                    {isPageLoading ? (
-                      <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
-                    ) : (
-                      <span
-                        className={`text-xs font-medium ${
-                          getPlanBadge(userData.plan).bgColor
-                        } ${
-                          getPlanBadge(userData.plan).textColor
-                        } px-2 py-1 rounded-full`}
-                      >
-                        Active
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+            
 
               {/* Available Plans */}
               <h4 className="font-medium text-gray-700 mb-4">
@@ -1716,96 +1677,11 @@ function SettingsPage() {
                 </div>
               )}
 
-              {/* Upgrade History */}
-              <div className="mt-8">
-                <h4 className="font-medium text-gray-700 mb-4">
-                  Upgrade History
-                </h4>
-                {isLoadingHistory ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="border border-gray-200 rounded-lg p-4 animate-pulse"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div className="h-4 bg-gray-200 rounded w-32"></div>
-                          <div className="h-4 bg-gray-200 rounded w-24"></div>
-                        </div>
-                        <div className="h-4 bg-gray-200 rounded w-48 mt-2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : upgradeHistory.length > 0 ? (
-                  <div className="space-y-3">
-                    {upgradeHistory.map((upgrade) => (
-                      <div
-                        key={upgrade._id}
-                        className="border border-gray-200 rounded-lg p-4"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">
-                              Upgraded to{" "}
-                              {upgrade.toPlan
-                                ? upgrade.toPlan.charAt(0).toUpperCase() +
-                                  upgrade.toPlan.slice(1)
-                                : "Unknown Plan"}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(upgrade.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
-                              )}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">
-                              Rs. {(upgrade.amount / 100).toLocaleString()}
-                            </p>
-                            <span
-                              className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                upgrade.status === "completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : upgrade.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {upgrade.status
-                                ? upgrade.status.charAt(0).toUpperCase() +
-                                  upgrade.status.slice(1)
-                                : "Unknown Status"}
-                            </span>
-                          </div>
-                        </div>
-                        {upgrade.khaltiTransactionId && (
-                          <p className="text-xs text-gray-400 mt-2">
-                            Transaction ID: {upgrade.khaltiTransactionId}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="border border-gray-200 rounded-lg p-8 text-center">
-                    <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No upgrade history yet</p>
-                    <p className="text-sm text-gray-400">
-                      Upgrade to a paid plan to see your transaction history
-                    </p>
-                  </div>
-                )}
-              </div>
-
+  
               <p className="text-sm text-gray-500 mt-4">
                 For custom enterprise plans, please contact our sales team at{" "}
                 <a href="mailto:sales@cubicle.app" className="text-[#18cb96]">
-                  sales@cubicle.app
+                  sales@worksage.app
                 </a>
               </p>
             </div>

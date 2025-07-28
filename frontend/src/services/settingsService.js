@@ -1,4 +1,4 @@
-import { createApiInstance } from './apiConfig';
+import { createApiInstance } from "./apiConfig";
 
 const api = createApiInstance();
 
@@ -18,7 +18,7 @@ const api = createApiInstance();
  */
 const addEmailAccount = async (emailData) => {
   try {
-    const response = await api.post('/email-accounts', emailData);
+    const response = await api.post("/email-accounts", emailData);
     return response.data;
   } catch (error) {
     console.error("Error adding email account:", error);
@@ -32,7 +32,7 @@ const addEmailAccount = async (emailData) => {
  */
 const getEmailAccounts = async () => {
   try {
-    const response = await api.get('/email-accounts');
+    const response = await api.get("/email-accounts");
     return response.data;
   } catch (error) {
     console.error("Error fetching email accounts:", error);
@@ -78,7 +78,7 @@ const deleteEmailAccount = async (accountId) => {
  */
 const testEmailAccount = async (emailData) => {
   try {
-    const response = await api.post('/email-accounts/test', emailData);
+    const response = await api.post("/email-accounts/test", emailData);
     return response.data;
   } catch (error) {
     console.error("Error testing email account:", error);
@@ -107,7 +107,7 @@ const setDefaultEmailAccount = async (accountId) => {
  */
 const getUserProfile = async () => {
   try {
-    const response = await api.get('/profile');
+    const response = await api.get("/profile");
     return response.data;
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -122,7 +122,7 @@ const getUserProfile = async () => {
  */
 const updateUserProfile = async (profileData) => {
   try {
-    const response = await api.put('/profile', profileData);
+    const response = await api.put("/profile", profileData);
     return response.data;
   } catch (error) {
     console.error("Error updating user profile:", error);
@@ -139,7 +139,7 @@ const updateUserProfile = async (profileData) => {
  */
 const updateUserPassword = async (passwordData) => {
   try {
-    const response = await api.put('/profile/password', passwordData);
+    const response = await api.put("/profile/password", passwordData);
     return response.data;
   } catch (error) {
     console.error("Error updating password:", error);
@@ -155,12 +155,11 @@ const updateUserPassword = async (passwordData) => {
 const uploadAvatar = async (avatarFile) => {
   try {
     const formData = new FormData();
-    formData.append('avatar', avatarFile);
-
-    const response = await api.post('/profile/avatar', formData, {
+    formData.append("profileImage", avatarFile);
+    const response = await api.put("/users/me/avatar", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   } catch (error) {
@@ -179,5 +178,5 @@ export default {
   getUserProfile,
   updateUserProfile,
   updateUserPassword,
-  uploadAvatar
+  uploadAvatar,
 };
