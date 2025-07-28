@@ -18,6 +18,7 @@ const {
   register,
   verifyEmail,
   login,
+  completeMFALogin,
   refreshToken,
   logout,
   logoutAll,
@@ -58,6 +59,18 @@ router.post(
     authLimiter,
   ],
   login
+);
+
+// Complete MFA Login
+router.post(
+  "/mfa-login",
+  [
+    body("userId").isMongoId(),
+    body("mfaToken").isLength({ min: 6, max: 6 }),
+    body("tempData").isObject(),
+    authLimiter,
+  ],
+  completeMFALogin
 );
 
 // Token refresh

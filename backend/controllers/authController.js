@@ -230,6 +230,21 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check if MFA is enabled for this user
+    if (user.mfa && user.mfa.enabled) {
+      // Don't create full session yet, return MFA challenge
+      return res.json({
+        success: true,
+        requiresMFA: true,
+        message: "Please enter your two-factor authentication code",
+        userId: user._id,
+        tempData: {
+          ipAddress,
+          userAgent
+        }
+      });
+    }
+
     // Create session with new token system
     const tokens = await TokenService.createSession(
       user._id,
@@ -263,6 +278,83 @@ exports.login = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error during login",
+    });
+  }
+};
+
+// @desc    Complete MFA Login
+// @route   POST /api/auth/mfa-login
+// @access  Public
+exports.completeMFALogin = async (req, res) => {
+  try {
+    const { userId, mfaToken, isBackupCode, tempData } = req.body;
+
+    if (!userId || !mfaToken || !tempData) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields"
+      });
+    }
+
+    // Verify MFA token
+    const mfaController = require('./mfaController');
+    const mfaResult = await mfaController.verifyMFA({
+      body: { token: mfaToken, isBackupCode, userId }
+    }, {
+      status: (code) => ({ json: (data) => ({ code, data }) }),
+      json: (data) => data
+    });
+
+    if (mfaResult.code && mfaResult.code !== 200) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid MFA token"
+      });
+    }
+
+    // Get user and create session
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Create session with original login data
+    const tokens = await TokenService.createSession(
+      user._id,
+      tempData.ipAddress,
+      tempData.userAgent
+    );
+
+    // Set secure HTTP-only cookie for refresh token
+    res.cookie("refreshToken", tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      data: {
+        accessToken: tokens.accessToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
+    });
+
+  } catch (error) {
+    console.error("MFA Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during MFA login",
     });
   }
 };

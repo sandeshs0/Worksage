@@ -8,14 +8,28 @@ exports.getProfile = async (req, res) => {
     // Use req.user._id instead of req.user.id
     const userId = req.user._id || req.user.id;
     const user = await User.findById(userId).select(
-      "-password -otp -otpExpires"
+      "-password -otp -otpExpires -mfa.secret"
     );
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-    res.json({ success: true, data: user });
+
+    // Add MFA status without sensitive data
+    const userData = user.toObject();
+    if (userData.mfa) {
+      userData.mfa = {
+        enabled: user.mfa.enabled || false,
+        setupAt: user.mfa.setupAt,
+        lastUsedAt: user.mfa.lastUsedAt,
+        backupCodesRemaining: user.mfa.backupCodes 
+          ? user.mfa.backupCodes.filter(code => !code.used).length 
+          : 0
+      };
+    }
+
+    res.json({ success: true, data: userData });
   } catch (error) {
     console.error("Error getting user profile:", error);
     res.status(500).json({ success: false, message: "Server error" });
