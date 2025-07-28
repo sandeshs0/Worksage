@@ -19,7 +19,8 @@ const authService = {
   // Verify email with OTP
   async verifyEmail(email, otp) {
     try {
-      const response = await api.post("/auth/verify", { email, otp });
+      console.log("Verifying OTP:", { email, otp });
+      const response = await api.post("/auth/verify", email, otp);
 
       if (response.data.success) {
         const { accessToken, user } = response.data.data;
@@ -144,8 +145,11 @@ const authService = {
   // Handle OAuth callback
   async handleOAuthCallback(accessToken, isNewUser = false) {
     try {
-      console.log("🔐 OAuth callback started with token:", accessToken ? "✅ Present" : "❌ Missing");
-      
+      console.log(
+        "🔐 OAuth callback started with token:",
+        accessToken ? "✅ Present" : "❌ Missing"
+      );
+
       if (accessToken) {
         // Token should already be stored by GoogleAuthCallback component
         // but ensure it's stored here too for safety
@@ -156,7 +160,7 @@ const authService = {
         console.log("👤 Fetching user profile...");
         const profileResponse = await this.getUserProfile();
         console.log("📋 Profile response:", profileResponse);
-        
+
         let userData = null;
         if (profileResponse.success && profileResponse.data) {
           userData = profileResponse.data;
@@ -168,11 +172,18 @@ const authService = {
           userData = profileResponse.user || profileResponse;
         }
 
-        if (userData && typeof userData === 'object' && (userData._id || userData.id)) {
+        if (
+          userData &&
+          typeof userData === "object" &&
+          (userData._id || userData.id)
+        ) {
           localStorage.setItem("user", JSON.stringify(userData));
           console.log("✅ User data stored:", userData);
         } else {
-          console.warn("⚠️ Could not extract valid user data:", profileResponse);
+          console.warn(
+            "⚠️ Could not extract valid user data:",
+            profileResponse
+          );
         }
 
         return {

@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 const express = require("express");
 const https = require("https");
@@ -53,6 +54,7 @@ app.use(
       "Content-Type",
       "Authorization",
       "X-Requested-With",
+      "X-CSRF-Token",
       "Accept",
       "Origin",
     ],
@@ -116,25 +118,132 @@ const auth = require("./middleware/auth");
 
 // app.use("/api", apiLimiter);
 
+// CSRF Protection
+const {
+  csrfProtection,
+  csrfErrorHandler,
+} = require("./middleware/csrfProtection");
+
+// Expose CSRF token for frontend to fetch
+app.get("/api/csrf-token", csrfProtection, (req, res) => {
+  res.json({
+    success: true,
+    csrfToken: req.csrfToken(),
+  });
+});
+
 // Public Routes
-app.use("/api/auth", require("./routes/auth"));
+app.use(
+  "/api/auth",
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/auth")
+);
 
 // Protected Routes (require authentication)
-app.use("/api/users", auth, require("./routes/users"));
-app.use("/api/profile", auth, require("./routes/profile"));
-app.use("/api/clients", auth, require("./routes/clients"));
-app.use("/api/emails", auth, require("./routes/emails"));
-app.use("/api/email", require("./routes/testEmail"));
-app.use("/api/projects", auth, require("./routes/projects"));
-app.use("/api/email-accounts", auth, require("./routes/emailAccounts"));
-app.use("/api/ai", auth, require("./routes/ai"));
-app.use("/api/boards", auth, require("./routes/board"));
-app.use("/api/columns", auth, require("./routes/column"));
-app.use("/api/tasks", auth, require("./routes/task"));
-app.use("/api/invoices", require("./routes/invoices"));
-app.use("/api/notifications", auth, require("./routes/notifications"));
+app.use(
+  "/api/users",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/users")
+);
+app.use(
+  "/api/profile",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/profile")
+);
+app.use(
+  "/api/clients",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/clients")
+);
+app.use(
+  "/api/emails",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/emails")
+);
+app.use(
+  "/api/email",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/testEmail")
+);
+app.use(
+  "/api/projects",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/projects")
+);
+app.use(
+  "/api/email-accounts",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/emailAccounts")
+);
+app.use(
+  "/api/ai",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/ai")
+);
+app.use(
+  "/api/boards",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/board")
+);
+app.use(
+  "/api/columns",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/column")
+);
+app.use(
+  "/api/tasks",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/task")
+);
+app.use(
+  "/api/invoices",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/invoices")
+);
+app.use(
+  "/api/notifications",
+  auth,
+  csrfProtection,
+  csrfErrorHandler,
+  require("./routes/notifications")
+);
 
-// Error handling middleware
+// Admin routes
+app.use(
+  "/api/admin",
+  csrfProtection,
+  csrfErrorHandler,
+  require("./middleware/authMiddleware").authenticateToken,
+  require("./middleware/authMiddleware").requireAdmin,
+  require("./routes/admin")
+);
+
+// Error handling middleware (should be last)
 app.use((err, req, res, next) => {
   console.error("Error:", err.message);
 

@@ -1,4 +1,4 @@
-import { createApiInstance } from './apiConfig';
+import { createApiInstance } from "./apiConfig";
 
 const api = createApiInstance();
 
@@ -39,13 +39,19 @@ const createClient = async (clientData) => {
     const isFormData = clientData instanceof FormData;
 
     // For FormData, don't set Content-Type - let browser handle it
-    const config = isFormData ? {
-      headers: {
-        // Remove Content-Type for FormData to allow browser to set boundary
-      }
-    } : {};
+    const config = isFormData
+      ? {
+          headers: {
+            // Remove Content-Type for FormData to allow browser to set boundary
+          },
+        }
+      : {};
 
-    const response = await api.post("/clients/createClient", clientData, config);
+    const response = await api.post(
+      "/clients/createClient",
+      clientData,
+      config
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
@@ -62,11 +68,13 @@ const updateClient = async (clientId, clientData) => {
   try {
     const isFormData = clientData instanceof FormData;
 
-    const config = isFormData ? {
-      headers: {
-        // Remove Content-Type for FormData
-      }
-    } : {};
+    const config = isFormData
+      ? {
+          headers: {
+            // Remove Content-Type for FormData
+          },
+        }
+      : {};
 
     const response = await api.put(`/clients/${clientId}`, clientData, config);
     return response.data;

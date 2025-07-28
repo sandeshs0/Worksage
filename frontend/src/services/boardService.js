@@ -1,4 +1,4 @@
-import { createApiInstance } from './apiConfig';
+import { createApiInstance } from "./apiConfig";
 
 const api = createApiInstance();
 
@@ -8,7 +8,7 @@ const api = createApiInstance();
  */
 export const getUserBoards = async () => {
   try {
-    const response = await api.get('/boards');
+    const response = await api.get("/boards");
     return response.data.data;
   } catch (error) {
     console.error("Error fetching boards:", error);
@@ -23,7 +23,7 @@ export const getUserBoards = async () => {
  */
 export const createBoard = async (boardData) => {
   try {
-    const response = await api.post('/boards', boardData);
+    const response = await api.post("/boards", boardData);
     return response.data.data;
   } catch (error) {
     console.error("Error creating board:", error);
