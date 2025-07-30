@@ -19,7 +19,7 @@ const authService = {
   // Verify email with OTP
   async verifyEmail(email, otp) {
     try {
-      console.log("Verifying OTP:", { email, otp });
+      //console.log("Verifying OTP:", { email, otp });
       const response = await api.post("/auth/verify", email, otp);
 
       if (response.data.success) {
@@ -38,20 +38,20 @@ const authService = {
   // Login user
   async login(credentials) {
     try {
-      console.log("🔐 Attempting login...", { email: credentials.email });
+      //console.log("🔐 Attempting login...", { email: credentials.email });
       const response = await api.post("/auth/login", credentials);
-      console.log("✅ Login response:", response.data);
+      //console.log("✅ Login response:", response.data);
 
       if (response.data.success) {
         // Check if MFA is required
         if (response.data.requiresMFA) {
-          console.log("🔐 MFA required for login");
+          //console.log("🔐 MFA required for login");
           return response.data;
         }
 
         // Regular successful login
         const { accessToken, user } = response.data.data;
-        console.log("💾 Storing tokens and user data:", { user });
+        //console.log("💾 Storing tokens and user data:", { user });
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("user", JSON.stringify(user));
         // Refresh token is automatically stored in HTTP-only cookie
@@ -123,9 +123,9 @@ const authService = {
   // Get user profile
   async getUserProfile() {
     try {
-      console.log("👤 Fetching user profile...");
+      //console.log("👤 Fetching user profile...");
       const response = await api.get("/users/profile");
-      console.log("✅ Profile response:", response.data);
+      //console.log("✅ Profile response:", response.data);
       return response.data;
     } catch (error) {
       console.error("❌ Profile fetch error:", error);
@@ -152,7 +152,7 @@ const authService = {
   // Handle OAuth callback
   async handleOAuthCallback(accessToken, isNewUser = false) {
     try {
-      console.log(
+      //console.log(
         "🔐 OAuth callback started with token:",
         accessToken ? "✅ Present" : "❌ Missing"
       );
@@ -161,12 +161,12 @@ const authService = {
         // Token should already be stored by GoogleAuthCallback component
         // but ensure it's stored here too for safety
         localStorage.setItem("accessToken", accessToken);
-        console.log("💾 Access token confirmed in localStorage");
+        //console.log("💾 Access token confirmed in localStorage");
 
         // Get user profile to store user data
-        console.log("👤 Fetching user profile...");
+        //console.log("👤 Fetching user profile...");
         const profileResponse = await this.getUserProfile();
-        console.log("📋 Profile response:", profileResponse);
+        //console.log("📋 Profile response:", profileResponse);
 
         let userData = null;
         if (profileResponse.success && profileResponse.data) {
@@ -185,7 +185,7 @@ const authService = {
           (userData._id || userData.id)
         ) {
           localStorage.setItem("user", JSON.stringify(userData));
-          console.log("✅ User data stored:", userData);
+          //console.log("✅ User data stored:", userData);
         } else {
           console.warn(
             "⚠️ Could not extract valid user data:",

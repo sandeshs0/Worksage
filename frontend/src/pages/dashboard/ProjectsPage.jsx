@@ -32,12 +32,12 @@ function ProjectsPage() {
   // Fetch all projects
   useEffect(() => {
     async function fetchProjects() {
-      console.log("Starting to fetch projects...");
+      //console.log("Starting to fetch projects...");
       try {
         setIsLoading(true);
-        console.log("Calling projectService.getAllProjects()");
+        //console.log("Calling projectService.getAllProjects()");
         const data = await projectService.getAllProjects();
-        console.log("API response received:", data);
+        //console.log("API response received:", data);
 
         // Store projects and set filtered projects initially to all projects
         setProjects(data);

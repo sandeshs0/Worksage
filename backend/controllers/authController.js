@@ -285,7 +285,7 @@ exports.completeMFALogin = async (req, res) => {
         });
       }
 
-      console.log("User MFA object for login:", {
+      //console.log("User MFA object for login:", {
         enabled: user.mfa.enabled,
         hasSecret: !!user.mfa.secret,
         secretLength: user.mfa.secret ? user.mfa.secret.length : 0,

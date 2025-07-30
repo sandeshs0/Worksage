@@ -1,4 +1,3 @@
-// OAuth pre-processor (must be first import)
 import "./utils/oauthPreProcessor";
 
 import { AnimatePresence } from "framer-motion";
@@ -40,10 +39,9 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-// Import debug utilities for development
+
 import "./utils/authDebug";
 
-// Dashboard pages
 import BoardsPage from "./pages/BoardsPage";
 import KanbanPage from "./pages/KanbanPage";
 import ClientDetailsPage from "./pages/dashboard/ClientDetailsPage";
@@ -68,7 +66,6 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -82,7 +79,6 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Auth routes */}
         <Route
           path="/OAuthCallback"
           element={
@@ -112,7 +108,6 @@ function AnimatedRoutes() {
           }
         />
 
-        {/* Dashboard routes */}
         <Route
           path="/dashboard"
           element={
@@ -139,8 +134,7 @@ function AnimatedRoutes() {
           <Route path="boards/:boardId" element={<KanbanPage />} />
         </Route>
 
-        {/* 404 route */}
-        {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
+    
       </Routes>
     </AnimatePresence>
   );

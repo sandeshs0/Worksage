@@ -5,7 +5,7 @@ export const debugAuth = {
     const accessToken = localStorage.getItem("accessToken");
     const user = localStorage.getItem("user");
 
-    console.log("🔍 Auth Debug State:", {
+    //console.log("🔍 Auth Debug State:", {
       hasAccessToken: !!accessToken,
       accessTokenLength: accessToken?.length || 0,
       hasUser: !!user,
@@ -25,7 +25,7 @@ export const debugAuth = {
 
     if (user) {
       try {
-        console.log("👤 Current User:", JSON.parse(user));
+        //console.log("👤 Current User:", JSON.parse(user));
       } catch (e) {
         console.error("❌ User data corrupt:", e);
       }
@@ -41,7 +41,7 @@ export const debugAuth = {
 
   // Simulate OAuth callback for testing
   simulateOAuthCallback(accessToken = "test-token", isNewUser = false) {
-    console.log("🧪 Simulating OAuth callback with:", {
+    //console.log("🧪 Simulating OAuth callback with:", {
       accessToken,
       isNewUser,
     });
@@ -53,7 +53,7 @@ export const debugAuth = {
     const newUrl = `/OAuthCallback?accessToken=${accessToken}&isNewUser=${isNewUser}`;
     window.history.pushState({}, "", newUrl);
 
-    console.log(
+    //console.log(
       "✅ OAuth simulation complete. Check console for GoogleAuthCallback logs."
     );
   },
@@ -62,7 +62,7 @@ export const debugAuth = {
   clearAuth() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
-    console.log("🧹 Auth data cleared");
+    //console.log("🧹 Auth data cleared");
   },
 
   // Test token refresh
@@ -74,7 +74,7 @@ export const debugAuth = {
       });
 
       const data = await response.json();
-      console.log("🔄 Token refresh test result:", data);
+      //console.log("🔄 Token refresh test result:", data);
       return data;
     } catch (error) {
       console.error("❌ Token refresh test failed:", error);
@@ -101,7 +101,7 @@ export const debugAuth = {
       });
 
       const data = await response.json();
-      console.log("👤 Profile fetch test result:", data);
+      //console.log("👤 Profile fetch test result:", data);
       return data;
     } catch (error) {
       console.error("❌ Profile fetch test failed:", error);
@@ -111,7 +111,7 @@ export const debugAuth = {
 
   // Quick OAuth simulation for testing
   quickOAuthTest() {
-    console.log("🧪 Starting quick OAuth test...");
+    //console.log("🧪 Starting quick OAuth test...");
 
     // Simulate a real JWT token structure (but with dummy data)
     const dummyToken =
@@ -129,23 +129,23 @@ export const debugAuth = {
       })
     );
 
-    console.log(
+    //console.log(
       "✅ Dummy OAuth data set. Try refreshing or navigating to dashboard."
     );
-    console.log("🔍 Current auth state:", this.checkAuthState());
+    //console.log("🔍 Current auth state:", this.checkAuthState());
 
     return dummyToken;
   },
 
   // Test OAuth pre-processing
   testOAuthPreprocessing() {
-    console.log("🧪 Testing OAuth pre-processing simulation...");
+    //console.log("🧪 Testing OAuth pre-processing simulation...");
 
     // Simulate OAuth URL
     const testUrl =
       window.location.origin +
       "/OAuthCallback?accessToken=test-oauth-token&isNewUser=false";
-    console.log("🔗 Simulated OAuth URL:", testUrl);
+    //console.log("🔗 Simulated OAuth URL:", testUrl);
 
     // Check if pre-processor would trigger
     const originalPath = window.location.pathname;
@@ -153,8 +153,8 @@ export const debugAuth = {
 
     // Import and run pre-processor
     import("./oauthPreProcessor").then(() => {
-      console.log("✅ OAuth pre-processor test complete");
-      console.log("📊 OAuth flags:", {
+      //console.log("✅ OAuth pre-processor test complete");
+      //console.log("📊 OAuth flags:", {
         oauthInProgress: sessionStorage.getItem("oauthInProgress"),
         oauthIsNewUser: sessionStorage.getItem("oauthIsNewUser"),
         hasToken: !!localStorage.getItem("accessToken"),
@@ -177,7 +177,7 @@ export const debugAuth = {
       fullURL: window.location.href,
     };
 
-    console.log("🔍 OAuth State Check:", state);
+    //console.log("🔍 OAuth State Check:", state);
     return state;
   },
 
@@ -185,12 +185,12 @@ export const debugAuth = {
   clearOAuthState() {
     sessionStorage.removeItem("oauthInProgress");
     sessionStorage.removeItem("oauthIsNewUser");
-    console.log("🧹 OAuth processing state cleared");
+    //console.log("🧹 OAuth processing state cleared");
   },
 
   // Manual OAuth callback simulation
   simulateOAuthCallback(token = "test-token") {
-    console.log("🧪 Simulating OAuth callback...");
+    //console.log("🧪 Simulating OAuth callback...");
 
     // Set up OAuth state
     sessionStorage.setItem("oauthInProgress", "true");
@@ -203,10 +203,10 @@ export const debugAuth = {
       `/OAuthCallback?accessToken=${token}&isNewUser=false`
     );
 
-    console.log(
+    //console.log(
       "✅ OAuth callback simulation set up. The GoogleAuthCallback component should now trigger."
     );
-    console.log("🔍 Current state:", this.checkOAuthState());
+    //console.log("🔍 Current state:", this.checkOAuthState());
   },
 };
 

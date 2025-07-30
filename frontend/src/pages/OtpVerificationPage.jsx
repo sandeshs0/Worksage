@@ -67,7 +67,7 @@ function OtpVerificationPage() {
   };
 
   const handleSubmit = async (e) => {
-    console.log("Submitting OTP:", otp.join(""));
+    //console.log("Submitting OTP:", otp.join(""));
     e.preventDefault();
     const otpValue = otp.join("");
 
@@ -80,7 +80,7 @@ function OtpVerificationPage() {
     setError("");
 
     try {
-      console.log("Verifying OTP:", otpValue);
+      //console.log("Verifying OTP:", otpValue);
       await authService.verifyEmail({
         email,
         otp: otpValue,
@@ -96,7 +96,7 @@ function OtpVerificationPage() {
   const handleResendOtp = () => {
     // Implement OTP resend functionality here
     // This would typically call the register endpoint again with a resend flag
-    console.log("Resend OTP for:", email);
+    //console.log("Resend OTP for:", email);
   };
 
   // Animation variants

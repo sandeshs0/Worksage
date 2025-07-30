@@ -9,37 +9,37 @@ function GoogleAuthCallback() {
   const navigate = useNavigate();
   const { refreshUserData, setOAuthProcessing } = useUser();
 
-  console.log("🔗 GoogleAuthCallback component mounted");
-  console.log("🔍 Current URL:", window.location.href);
-  console.log("🔍 Search params:", Object.fromEntries(searchParams.entries()));
+  //console.log("🔗 GoogleAuthCallback component mounted");
+  //console.log("🔍 Current URL:", window.location.href);
+  //console.log("🔍 Search params:", Object.fromEntries(searchParams.entries()));
 
   useEffect(() => {
-    console.log("🚀 GoogleAuthCallback useEffect triggered");
+    //console.log("🚀 GoogleAuthCallback useEffect triggered");
 
     const handleCallback = async () => {
       try {
         // Set OAuth processing flag to prevent UserContext interference
         setOAuthProcessing(true);
-        console.log("🔄 Set OAuth processing flag to true");
+        //console.log("🔄 Set OAuth processing flag to true");
 
         // Get token from URL params (should already be stored by pre-processor)
         const accessToken = searchParams.get("accessToken");
         const isNewUser = searchParams.get("isNewUser") === "true";
 
-        console.log("🔗 OAuth callback received:", {
+        //console.log("🔗 OAuth callback received:", {
           accessToken: accessToken ? "Present" : "Missing",
           isNewUser,
         });
 
         // Verify token is stored (pre-processor should have done this)
         const storedToken = localStorage.getItem("accessToken");
-        console.log("💾 Token check:", {
+        //console.log("💾 Token check:", {
           fromURL: accessToken ? "Present" : "Missing",
           fromStorage: storedToken ? "Present" : "Missing",
         });
 
         if (!storedToken && accessToken) {
-          console.log("💾 Pre-processor missed token, storing now...");
+          //console.log("💾 Pre-processor missed token, storing now...");
           localStorage.setItem("accessToken", accessToken);
         }
 
@@ -49,27 +49,27 @@ function GoogleAuthCallback() {
 
         const tokenToUse = accessToken || storedToken;
 
-        console.log("🚀 Calling authService.handleOAuthCallback...");
+        //console.log("🚀 Calling authService.handleOAuthCallback...");
         const result = await authService.handleOAuthCallback(
           tokenToUse,
           isNewUser
         );
-        console.log("✅ OAuth callback result:", result);
+        //console.log("✅ OAuth callback result:", result);
 
         if (result.success) {
           // Clear OAuth processing flags
           sessionStorage.removeItem("oauthInProgress");
           sessionStorage.removeItem("oauthIsNewUser");
-          console.log("🧹 Cleared OAuth processing flags");
+          //console.log("🧹 Cleared OAuth processing flags");
 
-          console.log("🔄 Refreshing user data...");
+          //console.log("🔄 Refreshing user data...");
           await refreshUserData(); // Refresh user context
 
           if (isNewUser) {
-            console.log("➡️ Redirecting to onboarding...");
+            //console.log("➡️ Redirecting to onboarding...");
             navigate("/dashboard/onboarding");
           } else {
-            console.log("➡️ Redirecting to dashboard...");
+            //console.log("➡️ Redirecting to dashboard...");
             navigate("/dashboard");
           }
         }
@@ -83,7 +83,7 @@ function GoogleAuthCallback() {
       } finally {
         // Clear OAuth processing flag
         setOAuthProcessing(false);
-        console.log("🔄 Set OAuth processing flag to false");
+        //console.log("🔄 Set OAuth processing flag to false");
       }
     };
 

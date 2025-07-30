@@ -122,13 +122,13 @@ const calculatePasswordStrength = (password) => {
 
 const checkPasswordReuse = async (userId, newPassword) => {
   try {
-    console.log(`Checking password reuse for user: ${userId}`);
+    //console.log(`Checking password reuse for user: ${userId}`);
     
     const user = await User.findById(userId).select(
       "+password +passwordHistory"
     );
     if (!user || !user.passwordHistory || user.passwordHistory.length === 0) {
-      console.log(
+      //console.log(
         `No password history found for user: ${userId} (history length: ${
           user?.passwordHistory?.length || 0
         })`
@@ -136,14 +136,14 @@ const checkPasswordReuse = async (userId, newPassword) => {
       return true;
     }
 
-    console.log(
+    //console.log(
       `Checking against ${user.passwordHistory.length} passwords in history (last 3)`
     );
     
     for (const oldPasswordHash of user.passwordHistory.slice(-3)) {
       const isReused = await bcrypt.compare(newPassword, oldPasswordHash);
       if (isReused) {
-        console.log(
+        //console.log(
           `Password reuse detected for user: ${userId} - matches history`
         );
         return false;
@@ -157,14 +157,14 @@ const checkPasswordReuse = async (userId, newPassword) => {
         user.password
       );
       if (isCurrentPassword) {
-        console.log(
+        //console.log(
           `Password reuse detected for user: ${userId} - matches current password`
         );
         return false;
       }
     }
 
-    console.log(`Password reuse check passed for user: ${userId}`);
+    //console.log(`Password reuse check passed for user: ${userId}`);
     return true;
   } catch (error) {
     console.error("Password reuse check error:", error);
@@ -173,7 +173,7 @@ const checkPasswordReuse = async (userId, newPassword) => {
 };
 
 const passwordPolicyMiddleware = async (req, res, next) => {
-  console.log(
+  //console.log(
     `Password policy middleware triggered for route: ${req.route?.path}`
   );
   const { password, newPassword } = req.body;
@@ -214,12 +214,12 @@ const passwordPolicyMiddleware = async (req, res, next) => {
 
   
   if (req.user && req.user._id) {
-    console.log(
+    //console.log(
       `Checking password reuse for authenticated user: ${req.user._id}`
     );
     const canUse = await checkPasswordReuse(req.user._id, passwordToCheck);
     if (!canUse) {
-      console.log(`Password reuse validation failed for user: ${req.user._id}`);
+      //console.log(`Password reuse validation failed for user: ${req.user._id}`);
       return res.status(400).json({
         success: false,
         message:
@@ -227,7 +227,7 @@ const passwordPolicyMiddleware = async (req, res, next) => {
         code: "PASSWORD_REUSED",
       });
     }
-    console.log(`Password reuse validation passed for user: ${req.user._id}`);
+    //console.log(`Password reuse validation passed for user: ${req.user._id}`);
   }
 
   req.passwordValidation = validation;

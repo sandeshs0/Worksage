@@ -59,7 +59,7 @@ const InvoicesTab = ({ invoices = [], project, client }) => {
 
   const handleSaveInvoice = (invoiceData) => {
     // Handle invoice save logic here
-    console.log("Saving invoice:", invoiceData);
+    //console.log("Saving invoice:", invoiceData);
     setShowInvoiceModal(false);
     // You can add API call or parent callback here
   };

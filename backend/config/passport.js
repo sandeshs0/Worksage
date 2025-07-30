@@ -11,10 +11,10 @@ module.exports = function (passport) {
         callbackURL: "/api/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
-        console.log(" Google OAuth strategy callback:");
-        console.log("Access Token:", accessToken ? " Present" : " Missing");
-        console.log("Profile ID:", profile?.id);
-        console.log("Profile Email:", profile?.emails?.[0]?.value);
+        //console.log(" Google OAuth strategy callback:");
+        //console.log("Access Token:", accessToken ? " Present" : " Missing");
+        //console.log("Profile ID:", profile?.id);
+        //console.log("Profile Email:", profile?.emails?.[0]?.value);
 
         const newUserInfo = {
           googleId: profile.id,

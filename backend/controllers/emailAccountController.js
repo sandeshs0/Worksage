@@ -73,8 +73,8 @@ exports.addEmailAccount = async (req, res) => {
 //       verificationToken: req.params.token,
 //     //   verificationExpires: { $gt: Date.now() + 24 * 3600000 }
 //     });
-//     console.log("verifying custom email account token",req.params.token);
-//     console.log("emailAccount: ",emailAccount);
+//     //console.log("verifying custom email account token",req.params.token);
+//     //console.log("emailAccount: ",emailAccount);
 
 //     if (!emailAccount) {
 //       return res.status(400).json({
@@ -124,7 +124,7 @@ exports.verifyEmailAccount = async (req, res) => {
       }
     );
 
-    console.log("Verification result:", result);
+    //console.log("Verification result:", result);
 
     if (!result) {
       return res.status(400).json({

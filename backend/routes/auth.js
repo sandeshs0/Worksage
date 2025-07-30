@@ -105,12 +105,12 @@ router.put(
 router.get(
   "/google",
   (req, res, next) => {
-    console.log("🚀 Initiating Google OAuth...");
-    console.log(
+    //console.log("🚀 Initiating Google OAuth...");
+    //console.log(
       "Google Client ID:",
       process.env.GOOGLE_CLIENT_ID ? "✅ Set" : "❌ Missing"
     );
-    console.log(
+    //console.log(
       "Google Client Secret:",
       process.env.GOOGLE_CLIENT_SECRET ? "✅ Set" : "❌ Missing"
     );
@@ -122,9 +122,9 @@ router.get(
 router.get(
   "/google/callback",
   (req, res, next) => {
-    console.log("🔍 Google OAuth callback received:");
-    console.log("Query params:", req.query);
-    console.log(
+    //console.log("🔍 Google OAuth callback received:");
+    //console.log("Query params:", req.query);
+    //console.log(
       "Raw OAuth code:",
       req.rawOAuthCode
         ? req.rawOAuthCode.substring(0, 20) + "..."
@@ -134,10 +134,10 @@ router.get(
     // If we have a preserved raw code, replace the encoded one
     if (req.rawOAuthCode) {
       req.query.code = req.rawOAuthCode;
-      console.log("✅ Using preserved raw OAuth code");
+      //console.log("✅ Using preserved raw OAuth code");
     }
 
-    console.log("Headers:", req.headers);
+    //console.log("Headers:", req.headers);
     next();
   },
   passport.authenticate("google", {

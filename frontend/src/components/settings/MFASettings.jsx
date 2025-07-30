@@ -34,9 +34,9 @@ const MFASettings = () => {
   const loadMFAStatus = async () => {
     try {
       setLoading(true);
-      console.log("Loading MFA status...");
+      //console.log("Loading MFA status...");
       const response = await mfaService.getMFAStatus();
-      console.log("MFA status response:", response);
+      //console.log("MFA status response:", response);
       setMfaStatus(response.data);
       setSetupStep(response.data.enabled ? 3 : 0);
     } catch (error) {
@@ -52,11 +52,11 @@ const MFASettings = () => {
       setActionLoading(true);
       setError("");
 
-      console.log("Starting MFA setup...");
+      //console.log("Starting MFA setup...");
       const response = await mfaService.setupMFA();
-      console.log("MFA setup response:", response);
-      console.log("TempSecret received:", response.tempSecret);
-      console.log("Type of tempSecret:", typeof response.tempSecret);
+      //console.log("MFA setup response:", response);
+      //console.log("TempSecret received:", response.tempSecret);
+      //console.log("Type of tempSecret:", typeof response.tempSecret);
       setQrCode(response.data.qrCode);
       setManualCode(response.data.manualEntryKey);
       setTempSecret(response.tempSecret);
@@ -79,14 +79,14 @@ const MFASettings = () => {
         return;
       }
 
-      console.log("Verifying MFA setup with token:", verificationToken);
-      console.log("TempSecret being sent:", tempSecret);
-      console.log("Type of tempSecret being sent:", typeof tempSecret);
+      //console.log("Verifying MFA setup with token:", verificationToken);
+      //console.log("TempSecret being sent:", tempSecret);
+      //console.log("Type of tempSecret being sent:", typeof tempSecret);
       const response = await mfaService.verifyMFASetup(
         verificationToken,
         tempSecret
       );
-      console.log("MFA verification response:", response);
+      //console.log("MFA verification response:", response);
       setBackupCodes(response.data.backupCodes);
       setSetupStep(2);
       setSuccess("MFA setup completed successfully!");

@@ -50,7 +50,7 @@ const downloadFile = (url) => {
 const getTransporter = async (userId = null) => {
   try {
     // If userId is provided, try to get user's default email account
-    console.log("searching for email account for userId: ", userId);
+    //console.log("searching for email account for userId: ", userId);
     if (userId) {
       const emailAccount = await EmailAccount.findOne({
         user: userId,
@@ -58,12 +58,12 @@ const getTransporter = async (userId = null) => {
         verified: true,
       }).select("+auth.pass"); // Include the encrypted password
 
-      console.log("emailAccount: ", emailAccount);
+      //console.log("emailAccount: ", emailAccount);
       if (emailAccount) {
         // const decryptedPass = emailAccount.decryptPassword();
-        console.log("found user custom email: ", emailAccount.auth);
+        //console.log("found user custom email: ", emailAccount.auth);
         if (emailAccount.auth.pass) {
-          console.log(`Using custom email account: ${emailAccount.email}`);
+          //console.log(`Using custom email account: ${emailAccount.email}`);
 
           const customTransporter = nodemailer.createTransport({
             host: emailAccount.smtp.host,
@@ -101,7 +101,7 @@ const getTransporter = async (userId = null) => {
     }
 
     // Fall back to system email
-    console.log("Using system default email account");
+    //console.log("Using system default email account");
     return {
       transporter: nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
@@ -164,7 +164,7 @@ class EmailService {
     let customEmailAccountId = null;
 
     try {
-      console.log("Starting email send process...");
+      //console.log("Starting email send process...");
 
       // Validate required fields
       if (!to || !to.length) {
@@ -177,7 +177,7 @@ class EmailService {
         throw new Error("Email content is required");
       }
 
-      console.log("Getting email transporter...", userId);
+      //console.log("Getting email transporter...", userId);
       // Get appropriate transporter (custom or system)
       const transporterInfo = await getTransporter(userId);
       emailTransporter = transporterInfo.transporter;
@@ -189,7 +189,7 @@ class EmailService {
         ? transporterInfo.accountId
         : null;
 
-      console.log("Creating email record...");
+      //console.log("Creating email record...");
       // Create email record in database with 'draft' status initially
       emailRecord = new Email({
         sender: userId,
@@ -215,7 +215,7 @@ class EmailService {
 
       // Save the email record
       await emailRecord.save();
-      console.log("Email record saved with ID:", emailRecord._id);
+      //console.log("Email record saved with ID:", emailRecord._id);
 
       // Generate formatted HTML email
       const emailHtml = generateEmailTemplate({
@@ -238,7 +238,7 @@ class EmailService {
               file.path.includes("res.cloudinary.com") &&
               file.path.toLowerCase().endsWith(".pdf")
             ) {
-              console.log("Downloading PDF from Cloudinary:", file.path);
+              //console.log("Downloading PDF from Cloudinary:", file.path);
               const downloadedFile = await downloadFile(file.path);
               cleanupFiles.push(downloadedFile.cleanup);
 
@@ -297,7 +297,7 @@ class EmailService {
         attachments: emailAttachments.length > 0 ? emailAttachments : undefined,
       };
 
-      console.log("Sending email with options:", {
+      //console.log("Sending email with options:", {
         from: mailOptions.from,
         to: mailOptions.to,
         subject: mailOptions.subject,
@@ -315,7 +315,7 @@ class EmailService {
       );
 
       const info = await Promise.race([sendEmailPromise, timeoutPromise]);
-      console.log("Email sent successfully, messageId:", info.messageId);
+      //console.log("Email sent successfully, messageId:", info.messageId);
 
       // Update email status to sent
       emailRecord.status = "sent";
@@ -361,7 +361,7 @@ class EmailService {
         error.code &&
         ["EAUTH", "EENVELOPE", "ECONNECTION"].includes(error.code)
       ) {
-        console.log(
+        //console.log(
           "Custom email account failed, retrying with system account..."
         );
         return this.sendEmail({
@@ -465,7 +465,7 @@ class EmailService {
     userId,
   }) => {
     try {
-      console.log("Sending plain email...");
+      //console.log("Sending plain email...");
 
       // Get appropriate transporter (custom or system)
       const transporterInfo = await getTransporter(userId);
@@ -508,7 +508,7 @@ class EmailService {
 
       // Send the email
       const info = await transporter.sendMail(mailOptions);
-      console.log("Email sent:", info.messageId);
+      //console.log("Email sent:", info.messageId);
 
       return {
         success: true,

@@ -29,7 +29,7 @@ const upload = multer({
     const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
     const allowedExtensions = ["jpeg", "jpg", "png", "webp"];
 
-    console.log("File upload attempt:", {
+    //console.log("File upload attempt:", {
       originalname: file.originalname,
       mimetype: file.mimetype,
       extname: fileExt,
@@ -208,7 +208,7 @@ const uploadTaskCover = multer({
 const deleteFile = async (filePath) => {
   try {
     await fs.unlink(filePath);
-    console.log(`Deleted file: ${filePath}`);
+    //console.log(`Deleted file: ${filePath}`);
   } catch (error) {
     console.error(`Error deleting file ${filePath}:`, error);
   }

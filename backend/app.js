@@ -112,7 +112,7 @@ const activityLogger = require("./middleware/activityLogger");
 app.use(activityLogger);
 
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path} - Origin: ${req.get("origin")}`);
+  //console.log(`${req.method} ${req.path} - Origin: ${req.get("origin")}`);
   next();
 });
 
@@ -144,24 +144,24 @@ app.use(
   "/api/auth",
   (req, res, next) => {
     if (req.path === "/google/callback" && req.url.includes("code=")) {
-      console.log("🔧 Preserving original OAuth query parameters");
+      //console.log("🔧 Preserving original OAuth query parameters");
 
       const rawUrl = req.url;
       const codeMatch = rawUrl.match(/code=([^&]+)/);
       if (codeMatch) {
         const rawCode = decodeURIComponent(codeMatch[1]);
-        console.log("📝 Raw OAuth code:", rawCode.substring(0, 20) + "...");
+        //console.log("📝 Raw OAuth code:", rawCode.substring(0, 20) + "...");
 
         req.rawOAuthCode = rawCode;
       }
     }
 
     if (req.path === "/google" || req.path === "/google/callback") {
-      console.log(`🔓 Skipping CSRF for OAuth route: ${req.path}`);
+      //console.log(`🔓 Skipping CSRF for OAuth route: ${req.path}`);
       return next();
     }
 
-    console.log(`🔒 Applying CSRF for auth route: ${req.path}`);
+    //console.log(`🔒 Applying CSRF for auth route: ${req.path}`);
     csrfProtection(req, res, next);
   },
   csrfErrorHandler,
@@ -304,8 +304,8 @@ const PORT = process.env.PORT || 5000;
 const httpsServer = https.createServer(options, app);
 
 httpsServer.listen(PORT, () => {
-  console.log(`🔒 Secure server running on https://localhost:${PORT}`);
-  console.log(`📡 CORS enabled for multiple origins`);
+  //console.log(`🔒 Secure server running on https://localhost:${PORT}`);
+  //console.log(`📡 CORS enabled for multiple origins`);
 });
 
 httpsServer.on("error", (err) => {

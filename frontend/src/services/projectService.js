@@ -7,11 +7,11 @@ const api = createApiInstance();
  * @returns {Promise} List of projects
  */
 const getAllProjects = async () => {
-  console.log("getAllProjects called");
+  //console.log("getAllProjects called");
   try {
-    console.log("Making API call to: /projects");
+    //console.log("Making API call to: /projects");
     const response = await api.get("/projects");
-    console.log("API response:", response);
+    //console.log("API response:", response);
     return response.data;
   } catch (error) {
     console.error("Error in getAllProjects:", error);

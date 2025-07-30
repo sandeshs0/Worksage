@@ -128,7 +128,7 @@ function SettingsPage() {
     try {
       setIsLoadingEmails(true);
       const accounts = await settingsService.getEmailAccounts();
-      console.log("API response for email accounts:", accounts);
+      //console.log("API response for email accounts:", accounts);
 
       // If accounts is an object with a data property
       if (accounts && accounts.data) {
@@ -567,12 +567,12 @@ function SettingsPage() {
 
   const fetchUpgradeHistory = async () => {
     try {
-      console.log("🔄 Fetching upgrade history...");
+      //console.log("🔄 Fetching upgrade history...");
       setIsLoadingHistory(true);
       const data = await planService.getPlanUpgradeHistory();
-      console.log("📋 Upgrade history response:", data);
+      //console.log("📋 Upgrade history response:", data);
       setUpgradeHistory(data.upgrades || []);
-      console.log("✅ Upgrade history set:", data.upgrades || []);
+      //console.log("✅ Upgrade history set:", data.upgrades || []);
     } catch (error) {
       console.error("❌ Failed to fetch upgrade history:", error);
       toast.error("Failed to load upgrade history");
@@ -605,7 +605,7 @@ function SettingsPage() {
   // Load plans when billing tab is active
   useEffect(() => {
     if (activeTab === "billing" || activeTab === "plans") {
-      console.log("📋 Active tab changed to billing/plans, fetching data...");
+      //console.log("📋 Active tab changed to billing/plans, fetching data...");
       fetchPlans();
       fetchUpgradeHistory();
     }
@@ -1322,7 +1322,6 @@ function SettingsPage() {
               <h3 className="text-xl font-medium mb-6">Plans & Billing</h3>
 
               {/* Current Plan */}
-            
 
               {/* Available Plans */}
               <h4 className="font-medium text-gray-700 mb-4">
@@ -1677,7 +1676,6 @@ function SettingsPage() {
                 </div>
               )}
 
-  
               <p className="text-sm text-gray-500 mt-4">
                 For custom enterprise plans, please contact our sales team at{" "}
                 <a href="mailto:sales@cubicle.app" className="text-[#18cb96]">

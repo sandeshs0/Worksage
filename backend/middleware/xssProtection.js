@@ -1,7 +1,7 @@
 const validator = require("validator");
 
 const xssProtection = async (req, res, next) => {
-  console.log(`XSS Protection: Processing ${req.method} ${req.path}`);
+  //console.log(`XSS Protection: Processing ${req.method} ${req.path}`);
 
   const oauthExemptions = ["/api/auth/google", "/api/auth/google/callback"];
 
@@ -21,12 +21,12 @@ const xssProtection = async (req, res, next) => {
   );
 
   if (isOAuthEndpoint) {
-    console.log(`🔓 XSS protection bypassed for OAuth endpoint: ${req.path}`);
+    //console.log(`🔓 XSS protection bypassed for OAuth endpoint: ${req.path}`);
     return next();
   }
 
   if (isHtmlExemptEndpoint) {
-    console.log(
+    //console.log(
       `⚠️ XSS protection bypassed for HTML-exempt endpoint: ${req.path}`
     );
     return next();
@@ -76,7 +76,7 @@ const xssProtection = async (req, res, next) => {
       return;
     }
 
-    console.log(` Checking for XSS in ${path}: "${obj.substring(0, 100)}"`);
+    //console.log(` Checking for XSS in ${path}: "${obj.substring(0, 100)}"`);
 
     
     for (const pattern of xssPatterns) {
@@ -84,7 +84,7 @@ const xssProtection = async (req, res, next) => {
         foundMaliciousContent = true;
 
         
-        console.log(
+        //console.log(
           ` XSS DETECTED! Pattern: ${pattern} matched in ${path}: ${obj.substring(
             0,
             50

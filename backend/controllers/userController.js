@@ -209,7 +209,7 @@ The Worksage Team`;
         message,
       });
 
-      console.log(`Password reset email sent to ${user.email}`);
+      //console.log(`Password reset email sent to ${user.email}`);
     } catch (emailError) {
       console.error("Error sending password reset email:", emailError);
       // Don't fail the request if email fails, but log it
@@ -258,9 +258,9 @@ exports.resetPassword = async (req, res) => {
     }
 
     // Use the robust password update method with history tracking
-    console.log(`Resetting password for user: ${user.email}`);
+    //console.log(`Resetting password for user: ${user.email}`);
     await user.updatePasswordWithHistory(password);
-    console.log(`Password reset successful for user: ${user.email}`);
+    //console.log(`Password reset successful for user: ${user.email}`);
 
     // Clear reset token
     user.otp = undefined;
@@ -289,7 +289,7 @@ The Worksage Team`;
         message,
       });
 
-      console.log(`Password reset confirmation email sent to ${user.email}`);
+      //console.log(`Password reset confirmation email sent to ${user.email}`);
     } catch (emailError) {
       console.error(
         "Error sending password reset confirmation email:",

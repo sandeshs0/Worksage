@@ -133,9 +133,9 @@ function LoginPage() {
         }
       } catch (error) {
         console.error("Login error:", error);
-        console.log("Error response:", error.response);
-        console.log("Error status:", error.response?.status);
-        console.log("Error data:", error.response?.data);
+        //console.log("Error response:", error.response);
+        //console.log("Error status:", error.response?.status);
+        //console.log("Error data:", error.response?.data);
 
         // Handle different error types
         // Check if it's a direct error object from authService (rate limit, etc.)
@@ -147,7 +147,7 @@ function LoginPage() {
             error.message ||
             "Too many authentication attempts from this IP";
 
-          console.log("Rate limit error detected (direct):", {
+          //console.log("Rate limit error detected (direct):", {
             retryAfter,
             errorMessage,
             error,
@@ -176,7 +176,7 @@ function LoginPage() {
             error.response?.data?.message ||
             "Too many authentication attempts from this IP";
 
-          console.log("Rate limit error detected (axios):", {
+          //console.log("Rate limit error detected (axios):", {
             retryAfter,
             errorMessage,
             responseData: error.response?.data,

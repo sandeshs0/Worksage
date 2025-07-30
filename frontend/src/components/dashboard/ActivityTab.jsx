@@ -62,7 +62,7 @@ ChartJS.register(
 );
 
 const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
-  console.log("ActivityTab rendered with client:", client);
+  //console.log("ActivityTab rendered with client:", client);
 
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [recipients, setRecipients] = useState([]);
@@ -128,10 +128,10 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
   useEffect(() => {
     const getEmailAccountInfo = async () => {
       try {
-        console.log("Checking email account info...");
+        //console.log("Checking email account info...");
         setIsLoadingEmailAccount(true);
         const data = await checkEmailAccount();
-        console.log("Email account data received:", data);
+        //console.log("Email account data received:", data);
         setEmailAccountInfo(data);
       } catch (error) {
         console.error("Failed to fetch email account info:", error);
@@ -161,13 +161,13 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
 
   // Add client email to recipients when available
   useEffect(() => {
-    console.log("useEffect for client email running with:", {
+    //console.log("useEffect for client email running with:", {
       clientEmail: client?.email,
       recipientsLength: recipients.length,
     });
 
     if (client?.email && recipients.length === 0) {
-      console.log("Adding client email to recipients:", client.email);
+      //console.log("Adding client email to recipients:", client.email);
       setRecipients([
         {
           id: "client-" + Date.now(),
@@ -177,7 +177,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         },
       ]);
     } else {
-      console.log("Not adding client email because:", {
+      //console.log("Not adding client email because:", {
         hasClientEmail: !!client?.email,
         recipientsEmpty: recipients.length === 0,
       });
@@ -217,10 +217,10 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         queryParams.projectId = project.id;
       }
 
-      console.log("Fetching emails with params:", queryParams);
+      //console.log("Fetching emails with params:", queryParams);
       const response = await getEmails(queryParams);
 
-      console.log("Email history retrieved:", response);
+      //console.log("Email history retrieved:", response);
 
       // Update this line to match the API response structure
       if (response && response.data) {
@@ -257,7 +257,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
   };
 
   const toggleEmailForm = () => {
-    console.log("toggleEmailForm called with:", {
+    //console.log("toggleEmailForm called with:", {
       showEmailForm,
       clientEmail: client?.email,
       recipients,
@@ -267,11 +267,11 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
     if (!showEmailForm && client?.email) {
       // Check if client email is already in recipients
       const hasClientEmail = recipients.some((r) => r.email === client.email);
-      console.log("Has client email already:", hasClientEmail);
+      //console.log("Has client email already:", hasClientEmail);
 
       if (!hasClientEmail) {
         // Add client email if not already in the list
-        console.log("Adding client email in toggle:", client.email);
+        //console.log("Adding client email in toggle:", client.email);
         setRecipients([
           ...recipients,
           {
@@ -524,7 +524,7 @@ const ActivityTab = ({ activities = [], client = {}, project = {} }) => {
         return;
       }
 
-      console.log("Starting to type:", rewrittenText.charAt(0)); // Debug log
+      //console.log("Starting to type:", rewrittenText.charAt(0)); // Debug log
 
       let currentText = "";
       let i = 0;

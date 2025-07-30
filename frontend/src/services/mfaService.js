@@ -17,8 +17,8 @@ class MFAService {
   // Verify MFA setup with TOTP token
   async verifyMFASetup(token, tempSecret) {
     try {
-      console.log("Frontend - sending tempSecret:", tempSecret);
-      console.log("Frontend - typeof tempSecret:", typeof tempSecret);
+      //console.log("Frontend - sending tempSecret:", tempSecret);
+      //console.log("Frontend - typeof tempSecret:", typeof tempSecret);
       const response = await api.post("/mfa/verify-setup", {
         token,
         tempSecret,

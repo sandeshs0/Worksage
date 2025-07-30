@@ -19,16 +19,16 @@ function PaymentCallbackPage() {
   useEffect(() => {
     // Absolutely prevent multiple executions with multiple checks
     if (hasProcessed.current) {
-      console.log("Payment verification already processed, skipping...");
+      //console.log("Payment verification already processed, skipping...");
       return;
     }
 
     if (isProcessingRef.current) {
-      console.log("Payment verification currently processing, skipping...");
+      //console.log("Payment verification currently processing, skipping...");
       return;
     }
 
-    console.log("Starting payment verification process...");
+    //console.log("Starting payment verification process...");
 
     // Mark as processed and processing immediately
     hasProcessed.current = true;
@@ -40,7 +40,7 @@ function PaymentCallbackPage() {
 
   const processPayment = async () => {
     try {
-      console.log("Starting payment verification...");
+      //console.log("Starting payment verification...");
 
       // Get URL parameters
       const status = searchParams.get("status");
@@ -48,7 +48,7 @@ function PaymentCallbackPage() {
       const transactionId = searchParams.get("transaction_id");
       const amount = searchParams.get("amount");
 
-      console.log("Payment callback parameters:", {
+      //console.log("Payment callback parameters:", {
         status,
         pidx,
         transactionId,
@@ -67,7 +67,7 @@ function PaymentCallbackPage() {
 
       // Check if payment was completed
       if (status !== "Completed") {
-        console.log("Payment not completed, status:", status);
+        //console.log("Payment not completed, status:", status);
         const failMsg =
           status === "User canceled"
             ? "Payment was canceled by user"
@@ -87,14 +87,14 @@ function PaymentCallbackPage() {
       setVerificationMessage("Verifying payment with server...");
 
       // Verify payment with backend
-      console.log("Calling backend verification for pidx:", pidx);
+      //console.log("Calling backend verification for pidx:", pidx);
       const response = await planService.verifyPlanUpgrade(pidx);
 
       if (response?.success) {
-        console.log("Payment verification successful:", response);
+        //console.log("Payment verification successful:", response);
         handleVerificationSuccess(response);
       } else {
-        console.log("Payment verification failed:", response);
+        //console.log("Payment verification failed:", response);
         handleVerificationFailure(
           "Payment verification failed. Please contact support.",
           "Payment verification failed",
@@ -114,7 +114,7 @@ function PaymentCallbackPage() {
   };
 
   const handleVerificationSuccess = (response) => {
-    console.log("Setting verification status to success...");
+    //console.log("Setting verification status to success...");
     setVerificationStatus("success");
     setVerificationMessage(
       "Payment verified successfully! Your plan has been upgraded."
@@ -126,15 +126,15 @@ function PaymentCallbackPage() {
       }!`,
     });
 
-    console.log("Redirecting to settings in 3 seconds...");
+    //console.log("Redirecting to settings in 3 seconds...");
     setTimeout(() => {
-      console.log("Executing redirect...");
+      //console.log("Executing redirect...");
       navigate("/dashboard/settings?tab=billing");
     }, 3000);
   };
 
   const handleVerificationFailure = (message, toastTitle, toastDescription) => {
-    console.log("Setting verification status to failed...");
+    //console.log("Setting verification status to failed...");
     setVerificationStatus("failed");
     setVerificationMessage(message);
 
@@ -142,9 +142,9 @@ function PaymentCallbackPage() {
       description: toastDescription || message,
     });
 
-    console.log("Redirecting to settings in 4 seconds...");
+    //console.log("Redirecting to settings in 4 seconds...");
     setTimeout(() => {
-      console.log("Executing redirect...");
+      //console.log("Executing redirect...");
       navigate("/dashboard/settings?tab=billing");
     }, 4000);
   };
@@ -176,7 +176,7 @@ function PaymentCallbackPage() {
   };
 
   const handleManualNavigation = () => {
-    console.log("Manual navigation triggered");
+    //console.log("Manual navigation triggered");
     navigate("/dashboard/settings?tab=billing");
   };
 

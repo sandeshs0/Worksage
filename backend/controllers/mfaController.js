@@ -75,14 +75,14 @@ exports.verifyMFASetup = async (req, res) => {
       });
     }
 
-    console.log("Received tempSecret:", tempSecret);
-    console.log("Type of tempSecret:", typeof tempSecret);
+    //console.log("Received tempSecret:", tempSecret);
+    //console.log("Type of tempSecret:", typeof tempSecret);
 
     let encryptedSecret;
     try {
       if (typeof tempSecret === "string") {
         const decodedSecret = decodeHTMLEntities(tempSecret);
-        console.log("Decoded tempSecret:", decodedSecret);
+        //console.log("Decoded tempSecret:", decodedSecret);
         encryptedSecret = JSON.parse(decodedSecret);
       } else {
         encryptedSecret = tempSecret;
@@ -316,9 +316,9 @@ exports.verifyMFA = async (req, res) => {
         await user.save();
       }
     } else {
-      console.log("Verifying TOTP for user:", userId);
-      console.log("User MFA object:", user.mfa);
-      console.log("User MFA secret:", user.mfa.secret);
+      //console.log("Verifying TOTP for user:", userId);
+      //console.log("User MFA object:", user.mfa);
+      //console.log("User MFA secret:", user.mfa.secret);
 
       if (!user.mfa.secret) {
         return res.status(400).json({

@@ -65,7 +65,7 @@ const decryptSecret = (encryptedData) => {
 
       return decrypted;
     } catch (newMethodError) {
-      console.log("New decryption method failed, trying legacy method...");
+      //console.log("New decryption method failed, trying legacy method...");
 
       // Fallback to old method (deprecated but for backward compatibility)
       try {
@@ -75,7 +75,7 @@ const decryptSecret = (encryptedData) => {
         let decrypted = decipher.update(encrypted, "hex", "utf8");
         decrypted += decipher.final("utf8");
 
-        console.log(
+        //console.log(
           "Legacy decryption successful - consider re-encrypting this secret"
         );
         return decrypted;
@@ -220,7 +220,7 @@ const resetUserMFA = async (userId) => {
         "mfa.setupAt": null,
       },
     });
-    console.log(`MFA reset for user: ${userId}`);
+    //console.log(`MFA reset for user: ${userId}`);
     return true;
   } catch (error) {
     console.error("Error resetting MFA:", error);

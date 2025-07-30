@@ -29,9 +29,9 @@ const authLimiter = rateLimit({
     retryAfter: 15 * 60,
   },
   skipSuccessfulRequests: true,
-  //   console.log("Inside authLimiter"),
+  //   //console.log("Inside authLimiter"),
   handler: (req, res) => {
-    console.log("Inside authLimiter");
+    //console.log("Inside authLimiter");
     res.status(429).json({
       error:
         "Too many authentication attempts from this IP, please try again after 15 minutes.",

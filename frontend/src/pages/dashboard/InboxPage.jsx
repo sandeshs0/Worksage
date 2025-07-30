@@ -78,7 +78,7 @@ function InboxPage() {
   const handleSendMessage = () => {
     if (messageInput.trim()) {
       // Add message sending logic here
-      console.log("Sending message:", messageInput);
+      //console.log("Sending message:", messageInput);
       setMessageInput("");
     }
   };

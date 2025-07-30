@@ -56,7 +56,7 @@ const createApiInstance = () => {
           errorCode === "INVALID_TOKEN"
         ) {
           try {
-            console.log("🔄 Attempting token refresh for error:", errorCode);
+            //console.log("🔄 Attempting token refresh for error:", errorCode);
 
             const response = await axios.post(
               `${API_URL}/auth/refresh`,
@@ -74,7 +74,7 @@ const createApiInstance = () => {
               );
             }
 
-            console.log(
+            //console.log(
               "✅ Token refresh successful, retrying original request"
             );
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
